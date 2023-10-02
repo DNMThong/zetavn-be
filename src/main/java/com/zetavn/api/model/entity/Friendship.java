@@ -1,10 +1,12 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
-import com.zetavn.api.entity.enums.FriendStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
+import com.zetavn.api.model.entity.enums.FriendStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,15 +21,18 @@ public class Friendship {
 
     @ManyToOne
     @JoinColumn(name = "sender_user_id", nullable = false)
+    @JsonBackReference
     private Users senderUser;
 
     @ManyToOne
     @JoinColumn(name = "receiver_user_id", nullable = false)
+    @JsonBackReference
     private Users receiverUser;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
     private FriendStatus status;
 }

@@ -1,4 +1,4 @@
-package com.zetavn.api.entity.enums;
+package com.zetavn.api.model.entity.enums;
 
 public enum UserStatus {
     ACTIVE,

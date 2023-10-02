@@ -1,13 +1,15 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.zetavn.api.entity.enums.PostAccessModifier;
-import com.zetavn.api.entity.enums.PostStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.zetavn.api.model.entity.enums.PostAccessModifier;
+import com.zetavn.api.model.entity.enums.PostStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,24 +22,28 @@ public class Posts {
     @Column(name = "post_id")
     private long postId;
 
-    @Column(name = "post_key", nullable = false, length = 36)
-    private String postKey;
-
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Users user;
+
+    @Column(name = "slug", nullable = false, length = 36)
+    private String slug;
 
     @Column(name = "content")
     private String content;
 
     @Column(name = "access_modifier")
+    @Enumerated(EnumType.STRING)
     private PostAccessModifier accessModifier;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private PostStatus status;
 
     @ManyToOne
     @JoinColumn(name = "post_activity_detail_id")
+    @JsonBackReference
     private PostActivity postActivityDetailId;
 
     @Column(name = "is_deleted")

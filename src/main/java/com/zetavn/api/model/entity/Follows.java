@@ -1,10 +1,12 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
-import com.zetavn.api.entity.enums.FollowPriority;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
+import com.zetavn.api.model.entity.enums.FollowPriority;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,13 +21,16 @@ public class Follows {
 
     @ManyToOne
     @JoinColumn(name = "follower_user_id", nullable = false)
+    @JsonBackReference
     private Users followerUser;
 
     @ManyToOne
     @JoinColumn(name = "following_user_id", nullable = false)
+    @JsonBackReference
     private Users followingUser;
 
     @Column(name = "priority", nullable = false)
+    @Enumerated(EnumType.STRING)
     private FollowPriority priority;
 
     @Column(name = "created_at", nullable = false)

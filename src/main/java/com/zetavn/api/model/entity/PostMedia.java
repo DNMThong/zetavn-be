@@ -1,5 +1,6 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +17,7 @@ public class PostMedia {
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
+    @JsonBackReference
     private Posts post;
 
     @Column(name = "media_path", nullable = false)
@@ -26,5 +28,6 @@ public class PostMedia {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Users user;
 }

@@ -1,12 +1,13 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.zetavn.api.entity.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.zetavn.api.model.entity.enums.UserStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,13 +20,10 @@ public class Users {
     @Column(name = "user_id")
     private long userId;
 
-    @Column(name = "user_key", nullable = false, unique = true)
-    private String userKey;
-
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "username", unique = true)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @Column(name = "phone")
@@ -47,6 +45,7 @@ public class Users {
     private String poster;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private UserStatus status;
 
     @Column(name = "is_authorized")

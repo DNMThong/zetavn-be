@@ -1,11 +1,13 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
-import com.zetavn.api.entity.enums.Gender;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.zetavn.api.model.entity.enums.Gender;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +22,7 @@ public class UserInfo {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JsonBackReference
     private Users user;
 
     @Column(name = "about_me")
@@ -29,7 +32,8 @@ public class UserInfo {
     private LocalDate birthday;
 
     @Column(name = "gender")
-    private Gender gender;
+    @Enumerated(EnumType.STRING)
+    private Gender genderEnum;
 
     @Column(name = "studied_at")
     private String studiedAt;

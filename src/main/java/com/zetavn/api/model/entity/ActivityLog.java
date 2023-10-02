@@ -1,5 +1,6 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class ActivityLog {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Users user;
 
     @Column(name = "online_time", nullable = false)

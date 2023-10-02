@@ -1,5 +1,6 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,15 +17,19 @@ public class Comment {
     @Column(name = "comment_id")
     private long commentId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
     @Column(name = "comment_parent_id")
-    private Long commentParentId;
+    @JsonBackReference
+    private Comment commentParentId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Users user;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
+    @JsonBackReference
     private Posts post;
 
     @Column(name = "content", nullable = false)

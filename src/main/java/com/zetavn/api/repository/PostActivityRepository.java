@@ -1,6 +1,6 @@
 package com.zetavn.api.repository;
 
-import com.zetavn.api.entity.PostActivity;
+import com.zetavn.api.model.entity.PostActivity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostActivityRepository extends JpaRepository<PostActivity, Long> {

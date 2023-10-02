@@ -1,5 +1,6 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,17 +9,19 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
-public class PostLike {
+public class PostMention {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_like_id")
-    private long postLikeId;
+    @Column(name = "mention_id")
+    private long mentionId;
 
     @ManyToOne
-    @JoinColumn(name = "follower_user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Users user;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
+    @JsonBackReference
     private Posts post;
 }

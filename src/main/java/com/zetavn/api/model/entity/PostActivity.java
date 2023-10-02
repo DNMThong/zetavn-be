@@ -1,4 +1,4 @@
-package com.zetavn.api.entity;
+package com.zetavn.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
