@@ -1,4 +1,4 @@
-package com.zetavn.api.exceptions;
+package com.zetavn.api.exception;
 
 public class DuplicateRecordException extends RuntimeException {
     public DuplicateRecordException(String message) {

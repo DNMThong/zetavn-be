@@ -22,15 +22,15 @@ public class Comment {
     @JsonBackReference
     private Comment commentParentId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private Users user;
+    private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     @JsonBackReference
-    private Posts post;
+    private Post post;
 
     @Column(name = "content", nullable = false)
     private String content;

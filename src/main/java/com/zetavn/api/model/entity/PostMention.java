@@ -18,10 +18,10 @@ public class PostMention {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private Users user;
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     @JsonBackReference
-    private Posts post;
+    private Post post;
 }

@@ -29,7 +29,7 @@ public class PostActivity {
     @Column(name = "post_activity_parent_id")
     private Long postActivityParentId;
 
-    @OneToMany(mappedBy = "postActivityDetailId")
+    @OneToMany(mappedBy = "postActivityDetailId", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<Posts> postActivityDetailList;
+    List<Post> postActivityDetailList;
 }

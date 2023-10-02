@@ -1,4 +1,4 @@
-package com.zetavn.api.exceptions;
+package com.zetavn.api.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

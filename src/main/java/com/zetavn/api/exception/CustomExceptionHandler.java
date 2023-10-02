@@ -1,4 +1,4 @@
-package com.zetavn.api.exceptions;
+package com.zetavn.api.exception;
 
 import com.zetavn.api.model.response.ApiResponse;
 import org.slf4j.Logger;

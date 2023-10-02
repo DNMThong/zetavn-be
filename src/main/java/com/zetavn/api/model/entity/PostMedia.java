@@ -18,7 +18,7 @@ public class PostMedia {
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     @JsonBackReference
-    private Posts post;
+    private Post post;
 
     @Column(name = "media_path", nullable = false)
     private String mediaPath;
@@ -29,5 +29,5 @@ public class PostMedia {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private Users user;
+    private User user;
 }

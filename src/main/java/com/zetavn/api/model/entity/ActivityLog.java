@@ -20,7 +20,7 @@ public class ActivityLog {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private Users user;
+    private User user;
 
     @Column(name = "online_time", nullable = false)
     private LocalDateTime onlineTime;

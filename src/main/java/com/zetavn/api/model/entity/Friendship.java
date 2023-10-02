@@ -6,7 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-import com.zetavn.api.model.entity.enums.FriendStatus;
+import com.zetavn.api.enums.FriendStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,12 +22,12 @@ public class Friendship {
     @ManyToOne
     @JoinColumn(name = "sender_user_id", nullable = false)
     @JsonBackReference
-    private Users senderUser;
+    private User senderUser;
 
     @ManyToOne
     @JoinColumn(name = "receiver_user_id", nullable = false)
     @JsonBackReference
-    private Users receiverUser;
+    private User receiverUser;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

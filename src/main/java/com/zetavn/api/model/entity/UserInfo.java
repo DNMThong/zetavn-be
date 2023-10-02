@@ -7,7 +7,7 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.zetavn.api.model.entity.enums.Gender;
+import com.zetavn.api.enums.Gender;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +23,7 @@ public class UserInfo {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     @JsonBackReference
-    private Users user;
+    private User user;
 
     @Column(name = "about_me")
     private String aboutMe;

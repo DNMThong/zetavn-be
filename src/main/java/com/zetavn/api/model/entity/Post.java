@@ -8,15 +8,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.zetavn.api.model.entity.enums.PostAccessModifier;
-import com.zetavn.api.model.entity.enums.PostStatus;
+import com.zetavn.api.enums.PostAccessModifier;
+import com.zetavn.api.enums.PostStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Entity
-public class Posts {
+public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
@@ -25,7 +25,7 @@ public class Posts {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private Users user;
+    private User user;
 
     @Column(name = "slug", nullable = false, length = 36)
     private String slug;
@@ -55,23 +55,23 @@ public class Posts {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<Comment> postCommentList;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<PostLike> postLikeList;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<PostMedia> postMediaList;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<PostMention> postMentionList;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<PostSaved> postSavedList;
 }

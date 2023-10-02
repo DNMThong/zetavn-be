@@ -6,14 +6,14 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-import com.zetavn.api.model.entity.enums.FollowPriority;
+import com.zetavn.api.enums.FollowPriority;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Entity
-public class Follows {
+public class Follow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "follows_id")
@@ -22,12 +22,12 @@ public class Follows {
     @ManyToOne
     @JoinColumn(name = "follower_user_id", nullable = false)
     @JsonBackReference
-    private Users followerUser;
+    private User followerUser;
 
     @ManyToOne
     @JoinColumn(name = "following_user_id", nullable = false)
     @JsonBackReference
-    private Users followingUser;
+    private User followingUser;
 
     @Column(name = "priority", nullable = false)
     @Enumerated(EnumType.STRING)
