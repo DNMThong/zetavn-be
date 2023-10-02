@@ -18,7 +18,7 @@ public class Comment {
     private long commentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "comment_parent_id")
+    @JoinColumn(name = "comment_parent_id")
     @JsonBackReference
     private Comment commentParentId;
 
