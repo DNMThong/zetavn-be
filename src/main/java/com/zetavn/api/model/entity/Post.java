@@ -16,6 +16,7 @@ import com.zetavn.api.enums.PostStatus;
 @Getter
 @Setter
 @Entity
+@Table(name = "Posts")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

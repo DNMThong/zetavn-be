@@ -14,6 +14,7 @@ import com.zetavn.api.enums.UserStatus;
 @Getter
 @Setter
 @Entity
+@Table(name = "Users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
