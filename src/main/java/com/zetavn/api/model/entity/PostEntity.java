@@ -21,7 +21,7 @@ public class PostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
-    private long postId;
+    private String postId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

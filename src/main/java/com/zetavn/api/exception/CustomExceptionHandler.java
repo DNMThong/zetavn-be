@@ -1,6 +1,6 @@
 package com.zetavn.api.exception;
 
-import com.zetavn.api.model.response.ApiResponse;
+import com.zetavn.api.payload.response.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
