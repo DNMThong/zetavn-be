@@ -20,7 +20,7 @@ public class CommentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_parent_id")
     @JsonBackReference
-    private CommentEntity commentEntityParentId;
+    private CommentEntity commentEntityParent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
