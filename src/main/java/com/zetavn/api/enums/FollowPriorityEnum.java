@@ -1,6 +1,6 @@
 package com.zetavn.api.enums;
 
-public enum FollowPriority {
+public enum FollowPriorityEnum {
     HIGH,
     MEDIUM,
     LOW

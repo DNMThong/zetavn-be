@@ -8,8 +8,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.zetavn.api.enums.PostAccessModifier;
-import com.zetavn.api.enums.PostStatus;
+import com.zetavn.api.enums.PostAccessModifierEnum;
+import com.zetavn.api.enums.PostStatusEnum;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +17,7 @@ import com.zetavn.api.enums.PostStatus;
 @Setter
 @Entity
 @Table(name = "Posts")
-public class Post {
+public class PostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
@@ -26,26 +26,23 @@ public class Post {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private User user;
-
-    @Column(name = "slug", nullable = false, length = 36)
-    private String slug;
+    private UserEntity userEntity;
 
     @Column(name = "content")
     private String content;
 
     @Column(name = "access_modifier")
     @Enumerated(EnumType.STRING)
-    private PostAccessModifier accessModifier;
+    private PostAccessModifierEnum accessModifier;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private PostStatus status;
+    private PostStatusEnum status;
 
     @ManyToOne
     @JoinColumn(name = "post_activity_detail_id")
     @JsonBackReference
-    private PostActivity postActivityDetailId;
+    private PostActivityEntity postActivityEntityDetailId;
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;
@@ -56,23 +53,23 @@ public class Post {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<Comment> postCommentList;
+    List<CommentEntity> postCommentListEntity;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<PostLike> postLikeList;
+    List<PostLikeEntity> postLikeEntityList;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<PostMedia> postMediaList;
+    List<PostMediaEntity> postMediaEntityList;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<PostMention> postMentionList;
+    List<PostMentionEntity> postMentionEntityList;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<PostSaved> postSavedList;
+    List<PostSavedEntity> postSavedEntityList;
 }

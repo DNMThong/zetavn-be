@@ -6,33 +6,33 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-import com.zetavn.api.enums.FriendStatus;
+import com.zetavn.api.enums.FollowPriorityEnum;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Entity
-public class Friendship {
+public class FollowEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "friendship_id")
-    private long friendshipId;
+    @Column(name = "follows_id")
+    private long followsId;
 
     @ManyToOne
-    @JoinColumn(name = "sender_user_id", nullable = false)
+    @JoinColumn(name = "follower_user_id", nullable = false)
     @JsonBackReference
-    private User senderUser;
+    private UserEntity followerUserEntity;
 
     @ManyToOne
-    @JoinColumn(name = "receiver_user_id", nullable = false)
+    @JoinColumn(name = "following_user_id", nullable = false)
     @JsonBackReference
-    private User receiverUser;
+    private UserEntity followingUserEntity;
+
+    @Column(name = "priority", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private FollowPriorityEnum priority;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private FriendStatus status;
 }

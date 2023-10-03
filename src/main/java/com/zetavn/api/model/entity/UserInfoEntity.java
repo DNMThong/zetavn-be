@@ -7,14 +7,14 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.zetavn.api.enums.Gender;
+import com.zetavn.api.enums.GenderEnum;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Entity
-public class UserInfo {
+public class UserInfoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "users_info_id")
@@ -23,7 +23,7 @@ public class UserInfo {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     @JsonBackReference
-    private User user;
+    private UserEntity userEntity;
 
     @Column(name = "about_me")
     private String aboutMe;
@@ -33,7 +33,7 @@ public class UserInfo {
 
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)
-    private Gender genderEnum;
+    private GenderEnum genderEnum;
 
     @Column(name = "studied_at")
     private String studiedAt;

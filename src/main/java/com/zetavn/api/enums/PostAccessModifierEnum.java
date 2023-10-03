@@ -1,6 +1,6 @@
 package com.zetavn.api.enums;
 
-public enum PostAccessModifier {
+public enum PostAccessModifierEnum {
     PUBLIC,
     PRIVATE,
     FRIENDS

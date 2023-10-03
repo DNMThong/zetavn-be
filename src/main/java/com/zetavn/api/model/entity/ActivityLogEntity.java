@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-public class ActivityLog {
+public class ActivityLogEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "activity_log_id")
@@ -20,7 +20,7 @@ public class ActivityLog {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private User user;
+    private UserEntity userEntity;
 
     @Column(name = "online_time", nullable = false)
     private LocalDateTime onlineTime;

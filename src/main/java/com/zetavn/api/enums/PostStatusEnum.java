@@ -1,6 +1,6 @@
 package com.zetavn.api.enums;
 
-public enum PostStatus {
+public enum PostStatusEnum {
     ACTIVE,
     LOCKED
 }

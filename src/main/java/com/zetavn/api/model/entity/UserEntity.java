@@ -7,7 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.zetavn.api.enums.UserStatus;
+import com.zetavn.api.enums.UserStatusEnum;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +15,7 @@ import com.zetavn.api.enums.UserStatus;
 @Setter
 @Entity
 @Table(name = "Users")
-public class User {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -47,7 +47,7 @@ public class User {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private UserStatus status;
+    private UserStatusEnum status;
 
     @Column(name = "is_authorized")
     private Boolean isAuthorized;
@@ -64,47 +64,47 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<ActivityLog> userActivitiesList;
+    List<ActivityLogEntity> userActivitiesList;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<Comment> userCommentList;
+    List<CommentEntity> userCommentListEntity;
 
-    @OneToMany(mappedBy = "followerUser", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "followerUserEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<Follow> userFollowerList;
+    List<FollowEntity> userFollowerList;
 
-    @OneToMany(mappedBy = "followingUser", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "followingUserEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<Follow> userFollowingList;
+    List<FollowEntity> userFollowingList;
 
-    @OneToMany(mappedBy = "senderUser", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "senderUserEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<Friendship> userSenderList;
+    List<FriendshipEntity> userSenderList;
 
-    @OneToMany(mappedBy = "receiverUser", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "receiverUserEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<Friendship> userReceiverList;
+    List<FriendshipEntity> userReceiverList;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<PostLike> userPostLikeList;
+    List<PostLikeEntity> userPostLikeEntityList;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<PostMedia> userPostMediaList;
+    List<PostMediaEntity> userPostMediaEntityList;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<PostMention> userPostMentionList;
+    List<PostMentionEntity> userPostMentionEntityList;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<UserInfo> userInfoList;
+    List<UserInfoEntity> userInfoEntityList;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<Post> userPostList;
+    List<PostEntity> userPostListEntity;
 }

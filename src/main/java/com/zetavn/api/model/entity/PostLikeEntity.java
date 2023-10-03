@@ -4,29 +4,24 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Entity
-public class PostSaved {
+public class PostLikeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_saved_id")
-    private long postSavedId;
+    @Column(name = "post_like_id")
+    private long postLikeId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "follower_user_id", nullable = false)
     @JsonBackReference
-    private User user;
+    private UserEntity userEntity;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     @JsonBackReference
-    private Post post;
-
-    @Column(name = "saved_time", nullable = false)
-    private LocalDateTime savedTime;
+    private PostEntity postEntity;
 }

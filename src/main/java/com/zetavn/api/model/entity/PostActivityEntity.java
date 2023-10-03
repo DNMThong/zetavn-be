@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-public class PostActivity {
+public class PostActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_activity_id")
@@ -29,7 +29,7 @@ public class PostActivity {
     @Column(name = "post_activity_parent_id")
     private Long postActivityParentId;
 
-    @OneToMany(mappedBy = "postActivityDetailId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postActivityEntityDetailId", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<Post> postActivityDetailList;
+    List<PostEntity> postEntityActivityDetailList;
 }

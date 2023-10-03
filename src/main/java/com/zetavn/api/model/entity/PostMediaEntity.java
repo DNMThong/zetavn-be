@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
-public class PostMedia {
+public class PostMediaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_media_id")
@@ -18,7 +18,7 @@ public class PostMedia {
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     @JsonBackReference
-    private Post post;
+    private PostEntity postEntity;
 
     @Column(name = "media_path", nullable = false)
     private String mediaPath;
@@ -29,5 +29,5 @@ public class PostMedia {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private User user;
+    private UserEntity userEntity;
 }

@@ -9,19 +9,19 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
-public class PostLike {
+public class PostMentionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_like_id")
-    private long postLikeId;
+    @Column(name = "mention_id")
+    private long mentionId;
 
     @ManyToOne
-    @JoinColumn(name = "follower_user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
-    private User user;
+    private UserEntity userEntity;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     @JsonBackReference
-    private Post post;
+    private PostEntity postEntity;
 }

@@ -1,6 +1,6 @@
 package com.zetavn.api.enums;
 
-public enum UserStatus {
+public enum UserStatusEnum {
     ACTIVE,
     LOCKED,
     SUSPENDED
