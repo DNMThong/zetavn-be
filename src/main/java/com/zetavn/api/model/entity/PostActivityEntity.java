@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@Table(name = "post_activity")
 public class PostActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

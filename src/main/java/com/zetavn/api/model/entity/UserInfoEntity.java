@@ -14,6 +14,7 @@ import com.zetavn.api.enums.GenderEnum;
 @Getter
 @Setter
 @Entity
+@Table(name = "user_info")
 public class UserInfoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
