@@ -9,6 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
+@Table(name = "post_like")
 public class PostLikeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +17,7 @@ public class PostLikeEntity {
     private long postLikeId;
 
     @ManyToOne
-    @JoinColumn(name = "follower_user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     private UserEntity userEntity;
 
