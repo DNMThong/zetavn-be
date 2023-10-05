@@ -1,6 +1,7 @@
 package com.zetavn.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.zetavn.api.enums.RoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -57,6 +58,10 @@ public class UserEntity {
 
     @Column(name = "token")
     private String token;
+
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private RoleEnum role;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
