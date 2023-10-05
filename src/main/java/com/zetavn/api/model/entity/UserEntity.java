@@ -17,7 +17,6 @@ import com.zetavn.api.enums.UserStatusEnum;
 @Table(name = "Users")
 public class UserEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private String userId;
 
