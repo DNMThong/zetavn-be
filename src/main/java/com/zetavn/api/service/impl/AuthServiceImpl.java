@@ -1,5 +1,6 @@
 package com.zetavn.api.service.impl;
 
+import com.zetavn.api.enums.RoleEnum;
 import com.zetavn.api.enums.UserStatusEnum;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.UserMapper;
@@ -58,6 +59,7 @@ public class AuthServiceImpl implements AuthService {
             userEntity.setCreatedAt(LocalDateTime.now());
             userEntity.setUpdatedAt(LocalDateTime.now());
             userEntity.setStatus(UserStatusEnum.ACTIVE);
+            userEntity.setRole(RoleEnum.USER);
             userEntity.setLastName(signUpRequest.getLastName());
             userEntity.setFirstName(signUpRequest.getFirstName());
             UserEntity _user = userRepository.save(userEntity);
@@ -75,7 +77,6 @@ public class AuthServiceImpl implements AuthService {
 
         // Fetch the user
         UserEntity user = userRepository.findUserEntityByEmail(signInRequest.getUsername());
-        log.info("Fetched User - " + 123);
         // Generate a JWT token, Refresh token
         Map<String, String> tokens = jwtHelper.generateTokens(user);
 

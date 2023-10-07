@@ -1,5 +1,6 @@
 package com.zetavn.api.config;
 
+import com.zetavn.api.enums.RoleEnum;
 import com.zetavn.api.jwt.JwtAuthenticationEntryPoint;
 import com.zetavn.api.jwt.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(r -> r.requestMatchers("/api/v0/auth/**").permitAll()
-                        .requestMatchers("/api/v0/users/**").authenticated())
+                        .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .addFilterBefore(new JwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);

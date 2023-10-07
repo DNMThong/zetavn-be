@@ -18,6 +18,7 @@ public class UserMapper {
         userResponse.setAvatar(userEntity.getAvatar());
         userResponse.setPhone(userEntity.getPhone());
         userResponse.setEmail(userEntity.getEmail());
+        userResponse.setRole(userEntity.getRole());
         userResponse.setAvatar(userEntity.getAvatar());
         userResponse.setUpdatedAt(userEntity.getUpdatedAt());
         userResponse.setUsername(userEntity.getUsername());
