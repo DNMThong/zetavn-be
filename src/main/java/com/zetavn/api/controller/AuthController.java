@@ -13,6 +13,7 @@ import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.JwtResponse;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.AuthService;
+import com.zetavn.api.utils.JwtHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +55,9 @@ public class AuthController {
     @Value("${zetavn.access_token_expiration_time}")
     private Long ACCESS_TOKEN_EXPIRATION_TIME;
 
+    @Autowired
+    private JwtHelper jwtHelper;
+
 
 
     @PostMapping("/register")
@@ -87,18 +91,13 @@ public class AuthController {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             try {
                 String refresh_token = authorizationHeader.substring("Bearer ".length());
-                Algorithm algorithm = Algorithm.HMAC256(ZETAVN_SECRET_KEY.getBytes());
-                JWTVerifier verifier = JWT.require(algorithm).build();
-                DecodedJWT decodedJWT = verifier.verify(refresh_token);
+//                Algorithm algorithm = Algorithm.HMAC256(ZETAVN_SECRET_KEY.getBytes());
+//                JWTVerifier verifier = JWT.require(algorithm).build();
+                DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
                 String username = decodedJWT.getSubject();
                 UserEntity user = userRepository.findUserEntityByEmail(username);
 
-                String access_token = JWT.create()
-                        .withSubject(user.getUsername())
-                        .withClaim("status", user.getStatus().toString())
-                        .withIssuedAt(new Date(System.currentTimeMillis()))
-                        .withExpiresAt(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
-                        .sign(algorithm);
+                String access_token = jwtHelper.generateToken(user);
 
                 Map<String, String> tokens = new HashMap<>();
 
