@@ -19,7 +19,6 @@ import com.zetavn.api.enums.PostStatusEnum;
 @Table(name = "Posts")
 public class PostEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     private String postId;
 
@@ -39,11 +38,6 @@ public class PostEntity {
     @Enumerated(EnumType.STRING)
     private PostStatusEnum status;
 
-    @ManyToOne
-    @JoinColumn(name = "post_activity_detail_id")
-    @JsonBackReference
-    private PostActivityEntity postActivityEntityDetailId;
-
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
@@ -55,11 +49,7 @@ public class PostEntity {
 
     @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<CommentEntity> postCommentListEntity;
-
-    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<PostLikeEntity> postLikeEntityList;
+    List<PostActivityEntity> postActivityEntityList;
 
     @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
@@ -68,8 +58,4 @@ public class PostEntity {
     @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<PostMentionEntity> postMentionEntityList;
-
-    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<PostSavedEntity> postSavedEntityList;
 }

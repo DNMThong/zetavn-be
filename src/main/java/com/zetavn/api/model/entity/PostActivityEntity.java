@@ -1,5 +1,6 @@
 package com.zetavn.api.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,6 +19,11 @@ public class PostActivityEntity {
     @Column(name = "post_activity_id")
     private long postActivityId;
 
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    @JsonBackReference
+    private PostEntity postEntity;
+
     @Column(name = "activity")
     private String activity;
 
@@ -29,8 +35,4 @@ public class PostActivityEntity {
 
     @Column(name = "post_activity_parent_id")
     private Long postActivityParentId;
-
-    @OneToMany(mappedBy = "postActivityEntityDetailId", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<PostEntity> postEntityActivityDetailList;
 }
