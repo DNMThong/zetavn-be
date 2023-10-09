@@ -11,11 +11,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
+@Table(name = "Comment")
 public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
-    private long commentId;
+    private Long commentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_parent_id")
