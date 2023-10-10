@@ -1,6 +1,11 @@
 package com.zetavn.api.service.impl;
 
+import com.zetavn.api.enums.PostStatusEnum;
+import com.zetavn.api.model.dto.CategoriesDto;
+import com.zetavn.api.model.dto.PostMediaDto;
 import com.zetavn.api.model.entity.*;
+import com.zetavn.api.model.mapper.CategoriesMapper;
+import com.zetavn.api.model.mapper.PostMediaMapper;
 import com.zetavn.api.payload.request.PostMediaRequest;
 import com.zetavn.api.payload.request.PostMentionRequest;
 import com.zetavn.api.payload.request.PostRequest;
@@ -34,10 +39,19 @@ public class PostServiceImpl implements PostService {
     private PostActivityRepository postActivityRepository;
 
     @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
     private PostMediaRepository postMediaRepository;
 
     @Autowired
     private PostMentionRepository postMentionRepository;
+
+    @Autowired
+    private PostMentionServiceImpl postMentionService;
+
+    @Autowired
+    private UserServiceImpl userService;
 
     @Override
     public ApiResponse<?> getPostById(String postId) {
@@ -61,21 +75,23 @@ public class PostServiceImpl implements PostService {
         post.setUserEntity(user);
         post.setContent(postRequest.getContent());
         post.setAccessModifier(postRequest.getAccessModifier());
+        post.setStatus(PostStatusEnum.ACTIVE);
         post.setIsDeleted(false);
         post.setCreatedAt(currentDateTime);
         post.setUpdatedAt(currentDateTime);
         postRepository.save(post);
 
-        if (postRequest.getPostActivity() != null) {
+        CategoriesDto categoriesDto = null;
+        if (postRequest.getCategoryId() != null) {
+            CategoryEntity categoryEntity = categoryRepository.getDetailCategoryById(postRequest.getCategoryId());
             PostActivityEntity postActivity = new PostActivityEntity();
             postActivity.setPostEntity(post);
-            postActivity.setActivity(postRequest.getPostActivity().getActivity());
-            postActivity.setDescription(postRequest.getPostActivity().getDescription());
-            postActivity.setActivityIconPath(postRequest.getPostActivity().getActivityIconPath());
-            postActivity.setPostActivityParentId(postRequest.getPostActivity().getPostActivityParentId());
+            postActivity.setCategoryEntity(categoryEntity);
             postActivityRepository.save(postActivity);
+            categoriesDto = CategoriesMapper.entityToDto(categoryEntity);
         }
 
+        List<PostMediaDto> postMediaDtos = null;
         if (postRequest.getPostMedias() != null) {
             List<PostMediaEntity> newList = new ArrayList<>();
             for (PostMediaRequest postMedia : postRequest.getPostMedias()) {
@@ -87,19 +103,20 @@ public class PostServiceImpl implements PostService {
                 newList.add(postMediaEntity);
             }
             postMediaRepository.saveAll(newList);
+            postMediaDtos = PostMediaMapper.entityListToDtoList(newList);
         }
 
         if (postRequest.getPostMentions() != null) {
             List<PostMentionEntity> newList = new ArrayList<>();
             for (PostMentionRequest postMention : postRequest.getPostMentions()) {
                 PostMentionEntity postMentionEntity = new PostMentionEntity();
-                postMentionEntity.setUserEntity(user); // chưa có func gọi tìm user theo userId
+                postMentionEntity.setUserEntity(userService.getUserByUserId(postMention.getUserId()));
                 postMentionEntity.setPostEntity(post);
                 newList.add(postMentionEntity);
             }
             postMentionRepository.saveAll(newList);
         }
 
-        return ApiResponse.success(HttpStatus.OK, "Create post success", mapToResponse(postRequest));
+        return ApiResponse.success(HttpStatus.OK, "Create post success", mapToResponse(postRequest, categoriesDto, postMediaDtos, postMentionService.getAllUserDtoByPostId(uuid)));
     }
 }

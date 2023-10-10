@@ -69,45 +69,45 @@ public class UserEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<ActivityLogEntity> userActivitiesList;
+    private UserInfoEntity userInfo;
 
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<CommentEntity> userCommentListEntity;
-
-    @OneToMany(mappedBy = "followerUserEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<FollowEntity> userFollowerList;
-
-    @OneToMany(mappedBy = "followingUserEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<FollowEntity> userFollowingList;
-
-    @OneToMany(mappedBy = "senderUserEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<FriendshipEntity> userSenderList;
-
-    @OneToMany(mappedBy = "receiverUserEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<FriendshipEntity> userReceiverList;
-
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<PostLikeEntity> userPostLikeEntityList;
-
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<PostMediaEntity> userPostMediaEntityList;
-
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<PostMentionEntity> userPostMentionEntityList;
-
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<UserInfoEntity> userInfoEntityList;
+//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+//    List<ActivityLogEntity> userActivitiesList;
+//
+//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+//    List<CommentEntity> userCommentListEntity;
+//
+//    @OneToMany(mappedBy = "followerUserEntity", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+//    List<FollowEntity> userFollowerList;
+//
+//    @OneToMany(mappedBy = "followingUserEntity", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+//    List<FollowEntity> userFollowingList;
+//
+//    @OneToMany(mappedBy = "senderUserEntity", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+//    List<FriendshipEntity> userSenderList;
+//
+//    @OneToMany(mappedBy = "receiverUserEntity", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+//    List<FriendshipEntity> userReceiverList;
+//
+//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+//    List<PostLikeEntity> userPostLikeEntityList;
+//
+//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+//    List<PostMediaEntity> userPostMediaEntityList;
+//
+//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+//    List<PostMentionEntity> userPostMentionEntityList;
 
     @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference

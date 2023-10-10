@@ -1,4 +1,4 @@
-package com.zetavn.api.payload.response;
+package com.zetavn.api.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostMentionResponse {
-    private String userId;
+public class PostMediaDto {
+    private String mediaPath;
+    private String mediaType;
 }

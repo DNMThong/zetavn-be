@@ -1,31 +1,22 @@
 package com.zetavn.api.model.mapper;
 
-import com.zetavn.api.payload.request.PostMediaRequest;
-import com.zetavn.api.payload.response.PostMediaResponse;
+import com.zetavn.api.model.dto.PostMediaDto;
+import com.zetavn.api.model.entity.PostMediaEntity;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostMediaMapper {
-
-    public static PostMediaResponse mapToResponse(PostMediaRequest postMediaRequest) {
-        if (postMediaRequest == null) {
-            return null;
-        }
-
-        PostMediaResponse postMediaResponse = new PostMediaResponse();
-        postMediaResponse.setMediaPath(postMediaRequest.getMediaPath());
-        postMediaResponse.setMediaType(postMediaRequest.getMediaType());
-
-        return postMediaResponse;
+    public static PostMediaDto entityToDto(PostMediaEntity postMediaEntity) {
+        PostMediaDto postMediaDto = new PostMediaDto();
+        postMediaDto.setMediaPath(postMediaEntity.getMediaPath());
+        postMediaDto.setMediaType(postMediaEntity.getMediaType());
+        return postMediaDto;
     }
 
-    public static PostMediaRequest mapToRequest(PostMediaResponse postMediaResponse) {
-        if (postMediaResponse == null) {
-            return null;
-        }
-
-        PostMediaRequest postMediaRequest = new PostMediaRequest();
-        postMediaRequest.setMediaPath(postMediaResponse.getMediaPath());
-        postMediaRequest.setMediaType(postMediaResponse.getMediaType());
-
-        return postMediaRequest;
+    public static List<PostMediaDto> entityListToDtoList(List<PostMediaEntity> postMedias) {
+        return postMedias.stream()
+                .map(PostMediaMapper::entityToDto)
+                .collect(Collectors.toList());
     }
 }
