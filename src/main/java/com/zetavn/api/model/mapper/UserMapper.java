@@ -5,6 +5,7 @@ import com.zetavn.api.payload.response.UserResponse;
 
 public class UserMapper {
     public static UserResponse userEntityToUserResponse(UserEntity userEntity){
+
         UserResponse userResponse = new UserResponse();
         userResponse.setUserId(userEntity.getUserId());
         userResponse.setIsDeleted(userEntity.getIsDeleted());

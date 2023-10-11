@@ -9,6 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
+@Table(name = "post_media")
 public class PostMediaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,6 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
+@Table(name = "post_mention")
 public class PostMentionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

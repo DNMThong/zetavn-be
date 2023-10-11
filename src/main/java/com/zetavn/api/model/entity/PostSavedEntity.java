@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
+@Table(name = "post_saved")
 public class PostSavedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
