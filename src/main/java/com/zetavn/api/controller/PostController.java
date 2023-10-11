@@ -29,4 +29,14 @@ public class PostController {
     public ApiResponse<?> createPost(@RequestBody PostRequest postRequest) {
         return postService.createPost(postRequest);
     }
+
+    @PutMapping("")
+    public ApiResponse<?> updatePost(String postId, @RequestBody PostRequest postRequest) {
+        return postService.updatePost(postId, postRequest); // chưa xong
+    }
+
+    @DeleteMapping("/{postId}")
+    public ApiResponse<?> deletePost(@PathVariable String postId) {
+        return postService.deletePost(postId);
+    }
 }
