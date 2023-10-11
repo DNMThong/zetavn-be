@@ -21,10 +21,10 @@ public class RefreshTokenEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "ip_address")
+    @Column(name = "ip_address", nullable = false)
     private String ipAddress;
 
-    @Column(name = "refresh_token")
+    @Column(name = "refresh_token", nullable = false, unique = true)
     private String refreshToken;
 
     @ManyToOne
