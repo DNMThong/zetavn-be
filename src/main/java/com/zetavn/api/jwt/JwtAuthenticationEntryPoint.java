@@ -1,5 +1,6 @@
 package com.zetavn.api.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,6 +10,11 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -30,7 +36,12 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
         // Write a custom message to the response indicating that access is denied
-        PrintWriter writer = response.getWriter();
-        writer.println("Access Denied!! " + authException.getMessage());
+        response.setHeader("ERROR", authException.getMessage());
+        response.setStatus(UNAUTHORIZED.value());
+        Map<String, String> error = new HashMap<>();
+        error.put("error", authException.getLocalizedMessage());
+        error.put("message", authException.getMessage());
+        response.setContentType(APPLICATION_JSON_VALUE);
+        new ObjectMapper().writeValue(response.getOutputStream(), error);
     }
 }

@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 @Component
 public class JwtHelper {
 //    @Value("${zetavn.secret_key}")
-    private final String ZETA_SECRET_KEY = "secret";
+    private String ZETA_SECRET_KEY = "secret";
 //    @Value("${zetavn.secret_key_ref}")
-    private final String ZETA_SECRET_KEY_REFRESH = "secret_ref";
+    private String ZETA_SECRET_KEY_REFRESH= "secret_ref";
 
     @Value("${zetavn.access_token_expiration_time}")
     private Long ACCESS_TOKEN_EXPIRATION_TIME;
@@ -56,7 +56,6 @@ public class JwtHelper {
         Algorithm algorithm = getAlgorithm_refresh();
         String refresh_token = JWT.create()
                 .withSubject(user.getEmail())
-                .withClaim("status", user.getStatus().toString())
                 .withClaim("userId", user.getUserId())
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .withExpiresAt(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))

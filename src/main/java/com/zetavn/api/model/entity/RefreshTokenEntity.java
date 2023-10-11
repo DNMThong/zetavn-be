@@ -24,8 +24,8 @@ public class RefreshTokenEntity {
     @Column(name = "ip_address", nullable = false)
     private String ipAddress;
 
-    @Column(name = "refresh_token", nullable = false, unique = true)
-    private String refreshToken;
+    @Column(name = "token", nullable = false, unique = true)
+    private String token;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
