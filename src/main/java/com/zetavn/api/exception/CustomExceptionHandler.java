@@ -1,5 +1,6 @@
 package com.zetavn.api.exception;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.zetavn.api.payload.response.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

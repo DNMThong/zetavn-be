@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static com.zetavn.api.utils.UUID.generateUUID;
+
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -40,7 +42,7 @@ public class UserServiceImpl implements UserService {
         } else {
 
             UserEntity userEntity = new UserEntity();
-            userEntity.setUserId(shortUUID());
+            userEntity.setUserId(generateUUID());
             userEntity.setUsername(userEntity.getUserId());
             userEntity.setEmail(signUpRequest.getEmail());
             userEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
@@ -104,13 +106,6 @@ public class UserServiceImpl implements UserService {
             log.info("Found username in database: {}", username);
             return user == null;
         }
-    }
-
-    public static String shortUUID() {
-        UUID uuid = UUID.randomUUID();
-        long l = ByteBuffer.wrap(uuid.toString().getBytes()).getLong();
-        log.info("Generating short UUID: {}", l);
-        return Long.toString(l, Character.MAX_RADIX);
     }
 
 }
