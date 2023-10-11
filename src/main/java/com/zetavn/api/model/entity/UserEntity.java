@@ -112,4 +112,8 @@ public class UserEntity {
     @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<PostEntity> userPostListEntity;
+
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    List<RefreshTokenEntity> refreshTokenEntityList;
 }
