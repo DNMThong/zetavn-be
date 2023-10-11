@@ -6,18 +6,26 @@ import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.SignInRequest;
 import com.zetavn.api.payload.request.SignUpRequest;
 import com.zetavn.api.payload.response.ApiResponse;
+import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.security.InvalidParameterException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +48,7 @@ public class UserServiceImpl implements UserService {
         } else {
 
             UserEntity userEntity = new UserEntity();
-            userEntity.setUserId(shortUUID());
+            userEntity.setUserId(generateUUID());
             userEntity.setUsername(userEntity.getUserId());
             userEntity.setEmail(signUpRequest.getEmail());
             userEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
@@ -81,6 +89,38 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+    @Override
+    public ApiResponse<?> getAllUsersByKeyword(String keyword, Integer pageNumber, Integer pageSize) {
+        log.info("Try to find Users by keyword {} at page number {} and page size {}", keyword, pageNumber, pageSize);
+        if (pageNumber < 0 || pageSize < 0) {
+            log.error("Error Logging: pageNumber {} < 0 || pageSize {} < 0 with keyword {}", pageNumber, pageSize, keyword);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Page number and page size must be positive");
+        } else {
+                Pageable pageable = PageRequest.of(pageNumber, pageSize);
+                Page<UserEntity> users = userRepository.findUserEntityByKeyword(keyword, pageable);
+                if (pageNumber > users.getTotalPages()) {
+                    log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, users.getNumber());
+                    throw new InvalidParameterException("pageNumber is out of total Page");
+                }
+            try {
+                List<UserEntity> userEntities = users.getContent();
+                List<UserResponse> userResponses = userEntities.stream().map(UserMapper::userEntityToUserResponse).toList();
+                Paginate<List<UserResponse>> dataResponse = new Paginate<>();
+                dataResponse.setData(userResponses);
+                dataResponse.setPageNumber(users.getNumber());
+                dataResponse.setPageSize(users.getSize());
+                dataResponse.setTotalElements(users.getTotalElements());
+                dataResponse.setTotalPages(users.getTotalPages());
+                dataResponse.setLastPage(users.isLast());
+                return ApiResponse.success(HttpStatus.OK, "Success", dataResponse);
+            } catch (Exception e) {
+                log.error("Error Logging: pageNumber: {}, pageSize: {}, keyword: {}, error_message: {}", pageNumber, pageSize, keyword, e.getMessage());
+                return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid Param");
+            }
+        }
+
+    }
+
 
     private boolean existUserByEmail(String email) {
         log.info("Trying to check user exist by email: {}", email);
@@ -106,11 +146,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public static String shortUUID() {
-        UUID uuid = UUID.randomUUID();
-        long l = ByteBuffer.wrap(uuid.toString().getBytes()).getLong();
-        log.info("Generating short UUID: {}", l);
-        return Long.toString(l, Character.MAX_RADIX);
+    public String generateUUID() {
+        return UUID.randomUUID().toString();
     }
+
 
 }

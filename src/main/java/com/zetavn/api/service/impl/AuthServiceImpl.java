@@ -14,6 +14,7 @@ import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.AuthService;
 import com.zetavn.api.service.UserService;
 import com.zetavn.api.utils.JwtHelper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
         } else {
 
             UserEntity userEntity = new UserEntity();
-            userEntity.setUserId(shortUUID());
+            userEntity.setUserId(generateUUID());
             userEntity.setUsername(userEntity.getUserId());
             userEntity.setEmail(signUpRequest.getEmail());
             userEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
@@ -81,33 +82,17 @@ public class AuthServiceImpl implements AuthService {
         Map<String, String> tokens = jwtHelper.generateTokens(user);
 
         // Build the response containing JWT token and refresh token
-        SignInResponse response = new SignInResponse();
+        SignInResponse signInResponse = new SignInResponse();
         JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
         UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
-        response.setUserInfo(userResponse);
-        response.setTokens(jwtResponse);
+        signInResponse.setUserInfo(userResponse);
+        signInResponse.setTokens(jwtResponse);
 
-        return ApiResponse.success(HttpStatus.OK, "Login success", response);
+        return ApiResponse.success(HttpStatus.OK, "Login success", signInResponse);
     }
 
-    public static String shortUUID() {
-        UUID uuid = UUID.randomUUID();
-        long l = ByteBuffer.wrap(uuid.toString().getBytes()).getLong();
-        log.info("Generating short UUID: {}", l);
-        return Long.toString(l, Character.MAX_RADIX);
+    public String generateUUID() {
+        return UUID.randomUUID().toString();
     }
-
-    // Helper method for user authentication
-//    private void doAuthenticate(SignInRequest request) {
-//        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-//                request.getUsername(), request.getPassword());
-//
-//        try {
-//            authenticationManager.authenticate(authenticationToken);
-//        } catch (BadCredentialsException e) {
-//            throw new BadCredentialsException("Invalid Username or Password!!");
-//        }
-//    }
-
 
 }

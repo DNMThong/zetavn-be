@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -67,7 +68,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ApiResponse<?> login(@RequestBody SignInRequest signInRequest) {
+    public ApiResponse<?> login(@RequestBody SignInRequest signInRequest, HttpServletRequest request, HttpServletResponse response) {
         // Authenticate the user
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 signInRequest.getUsername(), signInRequest.getPassword());
@@ -81,7 +82,7 @@ public class AuthController {
         log.info("Try to login: {}", signInRequest.toString());
         // Fetch the user details
 
-        return authService.login(signInRequest);
+        return authService.login(signInRequest, response);
     }
 
     @GetMapping("/token/refresh")
