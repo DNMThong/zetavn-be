@@ -5,6 +5,7 @@ import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.service.impl.PostServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,8 +16,8 @@ public class PostController {
     private PostServiceImpl postService;
 
     @GetMapping("/{postId}")
-    public ApiResponse<?> getAllUsers(@PathVariable String postId) {
-        return postService.getPostById(postId);
+    public ApiResponse<?> getPostById(@PathVariable String postId) {
+        return ApiResponse.success(HttpStatus.OK, "Get post success", postService.getPostById(postId));
     }
 
     @GetMapping("/user/{userId}")

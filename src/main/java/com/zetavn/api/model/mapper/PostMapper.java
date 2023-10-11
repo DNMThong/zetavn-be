@@ -1,23 +1,44 @@
 package com.zetavn.api.model.mapper;
 
-import com.zetavn.api.model.dto.CategoriesDto;
-import com.zetavn.api.model.dto.PostMediaDto;
-import com.zetavn.api.model.dto.UserMentionDto;
-import com.zetavn.api.payload.request.PostRequest;
-import com.zetavn.api.payload.response.PostResponse;
+import com.zetavn.api.model.dto.*;
+import com.zetavn.api.model.entity.PostEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PostMapper {
+    public static PostDto entityToDto(PostEntity entity) {
+        PostDto dto = new PostDto();
+        dto.setPostId(entity.getPostId());
+        dto.setUserEntity(UserMentionMapper.entityToDto(entity.getUserEntity()));
+        dto.setContent(entity.getContent());
+        dto.setAccessModifier(entity.getAccessModifier());
+        dto.setCreatedAt(entity.getCreatedAt());
 
-    public static PostResponse mapToResponse(PostRequest postRequest, CategoriesDto categoriesDto, List<PostMediaDto> postMediaDtos, List<UserMentionDto> postMentions) {
-        PostResponse postResponse = new PostResponse();
-        postResponse.setUserId(postRequest.getUserId());
-        postResponse.setContent(postRequest.getContent());
-        postResponse.setAccessModifier(postRequest.getAccessModifier());
-        postResponse.setCategory(categoriesDto);
-        postResponse.setPostMedias(postMediaDtos);
-        postResponse.setPostMentions(postMentions);
-        return postResponse;
+        if (entity.getPostActivityEntityList() != null) {
+            PostActivityDto postActivityDto = PostActivityMapper.entityToDto(entity.getPostActivityEntityList().get(0));
+            dto.setPostActivity(postActivityDto);
+        }
+
+        if (entity.getPostMediaEntityList() != null) {
+            List<PostMediaDto> postMediaDtoList = PostMediaMapper.entityListToDtoList(entity.getPostMediaEntityList());
+            dto.setPostMedias(postMediaDtoList);
+        }
+
+        if (entity.getPostMentionEntityList() != null) {
+            List<PostMentionDto> postMentionDtoList = PostMentionMapper.entityListToDtoList(entity.getPostMentionEntityList());
+            dto.setPostMentions(postMentionDtoList);
+        }
+        return dto;
     }
+
+    public static List<PostDto> entityListToDtoList(List<PostEntity> entityList) {
+        List<PostDto> dtoList = new ArrayList<>();
+        for (PostEntity entity : entityList) {
+            PostDto dto = entityToDto(entity);
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
+
 }

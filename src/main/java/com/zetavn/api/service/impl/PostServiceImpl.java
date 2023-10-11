@@ -1,16 +1,13 @@
 package com.zetavn.api.service.impl;
 
 import com.zetavn.api.enums.PostStatusEnum;
-import com.zetavn.api.model.dto.CategoriesDto;
-import com.zetavn.api.model.dto.PostMediaDto;
+import com.zetavn.api.model.dto.PostDto;
 import com.zetavn.api.model.entity.*;
-import com.zetavn.api.model.mapper.CategoriesMapper;
-import com.zetavn.api.model.mapper.PostMediaMapper;
+import com.zetavn.api.model.mapper.PostMapper;
 import com.zetavn.api.payload.request.PostMediaRequest;
 import com.zetavn.api.payload.request.PostMentionRequest;
 import com.zetavn.api.payload.request.PostRequest;
 import com.zetavn.api.payload.response.ApiResponse;
-import com.zetavn.api.payload.response.PostResponse;
 import com.zetavn.api.repository.*;
 import com.zetavn.api.service.PostService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.zetavn.api.model.mapper.PostMapper.mapToResponse;
 import static com.zetavn.api.utils.UUIDGenerator.generateRandomUUID;
 
 @Service
@@ -54,18 +50,19 @@ public class PostServiceImpl implements PostService {
     private UserServiceImpl userService;
 
     @Override
-    public ApiResponse<?> getPostById(String postId) {
+    public PostDto getPostById(String postId) {
         Optional<PostEntity> optional = postRepository.findById(postId);
-        return ApiResponse.success(HttpStatus.OK, "Get post success", optional);
+        PostEntity postEntity = optional.orElse(null);
+        return PostMapper.entityToDto(postEntity);
     }
 
     @Override
-    public ApiResponse<?> getAllPostByUserId(String userID) {
-        return ApiResponse.success(HttpStatus.OK, "Get all post by userId success", postRepository.getAllPostByUserId(userID));
+    public ApiResponse<List<PostDto>> getAllPostByUserId(String userID) {
+        return ApiResponse.success(HttpStatus.OK, "Get all post by userId success", PostMapper.entityListToDtoList(postRepository.getAllPostByUserId(userID)));
     }
 
     @Override
-    public ApiResponse<PostResponse> createPost(PostRequest postRequest) {
+    public ApiResponse<PostDto> createPost(PostRequest postRequest) {
         LocalDateTime currentDateTime = LocalDateTime.now();
         String uuid = generateRandomUUID();
 
@@ -81,17 +78,15 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(currentDateTime);
         postRepository.save(post);
 
-        CategoriesDto categoriesDto = null;
         if (postRequest.getCategoryId() != null) {
             CategoryEntity categoryEntity = categoryRepository.getDetailCategoryById(postRequest.getCategoryId());
             PostActivityEntity postActivity = new PostActivityEntity();
             postActivity.setPostEntity(post);
             postActivity.setCategoryEntity(categoryEntity);
             postActivityRepository.save(postActivity);
-            categoriesDto = CategoriesMapper.entityToDto(categoryEntity);
+            post.setPostActivityEntityList(List.of(postActivity));
         }
 
-        List<PostMediaDto> postMediaDtos = null;
         if (postRequest.getPostMedias() != null) {
             List<PostMediaEntity> newList = new ArrayList<>();
             for (PostMediaRequest postMedia : postRequest.getPostMedias()) {
@@ -103,7 +98,7 @@ public class PostServiceImpl implements PostService {
                 newList.add(postMediaEntity);
             }
             postMediaRepository.saveAll(newList);
-            postMediaDtos = PostMediaMapper.entityListToDtoList(newList);
+            post.setPostMediaEntityList(newList);
         }
 
         if (postRequest.getPostMentions() != null) {
@@ -115,8 +110,9 @@ public class PostServiceImpl implements PostService {
                 newList.add(postMentionEntity);
             }
             postMentionRepository.saveAll(newList);
+            post.setPostMentionEntityList(newList);
         }
 
-        return ApiResponse.success(HttpStatus.OK, "Create post success", mapToResponse(postRequest, categoriesDto, postMediaDtos, postMentionService.getAllUserDtoByPostId(uuid)));
+        return ApiResponse.success(HttpStatus.CREATED, "Created post success", PostMapper.entityToDto(post));
     }
 }
