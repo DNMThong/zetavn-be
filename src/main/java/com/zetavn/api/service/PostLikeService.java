@@ -8,7 +8,7 @@ import com.zetavn.api.payload.response.PostLikeOfPostResponse;
 
 
 public interface PostLikeService {
-       ApiResponse<PostLikeOfPostResponse> getListLikedUserOfPost(String postId);
-       ApiResponse<PostLikeEntity> createPostLike (PostLikeRequest postLikeRequest);
-       ApiResponse<PostLikeEntity> removePostLike (PostLikeRequest postLikeRequest);
+       ApiResponse<?> getListLikedUserOfPost(String postId);
+       ApiResponse<?> createPostLike (PostLikeRequest postLikeRequest);
+       ApiResponse<?> removePostLike (PostLikeRequest postLikeRequest);
 }

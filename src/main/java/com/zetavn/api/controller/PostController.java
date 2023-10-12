@@ -20,8 +20,8 @@ import java.util.List;
 public class PostController {
     @Autowired
     PostLikeService postLikeService;
-    @GetMapping("{postId}/post-like")
-    public ApiResponse<PostLikeOfPostResponse> getListLikedUserOfPost(@PathVariable("postId") String postId){
+    @GetMapping("{Id}/post-like")
+    public ApiResponse<?> getListLikedUserOfPost(@PathVariable("Id") String postId){
     return postLikeService.getListLikedUserOfPost(postId);
     }
 }

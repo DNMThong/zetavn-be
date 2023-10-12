@@ -60,5 +60,7 @@ public class SecurityConfig {
     AuthenticationManager authenticationManager() throws Exception {
         return configuration.getAuthenticationManager();
     }
-
+    private JwtAuthorizationFilter get(JwtHelper jwtHelper, RefreshTokenService refreshTokenService) {
+        return new JwtAuthorizationFilter(jwtHelper, refreshTokenService);
+    }
 }
