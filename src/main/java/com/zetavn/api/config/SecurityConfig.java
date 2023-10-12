@@ -1,10 +1,15 @@
 package com.zetavn.api.config;
 
-
+import com.zetavn.api.enums.RoleEnum;
+import com.zetavn.api.exception.EntryPointExceptionHandler;
+import com.zetavn.api.jwt.JwtAuthenticationEntryPoint;
+import com.zetavn.api.jwt.JwtAuthorizationFilter;
+import com.zetavn.api.service.RefreshTokenService;
+import com.zetavn.api.utils.JwtHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,13 +28,25 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration configuration;
 
+    private final JwtHelper jwtHelper;
+
+    private final RefreshTokenService refreshTokenService;
+
+    private final JwtAuthenticationEntryPoint unauthorizedHandler;
+
+
+    @Autowired
+    private EntryPointExceptionHandler entryPointExceptionHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth // Configure authorization rules
-                 .anyRequest().permitAll() // Require authentication for all other requests
-                );
+                .authorizeHttpRequests(r -> r.requestMatchers("/api/v0/auth/**").permitAll()
+                        .anyRequest().hasAnyAuthority("USER"))
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .addFilterBefore(get(jwtHelper, refreshTokenService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
