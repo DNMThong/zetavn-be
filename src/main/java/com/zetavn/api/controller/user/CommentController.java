@@ -23,28 +23,25 @@ public class CommentController {
 
     @GetMapping("/posts/{postId}/comments")
     public ApiResponse<List<CommentResponse>> getParentCommentsByPostId(@PathVariable String postId) { //CommentResponse
-        List<CommentResponse> commentDTO = commentService.getCommentsByPostId(postId);
-        return ApiResponse.success(HttpStatus.OK,"Get parentComments with postId: " + postId, commentDTO);
+        return commentService.getCommentsByPostId(postId);
     }
 
     @GetMapping("/comments/{commentId}/replies")
     public ApiResponse<List<CommentResponse>> getReply(@RequestParam(value = "postId") String postId, //CommentResponse
                                                           @PathVariable("commentId")Long commentId) {
-        List<CommentResponse> commentDTO = commentService.getParentCommentsByPostId(postId, commentId);
-        return ApiResponse.success(HttpStatus.OK,"success",commentDTO);
+        return commentService.getParentCommentsByPostId(postId, commentId);
     }
 
     @PutMapping("/comments")
     public ApiResponse<CommentResponse> updateComment(@RequestBody CommentRequest commentRequest) { //CommentRequest
-        CommentResponse comment = commentService.updateComment(commentRequest);
-        return ApiResponse.success(HttpStatus.OK ,"Comment has been updated successfully", comment);
+        return commentService.updateComment(commentRequest);
     }
 
     @PostMapping("/comments")
     public ApiResponse<CommentResponse> addComment(@RequestParam(value = "postId") String postId, //CommentRequest
                                                  @RequestBody CommentRequest commentRequest) {
-        CommentResponse comment = commentService.addComment(postId, commentRequest);
-        return ApiResponse.success(HttpStatus.CREATED ,"Comment has been created successfully.", comment);
+
+        return commentService.addComment(postId, commentRequest);
     }
 
     @DeleteMapping("/comments/{commentId}")

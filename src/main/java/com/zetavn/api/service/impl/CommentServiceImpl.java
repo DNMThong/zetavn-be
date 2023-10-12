@@ -2,6 +2,7 @@ package com.zetavn.api.service.impl;
 
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.payload.request.CommentRequest;
+import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.CommentResponse;
 import com.zetavn.api.model.entity.CommentEntity;
 import com.zetavn.api.model.entity.PostEntity;
@@ -10,6 +11,7 @@ import com.zetavn.api.repository.CommentRepository;
 import com.zetavn.api.repository.PostRepository;
 import com.zetavn.api.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,31 +20,45 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
 public class CommentServiceImpl implements CommentService {
-    @Autowired
-    private CommentRepository commentRepository;
-    @Autowired
-    private PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final PostRepository postRepository;
 
+    private final CommentMapper commentMapper;
     @Autowired
-    private CommentMapper commentMapper;
-
+    CommentServiceImpl(CommentRepository commentRepository, PostRepository postRepository, CommentMapper commentMapper) {
+        this.commentRepository = commentRepository;
+        this.postRepository = postRepository;
+        this.commentMapper = commentMapper;
+    }
 
     @Override
-    public List<CommentResponse> getCommentsByPostId(String postId) {
+    public ApiResponse<List<CommentResponse>> getCommentsByPostId(String postId) {
+        Optional<PostEntity> p = postRepository.findById(postId);
+        if(p.isEmpty()) {
+            throw new NotFoundException("Not found post with postId: " + postId);
+        }
         List<CommentEntity> comments = commentRepository.findCommentsByPostId(postId);
         List<CommentResponse> commentDTO = comments.stream().map(comment -> commentMapper.entityToCommentResponse(comment)).collect(Collectors.toList());
-        return commentDTO;
+        return ApiResponse.success(HttpStatus.OK, "Get comment by postId success! ", commentDTO);
     }
 
     @Override
-    public List<CommentResponse> getParentCommentsByPostId(String postId, Long parentCommentId) {
+    public ApiResponse<List<CommentResponse>> getParentCommentsByPostId(String postId, Long parentCommentId) {
+        Optional<PostEntity> p = postRepository.findById(postId);
+        if(p.isEmpty()) {
+            throw new NotFoundException("Not found post with postId: " + postId);
+        }
         List<CommentEntity> comments = this.commentRepository.findCommentsByCommentParentIdAndPostPostId(postId, parentCommentId);
         List<CommentResponse> commentDTO = comments.stream().map(commentMapper::entityToCommentResponse).collect(Collectors.toList());
-        return commentDTO;
+        return ApiResponse.success(HttpStatus.OK, "Get parent comment by postId success", commentDTO);
     }
 
     @Override
-    public CommentResponse addComment(String postId, CommentRequest commentRequest) {
+    public ApiResponse<CommentResponse> addComment(String postId, CommentRequest commentRequest) {
+        Optional<PostEntity> p = postRepository.findById(postId);
+        if(p.isEmpty()) {
+            throw new NotFoundException("Not found post with postId: " + postId);
+        }
         CommentEntity comment = commentMapper.commentRequestToEntity(commentRequest);
         comment.setCreatedAt(LocalDateTime.now());
         comment.setUpdatedAt(LocalDateTime.now());
@@ -51,11 +67,11 @@ public class CommentServiceImpl implements CommentService {
 
         CommentEntity saveComment = commentRepository.save(comment);
 
-        return commentMapper.entityToCommentResponse(saveComment);
+        return ApiResponse.success(HttpStatus.OK, "", commentMapper.entityToCommentResponse(saveComment));
     }
 
     @Override
-    public CommentResponse updateComment(CommentRequest commentRequest) {
+    public ApiResponse<CommentResponse> updateComment(CommentRequest commentRequest) {
         CommentEntity comment = commentRepository.findById(commentRequest.getCommentId()).orElseThrow(() -> new NotFoundException("Comment not found with commentID: " + commentRequest.getCommentId()));
         CommentEntity newComment = commentMapper.commentRequestToEntity(commentRequest);
         comment.setUpdatedAt(LocalDateTime.now());
@@ -63,13 +79,14 @@ public class CommentServiceImpl implements CommentService {
         comment.setContent(newComment.getContent());
         CommentEntity saveComment = commentRepository.save(comment);
 
-        return commentMapper.entityToCommentResponse(saveComment);
+        return ApiResponse.success(HttpStatus.OK, "", commentMapper.entityToCommentResponse(saveComment));
     }
 
     @Override
     public boolean deleteComment(Long commentId) {
-        if(commentId == null) {
-            throw new NullPointerException(commentId + "is null");
+        Optional<CommentEntity> c = commentRepository.findById(commentId);
+        if(c.isEmpty()) {
+            throw new NotFoundException("Not found comment!");
         }
         commentRepository.deleteById(commentId);
         Optional<CommentEntity> comment = commentRepository.findById(commentId);
