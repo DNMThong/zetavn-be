@@ -1,8 +1,11 @@
 package com.zetavn.api.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -14,15 +17,22 @@ public class PostActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_activity_id")
-    private long postActivityId;
+    private int postActivityId;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false, unique = true)
-    @JsonBackReference
-    private PostEntity postEntity;
+    @Column(name = "title")
+    private String title;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    @JsonBackReference
-    private CategoryEntity categoryEntity;
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "icon")
+    private String icon;
+
+    @OneToOne
+    @JoinColumn(name = "post_activity_parent_id")
+    @JsonManagedReference
+    private PostActivityEntity postActivityEntityParent;
 }

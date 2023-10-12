@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.zetavn.api.enums.UserStatusEnum;
 
@@ -72,44 +71,4 @@ public class UserEntity {
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
     private UserInfoEntity userInfo;
-
-//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-//    List<ActivityLogEntity> userActivitiesList;
-//
-//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-//    List<CommentEntity> userCommentListEntity;
-//
-//    @OneToMany(mappedBy = "followerUserEntity", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-//    List<FollowEntity> userFollowerList;
-//
-//    @OneToMany(mappedBy = "followingUserEntity", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-//    List<FollowEntity> userFollowingList;
-//
-//    @OneToMany(mappedBy = "senderUserEntity", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-//    List<FriendshipEntity> userSenderList;
-//
-//    @OneToMany(mappedBy = "receiverUserEntity", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-//    List<FriendshipEntity> userReceiverList;
-//
-//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-//    List<PostLikeEntity> userPostLikeEntityList;
-//
-//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-//    List<PostMediaEntity> userPostMediaEntityList;
-//
-//    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-//    List<PostMentionEntity> userPostMentionEntityList;
-
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<PostEntity> userPostListEntity;
 }

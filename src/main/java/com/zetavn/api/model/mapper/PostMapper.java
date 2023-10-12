@@ -15,8 +15,8 @@ public class PostMapper {
         dto.setAccessModifier(entity.getAccessModifier());
         dto.setCreatedAt(entity.getCreatedAt());
 
-        if (entity.getPostActivityEntityList() != null) {
-            PostActivityDto postActivityDto = PostActivityMapper.entityToDto(entity.getPostActivityEntityList().get(0));
+        if (entity.getPostActivityEntity() != null) {
+            PostActivityDto postActivityDto = PostActivityMapper.entityToDto(entity.getPostActivityEntity());
             dto.setPostActivity(postActivityDto);
         }
 

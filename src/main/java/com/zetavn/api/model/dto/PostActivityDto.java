@@ -1,5 +1,6 @@
 package com.zetavn.api.model.dto;
 
+import com.zetavn.api.model.entity.PostActivityEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostActivityDto {
-    private long postActivityId;
-    private CategoriesDto categoryEntity;
+    private int postActivityId;
+    private String title;
+    private String name;
+    private String description;
+    private String icon;
+    private PostActivityEntity postActivityEntityParent;
 }

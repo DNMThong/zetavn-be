@@ -47,9 +47,10 @@ public class PostEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<PostActivityEntity> postActivityEntityList;
+    @OneToOne
+    @JoinColumn(name = "post_activity_id")
+    @JsonBackReference
+    private PostActivityEntity postActivityEntity;
 
     @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference

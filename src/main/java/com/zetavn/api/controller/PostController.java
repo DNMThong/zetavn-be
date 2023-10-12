@@ -30,9 +30,9 @@ public class PostController {
         return postService.createPost(postRequest);
     }
 
-    @PutMapping("")
-    public ApiResponse<?> updatePost(String postId, @RequestBody PostRequest postRequest) {
-        return postService.updatePost(postId, postRequest); // chưa xong
+    @PutMapping("/{postId}")
+    public ApiResponse<?> updatePost(@PathVariable String postId, @RequestBody PostRequest postRequest) {
+        return postService.updatePost(postId, postRequest);
     }
 
     @DeleteMapping("/{postId}")

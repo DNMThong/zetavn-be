@@ -1,7 +1,7 @@
 package com.zetavn.api.payload.response;
 
 import com.zetavn.api.enums.PostAccessModifierEnum;
-import com.zetavn.api.model.dto.CategoriesDto;
+import com.zetavn.api.model.dto.PostActivityDto;
 import com.zetavn.api.model.dto.PostMediaDto;
 import com.zetavn.api.model.dto.UserMentionDto;
 import lombok.AllArgsConstructor;
@@ -20,7 +20,7 @@ public class PostResponse {
     private String userId;
     private String content;
     private PostAccessModifierEnum accessModifier;
-    private CategoriesDto category;
+    private PostActivityDto postActivity;
     private List<PostMediaDto> postMedias;
     private List<UserMentionDto> postMentions;
 }

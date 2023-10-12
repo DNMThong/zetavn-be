@@ -36,9 +36,6 @@ public class PostServiceImpl implements PostService {
     private PostActivityRepository postActivityRepository;
 
     @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
     private PostMediaRepository postMediaRepository;
 
     @Autowired
@@ -70,15 +67,11 @@ public class PostServiceImpl implements PostService {
         post.setIsDeleted(false);
         post.setCreatedAt(currentDateTime);
         post.setUpdatedAt(currentDateTime);
-        postRepository.save(post);
 
         if (postRequest.getCategoryId() != null) {
-            CategoryEntity categoryEntity = categoryRepository.getDetailCategoryById(postRequest.getCategoryId());
-            PostActivityEntity postActivity = new PostActivityEntity();
-            postActivity.setPostEntity(post);
-            postActivity.setCategoryEntity(categoryEntity);
-            postActivityRepository.save(postActivity);
-            post.setPostActivityEntityList(List.of(postActivity));
+            PostActivityEntity postActivity = postActivityRepository.getPostActivityById(postRequest.getCategoryId());
+            post.setPostActivityEntity(postActivity);
+            postRepository.save(post);
         }
 
         if (postRequest.getPostMedias() != null) {
@@ -106,76 +99,94 @@ public class PostServiceImpl implements PostService {
             postMentionRepository.saveAll(newList);
             post.setPostMentionEntityList(newList);
         }
-
         return ApiResponse.success(HttpStatus.CREATED, "Created post success", PostMapper.entityToDto(post));
     }
 
     public ApiResponse<PostDto> updatePost(String postId, PostRequest updatedPostRequest) {
         LocalDateTime currentDateTime = LocalDateTime.now();
         PostEntity existingPost = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No posts found with ID: " + postId));
+        UserEntity existingUser = userRepository.findById(updatedPostRequest.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + updatedPostRequest.getUserId()));
 
         existingPost.setContent(updatedPostRequest.getContent());
         existingPost.setAccessModifier(updatedPostRequest.getAccessModifier());
         existingPost.setUpdatedAt(currentDateTime);
-        postRepository.save(existingPost);
-
 
         if (updatedPostRequest.getCategoryId() != null) {
-            CategoryEntity categoryEntity = categoryRepository.getDetailCategoryById(updatedPostRequest.getCategoryId());
-            if (existingPost.getPostActivityEntityList() == null || existingPost.getPostActivityEntityList().isEmpty()) {
-                PostActivityEntity postActivity = new PostActivityEntity();
-                postActivity.setPostEntity(existingPost);
-                postActivity.setCategoryEntity(categoryEntity);
-                postActivityRepository.save(postActivity);
-                existingPost.setPostActivityEntityList(List.of(postActivity));
-            } else {
-                PostActivityEntity postActivity = existingPost.getPostActivityEntityList().get(0);
-                postActivity.setCategoryEntity(categoryEntity);
-                postActivityRepository.save(postActivity);
-            }
+            PostActivityEntity postActivity = postActivityRepository.getPostActivityById(updatedPostRequest.getCategoryId());
+            existingPost.setPostActivityEntity(postActivity);
+            postRepository.save(existingPost);
         } else {
-            // Nếu updatedPostRequest không chứa categoryId, bạn có thể xử lý theo cách phù hợp với ứng dụng của bạn
+            existingPost.setPostActivityEntity(null);
+            postRepository.save(existingPost);
         }
 
         if (updatedPostRequest.getPostMedias() != null) {
             List<PostMediaRequest> updatedMediaList = updatedPostRequest.getPostMedias();
             List<PostMediaEntity> currentMediaList = existingPost.getPostMediaEntityList();
+            List<PostMediaEntity> mediaToRemove = new ArrayList<>(currentMediaList);
 
-            // Merge strategy
-            for (PostMediaEntity currentMedia : currentMediaList) {
-                boolean mediaExists = false;
-                for (PostMediaRequest updatedMedia : updatedMediaList) {
-                    if (currentMedia.getMediaPath().equals(updatedMedia.getMediaPath())) {
-                        // Cập nhật thông tin trường currentMedia dựa trên updatedMedia
-                        currentMedia.setMediaPath(updatedMedia.getMediaPath());
-                        currentMedia.setMediaType(updatedMedia.getMediaType());
-                        // Các trường khác tương tự
+            for (PostMediaRequest updatedMedia : updatedMediaList) {
+                PostMediaEntity currentMedia = mediaToRemove.stream()
+                        .filter(media -> media.getMediaPath().equals(updatedMedia.getMediaPath()))
+                        .findFirst()
+                        .orElse(null);
 
-                        mediaExists = true;
-                        break;
-                    }
-                }
-
-                // Nếu không tồn tại trong danh sách updatedMedia, xóa bỏ nó
-                if (!mediaExists) {
-                    postMediaRepository.delete(currentMedia);
+                if (currentMedia != null) {
+                    currentMedia.setPostEntity(existingPost);
+                    currentMedia.setMediaPath(updatedMedia.getMediaPath());
+                    currentMedia.setMediaType(updatedMedia.getMediaType());
+                    currentMedia.setUserEntity(existingUser);
+                    mediaToRemove.remove(currentMedia);
                 }
             }
+            postMediaRepository.deleteAll(mediaToRemove);
 
-            // Thêm mới các media mới
             for (PostMediaRequest updatedMedia : updatedMediaList) {
-                if (updatedMedia.getMediaPath() == null) {
+                boolean mediaExists = currentMediaList.stream()
+                        .anyMatch(media -> media.getMediaPath().equals(updatedMedia.getMediaPath()));
+
+                if (!mediaExists) {
                     PostMediaEntity newMedia = new PostMediaEntity();
                     newMedia.setPostEntity(existingPost);
                     newMedia.setMediaPath(updatedMedia.getMediaPath());
                     newMedia.setMediaType(updatedMedia.getMediaType());
-                    // Các trường khác tương tự
-
-                    currentMediaList.add(newMedia);
+                    newMedia.setUserEntity(existingUser);
+                    postMediaRepository.save(newMedia);
                 }
             }
         }
 
+        if (updatedPostRequest.getPostMentions() != null) {
+            List<PostMentionRequest> updatedMentionList = updatedPostRequest.getPostMentions();
+            List<PostMentionEntity> currentMentionList = existingPost.getPostMentionEntityList();
+            List<PostMentionEntity> mentionToRemove = new ArrayList<>(currentMentionList);
+
+            for (PostMentionRequest updatedMention : updatedMentionList) {
+                PostMentionEntity currentMention = mentionToRemove.stream()
+                        .filter(mention -> mention.getUserEntity().getUserId().equals(updatedMention.getUserId()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (currentMention != null) {
+                    currentMention.setPostEntity(existingPost);
+                    currentMention.setUserEntity(userRepository.findById(updatedMention.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + updatedMention.getUserId())));
+                    mentionToRemove.remove(currentMention);
+                }
+            }
+            postMentionRepository.deleteAll(mentionToRemove);
+
+            for (PostMentionRequest updateMention : updatedMentionList) {
+                boolean mentionExists = currentMentionList.stream()
+                        .anyMatch(mention -> mention.getUserEntity().getUserId().equals(updateMention.getUserId()));
+
+                if (!mentionExists) {
+                    PostMentionEntity newMention = new PostMentionEntity();
+                    newMention.setPostEntity(existingPost);
+                    newMention.setUserEntity(userRepository.findById(updateMention.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + updateMention.getUserId())));
+                    postMentionRepository.save(newMention);
+                }
+            }
+        }
 
         return ApiResponse.success(HttpStatus.OK, "Updated post success", PostMapper.entityToDto(existingPost));
     }
