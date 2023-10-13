@@ -27,6 +27,9 @@ public class PostActivityEntity {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "icon")
+    private String icon;
+
     @Column(name = "post_activity_parent_id")
     private Long postActivityParentId;
 
