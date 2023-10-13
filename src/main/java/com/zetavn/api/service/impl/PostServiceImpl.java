@@ -193,12 +193,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ApiResponse<String> deletePost(String postId) {
+    public ApiResponse<?> deletePost(String postId) {
         Optional<PostEntity> optionalPost = postRepository.findById(postId);
         if (optionalPost.isPresent()) {
-            PostEntity existingPost = optionalPost.get();
-            postRepository.delete(existingPost);
-            return ApiResponse.success(HttpStatus.OK, "The post has been successfully deleted.", "postId: " + postId);
+            postRepository.disablePost(postId, true);
+            return ApiResponse.success(HttpStatus.OK, "The post has been successfully deleted.", "Soft delete successful. The item has been archived.");
         } else {
             return ApiResponse.error(HttpStatus.NOT_FOUND, "No posts found with ID: " + postId);
         }
