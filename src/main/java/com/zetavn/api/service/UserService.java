@@ -21,4 +21,6 @@ public interface UserService {
     ApiResponse<UserResponse> remove(String userId);
 
     ApiResponse<UserResponse> getUserByEmailOrUsername(String username, String email);
+
+    ApiResponse<?> getAllUsersByKeyword(String keyword, Integer pageNumber, Integer pageSize);
 }

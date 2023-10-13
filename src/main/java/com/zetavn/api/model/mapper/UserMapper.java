@@ -5,6 +5,7 @@ import com.zetavn.api.payload.response.UserResponse;
 
 public class UserMapper {
     public static UserResponse userEntityToUserResponse(UserEntity userEntity){
+
         UserResponse userResponse = new UserResponse();
         userResponse.setId(userEntity.getUserId());
         userResponse.setIsAuthorized(userEntity.getIsAuthorized() != null);

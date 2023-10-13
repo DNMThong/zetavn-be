@@ -13,6 +13,7 @@ import com.zetavn.api.enums.FriendStatusEnum;
 @Getter
 @Setter
 @Entity
+@Table(name = "friendship")
 public class FriendshipEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

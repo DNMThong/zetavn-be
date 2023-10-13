@@ -11,20 +11,21 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@Table(name = "post_activity")
 public class PostActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_activity_id")
     private long postActivityId;
 
-    @Column(name = "activity")
-    private String activity;
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "description")
     private String description;
-
-    @Column(name = "activity_icon_path")
-    private String activityIconPath;
 
     @Column(name = "post_activity_parent_id")
     private Long postActivityParentId;
