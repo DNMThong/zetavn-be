@@ -40,4 +40,7 @@ public class ApiResponse<T>{
     public static ApiResponse<Void> error(HttpStatus status, String message) {
         return new ApiResponse<>(status, message);
     }
+    public static <T> ApiResponse<T> error(HttpStatus status, String message, T data) {
+        return new ApiResponse<>(status, message, data);
+    }
 }

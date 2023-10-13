@@ -40,7 +40,7 @@ public class PostEntity {
     private PostStatusEnum status;
 
     @ManyToOne
-    @JoinColumn(name = "post_activity_detail_id")
+    @JoinColumn(name = "post_activity_id")
     @JsonBackReference
     private PostActivityEntity postActivityEntityDetailId;
 

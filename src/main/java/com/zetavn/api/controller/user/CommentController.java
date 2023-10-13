@@ -21,9 +21,9 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    @GetMapping("/posts/{postId}/comments")
-    public ApiResponse<List<CommentResponse>> getParentCommentsByPostId(@PathVariable String postId) { //CommentResponse
-        return commentService.getCommentsByPostId(postId);
+    @GetMapping("/posts/{id}/comments")
+    public ApiResponse<List<CommentResponse>> getParentCommentsByPostId(@PathVariable String id) { //CommentResponse
+        return commentService.getCommentsByPostId(id);
     }
 
     @GetMapping("/comments/{commentId}/replies")
@@ -32,16 +32,18 @@ public class CommentController {
         return commentService.getParentCommentsByPostId(postId, commentId);
     }
 
-    @PutMapping("/comments")
-    public ApiResponse<CommentResponse> updateComment(@RequestBody CommentRequest commentRequest) { //CommentRequest
-        return commentService.updateComment(commentRequest);
+    @PutMapping("/comments/{id}")
+    public ApiResponse<CommentResponse> updateComment(@PathVariable("id") Long id,
+                                                      @RequestParam("content") String content,
+                                                      @RequestParam("media") String media) {
+        return commentService.updateComment(id, content, media);
     }
 
     @PostMapping("/comments")
-    public ApiResponse<CommentResponse> addComment(@RequestParam(value = "postId") String postId, //CommentRequest
+    public ApiResponse<CommentResponse> addComment(@RequestParam("id") String id,
                                                  @RequestBody CommentRequest commentRequest) {
 
-        return commentService.addComment(postId, commentRequest);
+        return commentService.addComment(id, commentRequest);
     }
 
     @DeleteMapping("/comments/{commentId}")

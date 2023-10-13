@@ -9,22 +9,18 @@ import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.FollowService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v0")
 public class FollowController {
     private final FollowService followService;
-    private final UserRepository userRepository;
     @Autowired
-    FollowController(FollowService followService, UserRepository userRepository) {
+    FollowController(FollowService followService) {
         this.followService = followService;
-        this.userRepository = userRepository;
     }
 
     @PostMapping("/follows")
@@ -35,25 +31,14 @@ public class FollowController {
 
     @Transactional
     @DeleteMapping("/follows")
-    public ApiResponse<?> unfollow(@RequestParam String followerUserId,
-                                   @RequestParam String followingUserId) {
-        Optional<UserEntity> followerUser = userRepository.findById(followerUserId);
-        Optional<UserEntity> followingUser = userRepository.findById(followingUserId);
-        if(followerUser.isEmpty() || followingUser.isEmpty()) {
-            throw new NotFoundException("Not found user");
-        }
-        boolean unfollow = followService.deleteFollow(followerUserId, followingUserId);
-        String message = followerUserId + " unfollow " + followingUserId;
-        if (unfollow) {
-            return ApiResponse.success(HttpStatus.OK, message, null);
-        } else {
-            return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found follows");
-        }
+    public ApiResponse<?> unfollow(@RequestParam String followerId,
+                                   @RequestParam String followingId) {
+        return followService.deleteFollow(followerId, followingId);
     }
 
-    @GetMapping("/following-users/{followerUserId}")//Lấy danh sách followerUserId(người dùng) đang theo dõi ai
-    public ApiResponse<List<UserResponse>> getFollowingUsers(@PathVariable("followerUserId") String followerUserId) {
-        return followService.getFollowingUsers(followerUserId);
+    @GetMapping("/following-users/{followerId}")//Lấy danh sách followerUserId(người dùng) đang theo dõi ai
+    public ApiResponse<List<UserResponse>> getFollowingUsers(@PathVariable("followerId") String followerId) {
+        return followService.getFollowingUsers(followerId);
     }
 
     @GetMapping("/users/{userId}/followers")//Lấy danh sách ai đang theo dõi UserId này
@@ -61,9 +46,9 @@ public class FollowController {
         return followService.getFollower(userId);
     }
 
-    @PutMapping("/follows/updatePriority")
-    public ApiResponse<FollowResponse> updatePriority(@RequestBody FollowRequest followRequest) {
-        return followService.updatePriority(followRequest);
+    @PutMapping("/follows/update-priority")
+    public ApiResponse<FollowResponse> updatePriority(@RequestParam Long id, @RequestParam String priority) {
+        return followService.updatePriority(id, priority);
     }
 
 }

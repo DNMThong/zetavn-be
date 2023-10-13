@@ -51,7 +51,6 @@ public class CommentMapper {
 
     public CommentEntity commentRequestToEntity(CommentRequest commentRequest) {
         CommentEntity comment = new CommentEntity();
-        comment.setCommentId(commentRequest.getCommentId());
 
         Long parentCommentId = commentRequest.getCommentEntityParentId();
         if (parentCommentId != null) {

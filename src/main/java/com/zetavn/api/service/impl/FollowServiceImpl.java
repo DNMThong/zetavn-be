@@ -1,6 +1,6 @@
 package com.zetavn.api.service.impl;
 
-import com.zetavn.api.exception.DuplicateRecordException;
+import com.zetavn.api.enums.FollowPriorityEnum;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.FollowEntity;
 import com.zetavn.api.model.entity.UserEntity;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class FollowServiceImpl implements FollowService {
@@ -39,40 +38,43 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public ApiResponse<FollowResponse> createFollow(FollowRequest followRequest) {
+        Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerUserId(), followRequest.getFollowingUserId());
+        if (check.isEmpty()) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Friend request already exists", null);
+        }
         FollowEntity followEntity = followMapper.commentRequestToEntity(followRequest);
         followEntity.setCreatedAt(LocalDateTime.now());
+        followEntity.setPriority(FollowPriorityEnum.MEDIUM);
         FollowEntity saveFollow = followRepository.save(followEntity);
-        if(saveFollow.getFollowsId() == followEntity.getFollowsId()) {
-            throw new DuplicateRecordException("Followed is existing");
-        }
         return ApiResponse.success(HttpStatus.OK, "", followMapper.entityToFollowResponse(saveFollow));
     }
 
     @Override
-    public ApiResponse<FollowResponse> updatePriority(FollowRequest followRequest) {
-        Optional<UserEntity> userFollower = userRepository.findById(followRequest.getFollowerUserId());
-        Optional<UserEntity> userFollowing = userRepository.findById(followRequest.getFollowingUserId());
-        if (userFollower.isEmpty() || userFollowing.isEmpty())
-            throw new NotFoundException("userId not found!");
-
-        Optional<FollowEntity> follow = followRepository.findByFollowerUserEntityAndFollowingUserEntity(userFollower.get(),userFollowing.get());
-        if (follow.isEmpty())
-            throw new NotFoundException("Follow not found");
-
+    public ApiResponse<FollowResponse> updatePriority(Long followId, String priority) {
+        Optional<FollowEntity> follow = followRepository.findById(followId);
+        if (follow.isEmpty()) throw new NotFoundException("Follow not found");
         FollowEntity newPriority = follow.get();
-        newPriority.setPriority(followRequest.getPriority());
+        newPriority.setPriority(FollowPriorityEnum.valueOf(priority));
         followRepository.save(newPriority);
         return ApiResponse.success(HttpStatus.OK,"", followMapper.entityToFollowResponse(newPriority));
     }
 
     @Override
-    public boolean deleteFollow(String followerUserId, String followingUserId) {
-        if(followerUserId.isEmpty() || followingUserId.isEmpty()) {
-            throw new NotFoundException("FollowUserId not found");
+    public ApiResponse<Object> deleteFollow(String followerUserId, String followingUserId) {
+        Optional<UserEntity> followerUser = userRepository.findById(followerUserId);
+        Optional<UserEntity> followingUser = userRepository.findById(followingUserId);
+        if(followerUser.isEmpty() || followingUser.isEmpty()) {
+            throw new NotFoundException("Not found user");
         }
         followRepository.deleteByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followerUserId, followingUserId);
         boolean isFollowing = followRepository.existsByFollowerIdAndFollowingId(followerUserId, followingUserId);
-        return !isFollowing;
+        String message = followerUserId + " unfollow " + followingUserId;
+
+        if (isFollowing) {
+            return ApiResponse.success(HttpStatus.OK, message, null);
+        } else {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found follows", null);
+        }
     }
 
     @Override
@@ -95,5 +97,13 @@ public class FollowServiceImpl implements FollowService {
         List<UserEntity> user = followRepository.getFollowers(userId);
         List<UserResponse> userResponses = user.stream().map(userMapper::userEntityToUserResponse).toList();
         return ApiResponse.success(HttpStatus.OK, "", userResponses);
+    }
+
+    @Override
+    public void friendshipFollow(FollowRequest followRequest) {
+        FollowEntity followEntity = followMapper.commentRequestToEntity(followRequest);
+        followEntity.setCreatedAt(LocalDateTime.now());
+        followEntity.setPriority(FollowPriorityEnum.MEDIUM);
+        followRepository.save(followEntity);
     }
 }

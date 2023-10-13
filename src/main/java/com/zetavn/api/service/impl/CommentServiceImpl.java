@@ -38,7 +38,7 @@ public class CommentServiceImpl implements CommentService {
             throw new NotFoundException("Not found post with postId: " + postId);
         }
         List<CommentEntity> comments = commentRepository.findCommentsByPostId(postId);
-        List<CommentResponse> commentDTO = comments.stream().map(comment -> commentMapper.entityToCommentResponse(comment)).collect(Collectors.toList());
+        List<CommentResponse> commentDTO = comments.stream().map(commentMapper::entityToCommentResponse).collect(Collectors.toList());
         return ApiResponse.success(HttpStatus.OK, "Get comment by postId success! ", commentDTO);
     }
 
@@ -71,15 +71,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public ApiResponse<CommentResponse> updateComment(CommentRequest commentRequest) {
-        CommentEntity comment = commentRepository.findById(commentRequest.getCommentId()).orElseThrow(() -> new NotFoundException("Comment not found with commentID: " + commentRequest.getCommentId()));
-        CommentEntity newComment = commentMapper.commentRequestToEntity(commentRequest);
+    public ApiResponse<CommentResponse> updateComment(Long commentId, String content, String mediaPath) {
+        CommentEntity comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Comment not found with commentID: " + commentId));
         comment.setUpdatedAt(LocalDateTime.now());
-        comment.setMediaPath(newComment.getMediaPath());
-        comment.setContent(newComment.getContent());
+        comment.setMediaPath(mediaPath);
+        comment.setContent(content);
         CommentEntity saveComment = commentRepository.save(comment);
-
-        return ApiResponse.success(HttpStatus.OK, "", commentMapper.entityToCommentResponse(saveComment));
+        return ApiResponse.success(HttpStatus.OK, "Update comment success", commentMapper.entityToCommentResponse(saveComment));
     }
 
     @Override
