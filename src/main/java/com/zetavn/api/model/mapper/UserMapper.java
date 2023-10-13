@@ -5,15 +5,14 @@ import com.zetavn.api.payload.response.UserResponse;
 
 public class UserMapper {
     public static UserResponse userEntityToUserResponse(UserEntity userEntity){
+
         UserResponse userResponse = new UserResponse();
-        userResponse.setUserId(userEntity.getUserId());
-        userResponse.setIsDeleted(userEntity.getIsDeleted());
-        userResponse.setIsAuthorized(userEntity.getIsAuthorized());
-        userResponse.setToken(userEntity.getToken());
-        userResponse.setFirstName(userEntity.getFirstName());
-        userResponse.setPoster(userEntity.getPoster());
+        userResponse.setId(userEntity.getUserId());
+        userResponse.setIsAuthorized(userEntity.getIsAuthorized() != null);
         userResponse.setLastName(userEntity.getLastName());
-        userResponse.setStatus(userEntity.getStatus());
+        userResponse.setFirstName(userEntity.getFirstName());
+        userResponse.setDisplay(userEntity.getFirstName() + " " + userEntity.getLastName());
+        userResponse.setPoster(userEntity.getPoster());
         userResponse.setCreatedAt(userEntity.getCreatedAt());
         userResponse.setAvatar(userEntity.getAvatar());
         userResponse.setPhone(userEntity.getPhone());

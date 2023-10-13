@@ -1,6 +1,7 @@
 package com.zetavn.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.zetavn.api.enums.RoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -57,23 +58,15 @@ public class UserEntity {
     @Column(name = "token")
     private String token;
 
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private RoleEnum role;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<ActivityLogEntity> userActivitiesList;
-
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<CommentEntity> userCommentListEntity;
-
-    @OneToMany(mappedBy = "followerUserEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    List<FollowEntity> userFollowerList;
 
     @OneToMany(mappedBy = "followingUserEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
@@ -101,9 +94,13 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<UserInfoEntity> userInfoEntityList;
+    List<PostEntity> userPostListEntity;
 
     @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<PostEntity> userPostListEntity;
+    List<RefreshTokenEntity> refreshTokenEntityList;
+
+    @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    UserInfoEntity userInfo;
 }

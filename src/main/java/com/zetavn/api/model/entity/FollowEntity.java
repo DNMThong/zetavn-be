@@ -13,6 +13,7 @@ import com.zetavn.api.enums.FollowPriorityEnum;
 @Getter
 @Setter
 @Entity
+@Table(name = "follow")
 public class FollowEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ApiResponse<T>{
+public class ApiResponse<T> {
     private int code;
     private HttpStatus status;
     private String message;
@@ -37,7 +37,10 @@ public class ApiResponse<T>{
         return new ApiResponse<>(status, message, data);
     }
 
-    public static ApiResponse<Void> error(HttpStatus status, String message) {
+    public static <T> ApiResponse<T> error(HttpStatus status, String message) {
         return new ApiResponse<>(status, message);
+    }
+    public static <T> ApiResponse<T> error(HttpStatus status, String message, T data) {
+        return new ApiResponse<>(status, message, data);
     }
 }

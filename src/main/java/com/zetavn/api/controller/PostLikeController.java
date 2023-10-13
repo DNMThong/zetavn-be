@@ -14,7 +14,7 @@ public class PostLikeController {
     PostLikeService postLikeService;
 
     @PostMapping("")
-    public ApiResponse<PostLikeEntity> createPostLike(@RequestBody PostLikeRequest postLikeRequest){
+    public ApiResponse<?> createPostLike(@RequestBody PostLikeRequest postLikeRequest){
         return postLikeService.createPostLike(postLikeRequest);
     }
     @DeleteMapping("")

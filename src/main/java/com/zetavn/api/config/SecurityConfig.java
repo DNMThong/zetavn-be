@@ -1,7 +1,10 @@
 package com.zetavn.api.config;
 
+import com.zetavn.api.enums.RoleEnum;
 import com.zetavn.api.jwt.JwtAuthenticationEntryPoint;
 import com.zetavn.api.jwt.JwtAuthorizationFilter;
+import com.zetavn.api.service.RefreshTokenService;
+import com.zetavn.api.utils.JwtHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,18 +27,21 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration configuration;
 
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
+    private final JwtHelper jwtHelper;
+
+    private final RefreshTokenService refreshTokenService;
+
+    private final JwtAuthenticationEntryPoint unauthorizedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(r -> r.requestMatchers("/api/v0/auth/**").permitAll()
-                        .requestMatchers("/api/v0/users/**").authenticated())
+                        .anyRequest().hasAnyAuthority("USER"))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-                .addFilterBefore(new JwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(get(jwtHelper, refreshTokenService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -49,5 +55,7 @@ public class SecurityConfig {
     AuthenticationManager authenticationManager() throws Exception {
         return configuration.getAuthenticationManager();
     }
-
+    private JwtAuthorizationFilter get(JwtHelper jwtHelper, RefreshTokenService refreshTokenService) {
+        return new JwtAuthorizationFilter(jwtHelper, refreshTokenService);
+    }
 }
