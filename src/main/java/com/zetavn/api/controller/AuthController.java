@@ -71,7 +71,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ApiResponse<?> login(@RequestBody SignInRequest signInRequest, HttpServletResponse response) {
+    public ApiResponse<?> login(@RequestBody SignInRequest signInRequest, HttpServletResponse response) throws IOException {
         // Authenticate the user
 
 //        doAuthenticate(signInRequest);
@@ -83,54 +83,11 @@ public class AuthController {
 
     @GetMapping("/token/refresh")
     public ApiResponse<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException, IOException {
-        String refresh_token = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie c: cookies) {
-            if (c.getName().equals("refresh_token2")) {
-                refresh_token = c.getValue();
-            }
-        }
-        if (refresh_token != null && !refresh_token.equals("")) {
-            try {
-                DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
-                if (decodedJWT.getExpiresAt().before(new Date())) {
-                    log.info("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
-                    throw new TokenExpiredException("The token has expired", decodedJWT.getExpiresAt().toInstant());
-                }
-                String username = decodedJWT.getSubject();
-                UserEntity user = userRepository.findUserEntityByEmail(username);
-
-                String access_token = jwtHelper.generateToken(user);
-
-                Map<String, String> tokens = new HashMap<>();
-
-                tokens.put("access_token", access_token);
-                tokens.put("refresh_token", refresh_token);
-                JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
-                return ApiResponse.success(HttpStatus.OK, "Refresh token Success", jwtResponse);
-            } catch (TokenExpiredException e) {
-                response.setHeader("ERROR", e.getMessage());
-                response.setStatus(UNAUTHORIZED.value());
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "TokenExpired");
-                error.put("message", e.getMessage());
-                response.setContentType(APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(), error);
-            } catch (Exception e) {
-                response.setHeader("ERROR", e.getMessage());
-                response.setStatus(UNAUTHORIZED.value());
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "TokenInvalid");
-                error.put("message", "The Token is invalid");
-                response.setContentType(APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(), error);
-            }
-        }
-        return ApiResponse.error(FORBIDDEN, "Refresh token is missing");
+        return authService.refreshToken(request, response);
     }
 
     @GetMapping("/re-login")
-    public ApiResponse<?> reLogin(HttpServletRequest request, HttpServletResponse response) {
+    public ApiResponse<?> reLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
         return authService.reLogin(request, response);
     }
 

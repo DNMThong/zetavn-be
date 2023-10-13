@@ -25,6 +25,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -40,6 +42,7 @@ import java.util.*;
 import static com.zetavn.api.utils.UUID.generateUUID;
 import static java.util.Arrays.stream;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
@@ -131,8 +134,103 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ApiResponse<?> reLogin(HttpServletRequest request, HttpServletResponse response) {
-        return null;
+    public ApiResponse<?> reLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String refresh_token = null;
+        Cookie[] cookies = request.getCookies();
+        for (Cookie c: cookies) {
+            if (c.getName().equals("refresh_token2")) {
+                refresh_token = c.getValue();
+            }
+        }
+        if (refresh_token != null && !refresh_token.equals("")) {
+            try {
+                DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
+                if (decodedJWT.getExpiresAt().before(new Date())) {
+                    log.info("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
+                    throw new TokenExpiredException("The token has expired", decodedJWT.getExpiresAt().toInstant());
+                }
+                String username = decodedJWT.getSubject();
+                UserEntity user = userRepository.findUserEntityByEmail(username);
+
+                String access_token = jwtHelper.generateToken(user);
+
+                Map<String, String> tokens = new HashMap<>();
+
+                tokens.put("access_token", access_token);
+                tokens.put("refresh_token", refresh_token);
+                JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
+                SignInResponse _res = new SignInResponse();
+                UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
+                _res.setUserInfo(userResponse);
+                _res.setTokens(jwtResponse);
+                return ApiResponse.success(HttpStatus.OK, "Refresh token Success", _res);
+            } catch (TokenExpiredException e) {
+                response.setHeader("ERROR", e.getMessage());
+                response.setStatus(UNAUTHORIZED.value());
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "TokenExpired");
+                error.put("message", e.getMessage());
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(), error);
+            } catch (Exception e) {
+                response.setHeader("ERROR", e.getMessage());
+                response.setStatus(UNAUTHORIZED.value());
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "TokenInvalid");
+                error.put("message", "The Token is invalid");
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(), error);
+            }
+        }
+        return ApiResponse.error(FORBIDDEN, "Refresh token is invalid");
+    }
+
+    @Override
+    public ApiResponse<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String refresh_token = null;
+        Cookie[] cookies = request.getCookies();
+        for (Cookie c: cookies) {
+            if (c.getName().equals("refresh_token2")) {
+                refresh_token = c.getValue();
+            }
+        }
+        if (refresh_token != null && !refresh_token.equals("")) {
+            try {
+                DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
+                if (decodedJWT.getExpiresAt().before(new Date())) {
+                    log.info("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
+                    throw new TokenExpiredException("The token has expired", decodedJWT.getExpiresAt().toInstant());
+                }
+                String username = decodedJWT.getSubject();
+                UserEntity user = userRepository.findUserEntityByEmail(username);
+
+                String access_token = jwtHelper.generateToken(user);
+
+                Map<String, String> tokens = new HashMap<>();
+
+                tokens.put("access_token", access_token);
+                tokens.put("refresh_token", refresh_token);
+                JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
+                return ApiResponse.success(HttpStatus.OK, "Refresh token Success", jwtResponse);
+            } catch (TokenExpiredException e) {
+                response.setHeader("ERROR", e.getMessage());
+                response.setStatus(UNAUTHORIZED.value());
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "TokenExpired");
+                error.put("message", e.getMessage());
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(), error);
+            } catch (Exception e) {
+                response.setHeader("ERROR", e.getMessage());
+                response.setStatus(UNAUTHORIZED.value());
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "TokenInvalid");
+                error.put("message", "The Token is invalid");
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(), error);
+            }
+        }
+        return ApiResponse.error(FORBIDDEN, "Refresh token is invalid");
     }
 
 }
