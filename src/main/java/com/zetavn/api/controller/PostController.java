@@ -2,6 +2,8 @@ package com.zetavn.api.controller;
 
 import com.zetavn.api.payload.request.PostRequest;
 import com.zetavn.api.payload.response.ApiResponse;
+import com.zetavn.api.service.PostLikeService;
+import com.zetavn.api.service.PostService;
 import com.zetavn.api.service.impl.PostServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,14 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class PostController {
     @Autowired
+    PostService postService;
+
+    @Autowired
     PostLikeService postLikeService;
     @GetMapping("{Id}/post-like")
     public ApiResponse<?> getListLikedUserOfPost(@PathVariable("Id") String postId){
-    return postLikeService.getListLikedUserOfPost(postId);
-    private PostServiceImpl postService;
+        return postLikeService.getListLikedUserOfPost(postId);
+    }
 
     @GetMapping("/{postId}")
     public ApiResponse<?> getPostById(@PathVariable String postId) {

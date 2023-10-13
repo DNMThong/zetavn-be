@@ -102,6 +102,7 @@ public class PostServiceImpl implements PostService {
         return ApiResponse.success(HttpStatus.CREATED, "Created post success", PostMapper.entityToDto(post));
     }
 
+    @Override
     public ApiResponse<PostDto> updatePost(String postId, PostRequest updatedPostRequest) {
         LocalDateTime currentDateTime = LocalDateTime.now();
         PostEntity existingPost = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No posts found with ID: " + postId));
@@ -191,6 +192,7 @@ public class PostServiceImpl implements PostService {
         return ApiResponse.success(HttpStatus.OK, "Updated post success", PostMapper.entityToDto(existingPost));
     }
 
+    @Override
     public ApiResponse<String> deletePost(String postId) {
         Optional<PostEntity> optionalPost = postRepository.findById(postId);
         if (optionalPost.isPresent()) {

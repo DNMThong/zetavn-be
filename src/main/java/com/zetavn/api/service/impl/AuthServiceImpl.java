@@ -1,6 +1,5 @@
 package com.zetavn.api.service.impl;
 
-import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +16,8 @@ import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.AuthService;
 import com.zetavn.api.service.RefreshTokenService;
-import com.zetavn.api.service.UserService;
 import com.zetavn.api.utils.JwtHelper;
+import com.zetavn.api.utils.UUIDGenerator;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,22 +28,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.util.*;
-
-import static com.zetavn.api.utils.UUID.generateUUID;
-import static java.util.Arrays.stream;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 @Service @Slf4j
 public class AuthServiceImpl implements AuthService {
@@ -75,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
         } else {
 
             UserEntity userEntity = new UserEntity();
-            userEntity.setUserId(generateUUID());
+            userEntity.setUserId(UUIDGenerator.generateRandomUUID());
             userEntity.setUsername(userEntity.getUserId());
             userEntity.setEmail(signUpRequest.getEmail());
             userEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.zetavn.api.enums.UserStatusEnum;
 
@@ -67,7 +68,7 @@ public class UserEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "followingUserEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<FollowEntity> userFollowingList;
 
@@ -93,10 +94,6 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    List<UserInfoEntity> userInfoEntityList;
-
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    @JsonManagedReference
     List<PostEntity> userPostListEntity;
 
     @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
@@ -105,5 +102,5 @@ public class UserEntity {
 
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
-    private UserInfoEntity userInfo;
+    UserInfoEntity userInfo;
 }

@@ -26,14 +26,12 @@ public class FollowServiceImpl implements FollowService {
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
     private final FollowMapper followMapper;
-    private final UserMapper userMapper;
 
     @Autowired
-    FollowServiceImpl(FollowRepository followRepository, UserRepository userRepository,FollowMapper followMapper, UserMapper userMapper) {
+    FollowServiceImpl(FollowRepository followRepository, UserRepository userRepository,FollowMapper followMapper) {
         this.followRepository = followRepository;
         this.userRepository = userRepository;
         this.followMapper = followMapper;
-        this.userMapper = userMapper;
     }
 
     @Override
@@ -84,7 +82,7 @@ public class FollowServiceImpl implements FollowService {
             throw new NotFoundException("Not found user with userId: " + u);
         }
         List<UserEntity> user = followRepository.getFollowingUsers(followerUserId);
-        List<UserResponse> userResponses = user.stream().map(userMapper::userEntityToUserResponse).toList();
+        List<UserResponse> userResponses = user.stream().map(UserMapper::userEntityToUserResponse).toList();
         return ApiResponse.success(HttpStatus.OK, "", userResponses);
     }
 
@@ -95,7 +93,7 @@ public class FollowServiceImpl implements FollowService {
             throw new NotFoundException("Not found user with userId: " + u);
         }
         List<UserEntity> user = followRepository.getFollowers(userId);
-        List<UserResponse> userResponses = user.stream().map(userMapper::userEntityToUserResponse).toList();
+        List<UserResponse> userResponses = user.stream().map(UserMapper::userEntityToUserResponse).toList();
         return ApiResponse.success(HttpStatus.OK, "", userResponses);
     }
 

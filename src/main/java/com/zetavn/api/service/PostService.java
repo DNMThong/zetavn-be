@@ -12,4 +12,8 @@ public interface PostService {
     ApiResponse<?> getAllPostByUserId(String userID);
 
     ApiResponse<PostDto> createPost(PostRequest postRequest);
+
+    ApiResponse<PostDto> updatePost(String postId, PostRequest updatedPostRequest);
+
+    ApiResponse<String> deletePost(String postId);
 }
