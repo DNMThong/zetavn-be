@@ -5,7 +5,9 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zetavn.api.enums.RoleEnum;
 import com.zetavn.api.enums.UserStatusEnum;
+import com.zetavn.api.model.entity.RefreshTokenEntity;
 import com.zetavn.api.model.entity.UserEntity;
+import com.zetavn.api.model.entity.UserInfoEntity;
 import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.SignInRequest;
 import com.zetavn.api.payload.request.SignUpRequest;
@@ -13,6 +15,7 @@ import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.JwtResponse;
 import com.zetavn.api.payload.response.SignInResponse;
 import com.zetavn.api.payload.response.UserResponse;
+import com.zetavn.api.repository.UserInfoRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.AuthService;
 import com.zetavn.api.service.RefreshTokenService;
@@ -43,6 +46,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserInfoRepository userInfoRepository;
+
 
     @Autowired
     private RefreshTokenService refreshTokenService;
@@ -64,9 +70,9 @@ public class AuthServiceImpl implements AuthService {
             log.error("User exist in DB: {}", signUpRequest.getEmail());
             return ApiResponse.error(HttpStatus.CONFLICT, "Email have been taken");
         } else {
-
+            String id = UUIDGenerator.generateRandomUUID();
             UserEntity userEntity = new UserEntity();
-            userEntity.setUserId(UUIDGenerator.generateRandomUUID());
+            userEntity.setUserId(id);
             userEntity.setUsername(userEntity.getUserId());
             userEntity.setEmail(signUpRequest.getEmail());
             userEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
@@ -77,6 +83,22 @@ public class AuthServiceImpl implements AuthService {
             userEntity.setLastName(signUpRequest.getLastName());
             userEntity.setFirstName(signUpRequest.getFirstName());
             UserEntity _user = userRepository.save(userEntity);
+
+            if (_user != null) {
+                UserInfoEntity userInfo = new UserInfoEntity();
+                userInfo.setBirthday(signUpRequest.getBirthday());
+                userInfo.setGenderEnum(signUpRequest.getGender());
+                userInfo.setUserEntity(_user);
+                userInfo.setCreatedAt(LocalDateTime.now());
+                userInfo.setUpdatedAt(LocalDateTime.now());
+                log.info("try to save userinfo: birthday: {} - gender: {}", userInfo.getBirthday(), userInfo.getGenderEnum());
+                userInfoRepository.save(userInfo);
+            } else {
+                log.error("Error Logging: Cannot find user in database: {}", userEntity.getEmail());
+                return ApiResponse.error(HttpStatus.NOT_FOUND, "Cannot save user info in database");
+            }
+
+
             log.info("Register user in database success: {}", _user.getEmail());
             return ApiResponse.success(HttpStatus.OK, "Register success", UserMapper.userEntityToUserResponse(_user));
         }
@@ -192,10 +214,8 @@ public class AuthServiceImpl implements AuthService {
                     log.info("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
                     throw new TokenExpiredException("The token has expired", decodedJWT.getExpiresAt().toInstant());
                 }
-                String username = decodedJWT.getSubject();
-                UserEntity user = userRepository.findUserEntityByEmail(username);
-
-                String access_token = jwtHelper.generateToken(user);
+                RefreshTokenEntity user = refreshTokenService.getRefreshTokenByToken(refresh_token);
+                String access_token = jwtHelper.generateToken(user.getUserEntity());
 
                 Map<String, String> tokens = new HashMap<>();
 
@@ -221,6 +241,10 @@ public class AuthServiceImpl implements AuthService {
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             }
         }
+//        else {
+//            // Do delete refresh token in db by ip and user id
+//            refreshTokenService.removeRefreshTokenByIpAddressAndUserId();
+//        }
         return ApiResponse.error(FORBIDDEN, "Refresh token is invalid");
     }
 

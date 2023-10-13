@@ -1,5 +1,6 @@
 package com.zetavn.api.payload.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class ApiResponse<T> {
     private int code;
     private HttpStatus status;
     private String message;
+    @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
     private LocalDateTime time = LocalDateTime.now();
     private T data;
 
