@@ -2,15 +2,18 @@ package com.zetavn.api.service;
 
 import com.zetavn.api.payload.request.SignUpRequest;
 import com.zetavn.api.payload.response.ApiResponse;
+import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.payload.response.UserResponse;
 import org.springframework.data.domain.Page;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
 
-    ApiResponse<?> create(SignUpRequest signUpRequest);
+    ApiResponse<?> create(SignUpRequest signUpRequest) throws UnsupportedEncodingException, NoSuchAlgorithmException;
 
     ApiResponse<UserResponse> getUserByEmail(String email);
 
