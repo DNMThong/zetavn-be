@@ -9,6 +9,7 @@ import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.UserService;
+import com.zetavn.api.utils.UUIDGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,8 +22,6 @@ import org.springframework.stereotype.Service;
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static com.zetavn.api.utils.UUID.generateUUID;
 
 @Service
 @Slf4j
@@ -43,7 +42,7 @@ public class UserServiceImpl implements UserService {
         } else {
 
             UserEntity userEntity = new UserEntity();
-            userEntity.setUserId(generateUUID());
+            userEntity.setUserId(UUIDGenerator.generateRandomUUID());
             userEntity.setUsername(userEntity.getUserId());
             userEntity.setEmail(signUpRequest.getEmail());
             userEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));

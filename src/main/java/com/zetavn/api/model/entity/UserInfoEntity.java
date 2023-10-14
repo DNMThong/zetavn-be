@@ -21,7 +21,7 @@ public class UserInfoEntity {
     @Column(name = "users_info_id")
     private long usersInfoId;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     @JsonBackReference
     private UserEntity userEntity;

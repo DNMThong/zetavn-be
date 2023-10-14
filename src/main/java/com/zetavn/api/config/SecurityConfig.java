@@ -1,7 +1,6 @@
 package com.zetavn.api.config;
 
 import com.zetavn.api.enums.RoleEnum;
-import com.zetavn.api.exception.EntryPointExceptionHandler;
 import com.zetavn.api.jwt.JwtAuthenticationEntryPoint;
 import com.zetavn.api.jwt.JwtAuthorizationFilter;
 import com.zetavn.api.service.RefreshTokenService;
@@ -33,10 +32,6 @@ public class SecurityConfig {
     private final RefreshTokenService refreshTokenService;
 
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
-
-
-    @Autowired
-    private EntryPointExceptionHandler entryPointExceptionHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
