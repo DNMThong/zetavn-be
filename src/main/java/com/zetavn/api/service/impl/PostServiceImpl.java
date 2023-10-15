@@ -71,12 +71,12 @@ public class PostServiceImpl implements PostService {
         if (postRequest.getActivityId() != null) {
             PostActivityEntity postActivity = postActivityRepository.getPostActivityById(postRequest.getActivityId());
             post.setPostActivityEntity(postActivity);
-
+            postRepository.save(post);
         }
 
-        if (postRequest.getPostMedias() != null) {
+        if (postRequest.getMedias() != null) {
             List<PostMediaEntity> newList = new ArrayList<>();
-            for (PostMediaRequest postMedia : postRequest.getPostMedias()) {
+            for (PostMediaRequest postMedia : postRequest.getMedias()) {
                 PostMediaEntity postMediaEntity = new PostMediaEntity();
                 postMediaEntity.setPostEntity(post);
                 postMediaEntity.setMediaPath(postMedia.getMediaPath());
@@ -88,9 +88,9 @@ public class PostServiceImpl implements PostService {
             post.setPostMediaEntityList(newList);
         }
 
-        if (postRequest.getPostMentions() != null) {
+        if (postRequest.getMentions() != null) {
             List<PostMentionEntity> newList = new ArrayList<>();
-            for (PostMentionRequest postMention : postRequest.getPostMentions()) {
+            for (PostMentionRequest postMention : postRequest.getMentions()) {
                 PostMentionEntity postMentionEntity = new PostMentionEntity();
                 postMentionEntity.setUserEntity(userRepository.findById(postMention.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + postMention.getUserId())));
                 postMentionEntity.setPostEntity(post);
@@ -99,8 +99,7 @@ public class PostServiceImpl implements PostService {
             postMentionRepository.saveAll(newList);
             post.setPostMentionEntityList(newList);
         }
-        PostEntity postEntity = postRepository.save(post);
-        return ApiResponse.success(HttpStatus.CREATED, "Created post success", PostMapper.entityToDto(postEntity));
+        return ApiResponse.success(HttpStatus.CREATED, "Created post success", PostMapper.entityToDto(post));
     }
 
     @Override
@@ -122,8 +121,8 @@ public class PostServiceImpl implements PostService {
             postRepository.save(existingPost);
         }
 
-        if (updatedPostRequest.getPostMedias() != null) {
-            List<PostMediaRequest> updatedMediaList = updatedPostRequest.getPostMedias();
+        if (updatedPostRequest.getMedias() != null) {
+            List<PostMediaRequest> updatedMediaList = updatedPostRequest.getMedias();
             List<PostMediaEntity> currentMediaList = existingPost.getPostMediaEntityList();
             List<PostMediaEntity> mediaToRemove = new ArrayList<>(currentMediaList);
 
@@ -158,8 +157,8 @@ public class PostServiceImpl implements PostService {
             }
         }
 
-        if (updatedPostRequest.getPostMentions() != null) {
-            List<PostMentionRequest> updatedMentionList = updatedPostRequest.getPostMentions();
+        if (updatedPostRequest.getMentions() != null) {
+            List<PostMentionRequest> updatedMentionList = updatedPostRequest.getMentions();
             List<PostMentionEntity> currentMentionList = existingPost.getPostMentionEntityList();
             List<PostMentionEntity> mentionToRemove = new ArrayList<>(currentMentionList);
 

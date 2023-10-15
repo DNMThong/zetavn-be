@@ -2,9 +2,11 @@ package com.zetavn.api.model.mapper;
 
 import com.zetavn.api.model.dto.*;
 import com.zetavn.api.model.entity.PostEntity;
+import com.zetavn.api.model.entity.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostMapper {
     public static PostDto entityToDto(PostEntity entity) {
@@ -27,8 +29,8 @@ public class PostMapper {
         }
 
         if (entity.getPostMentionEntityList() != null) {
-            List<PostMentionDto> postMentionDtoList = PostMentionMapper.entityListToDtoList(entity.getPostMentionEntityList());
-            dto.setMentions(postMentionDtoList);
+            List<UserEntity> users = entity.getPostMentionEntityList().stream().map(item -> item.getUserEntity()).collect(Collectors.toList());
+            dto.setMentions(UserMentionMapper.entityListToDtoList(users));
         }
         return dto;
     }

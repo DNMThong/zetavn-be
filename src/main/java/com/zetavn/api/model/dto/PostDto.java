@@ -25,5 +25,5 @@ public class PostDto {
     private LocalDateTime updateAt;
     private PostActivityDto activity;
     List<PostMediaDto> medias;
-    List<PostMentionDto> mentions;
+    List<UserMentionDto> mentions;
 }
