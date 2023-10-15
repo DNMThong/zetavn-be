@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -69,30 +70,30 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             } catch (TokenExpiredException e) {
                 log.error("Error logging in: {}", e.getMessage());
-                response.setHeader("ERROR", e.getMessage());
-                response.setStatus(UNAUTHORIZED.value());
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "TokenExpired");
-                error.put("message", e.getMessage());
-                response.setContentType(APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(), error);
-            } catch (SignatureVerificationException e) {
-                log.error("Error logging in: {}", e.getMessage());
-                response.setHeader("ERROR", e.getMessage());
+                response.setHeader("Error", "The Token is invalid");
                 response.setStatus(UNAUTHORIZED.value());
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "TokenInvalid");
                 error.put("message", "The Token is invalid");
-                response.setContentType(APPLICATION_JSON_VALUE);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(), error);
+            } catch (SignatureVerificationException e) {
+                log.error("Error logging in: {}", e.getMessage());
+                response.setHeader("Error", "The Token is invalid");
+                response.setStatus(UNAUTHORIZED.value());
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "TokenInvalid");
+                error.put("message", "The Token is invalid");
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             } catch (Exception e) {
                 log.error("Error logging in: {}", e.getMessage());
-                response.setHeader("ERROR", e.getMessage());
+                response.setHeader("Error", "The Token is invalid");
                 response.setStatus(UNAUTHORIZED.value());
                 Map<String, String> error = new HashMap<>();
-                error.put("error", e.getMessage());
-                error.put("message", e.getMessage());
-                response.setContentType(APPLICATION_JSON_VALUE);
+                error.put("error", "TokenInvalid");
+                error.put("message", "The Token is invalid");
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             }
 
