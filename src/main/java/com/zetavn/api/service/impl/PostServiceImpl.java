@@ -69,7 +69,7 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(currentDateTime);
 
         if (postRequest.getActivityId() != null) {
-            PostActivityEntity postActivity = postActivityRepository.getPostActivityById(postRequest.getActivityId());
+            PostActivityEntity postActivity = postActivityRepository.getActivityById(postRequest.getActivityId());
             post.setPostActivityEntity(postActivity);
             postRepository.save(post);
         }
@@ -113,7 +113,7 @@ public class PostServiceImpl implements PostService {
         existingPost.setUpdatedAt(currentDateTime);
 
         if (updatedPostRequest.getActivityId() != null) {
-            PostActivityEntity postActivity = postActivityRepository.getPostActivityById(updatedPostRequest.getActivityId());
+            PostActivityEntity postActivity = postActivityRepository.getActivityById(updatedPostRequest.getActivityId());
             existingPost.setPostActivityEntity(postActivity);
             postRepository.save(existingPost);
         } else {

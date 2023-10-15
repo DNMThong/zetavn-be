@@ -37,6 +37,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -149,45 +151,39 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ApiResponse<?> reLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String refresh_token = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie c: cookies) {
-            if (c.getName().equals("refresh_token2")) {
-                refresh_token = c.getValue();
-            }
-        }
-        if (refresh_token != null && !refresh_token.equals("")) {
+        String token = null;
+        token = request.getHeader(AUTHORIZATION).substring(7);
+        if (!token.equals("")) {
             try {
-                DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
+                DecodedJWT decodedJWT = jwtHelper.decodedJWT(token);
                 if (decodedJWT.getExpiresAt().before(new Date())) {
-                    log.info("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
+                    log.error("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
                     throw new TokenExpiredException("The token has expired", decodedJWT.getExpiresAt().toInstant());
                 }
                 String username = decodedJWT.getSubject();
                 UserEntity user = userRepository.findUserEntityByEmail(username);
 
+                // Generate new access token
                 String access_token = jwtHelper.generateToken(user);
 
-                Map<String, String> tokens = new HashMap<>();
-
-                tokens.put("access_token", access_token);
-                tokens.put("refresh_token", refresh_token);
-//                JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
+                // response data for client
                 SignInResponse _res = new SignInResponse();
                 UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
                 _res.setUserInfo(userResponse);
-                _res.setAccess_token(tokens.get("access_token"));
-                return ApiResponse.success(HttpStatus.OK, "Refresh token Success", _res);
+                _res.setAccess_token(access_token);
+                return ApiResponse.success(HttpStatus.OK, "Re-login success", _res);
             } catch (TokenExpiredException e) {
-                response.setHeader("ERROR", e.getMessage());
+                log.error("Error logging in: {}", e.getMessage());
+                response.setHeader("ERROR", "The Token is invalid");
                 response.setStatus(UNAUTHORIZED.value());
                 Map<String, String> error = new HashMap<>();
-                error.put("error", "TokenExpired");
-                error.put("message", e.getMessage());
+                error.put("error", "TokenInvalid");
+                error.put("message", "The Token is invalid");
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             } catch (Exception e) {
-                response.setHeader("ERROR", e.getMessage());
+                log.error("Error logging in: {}", e.getMessage());
+                response.setHeader("ERROR", "The Token is invalid");
                 response.setStatus(UNAUTHORIZED.value());
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "TokenInvalid");
@@ -196,7 +192,7 @@ public class AuthServiceImpl implements AuthService {
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             }
         }
-        return ApiResponse.error(FORBIDDEN, "Refresh token is invalid");
+        return ApiResponse.error(FORBIDDEN, "Re-login failed");
     }
 
     @Override
