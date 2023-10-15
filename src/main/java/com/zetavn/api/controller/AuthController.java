@@ -90,6 +90,4 @@ public class AuthController {
     public ApiResponse<?> reLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
         return authService.reLogin(request, response);
     }
-
-
 }

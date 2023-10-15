@@ -5,7 +5,7 @@ import lombok.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Builder @ToString
-public class Paginate<T> {
+public class PaginateResponse<T> {
 
     private T data;
     private int pageNumber;
