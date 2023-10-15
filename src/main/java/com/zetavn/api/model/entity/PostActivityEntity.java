@@ -17,7 +17,7 @@ public class PostActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_activity_id")
-    private int postActivityId;
+    private int id;
 
     @Column(name = "title")
     private String title;
@@ -26,13 +26,13 @@ public class PostActivityEntity {
     private String name;
 
     @Column(name = "description")
-    private String description;
+    private String desc;
 
     @Column(name = "icon")
-    private String icon;
+    private String pic;
 
     @OneToOne
     @JoinColumn(name = "post_activity_parent_id")
     @JsonManagedReference
-    private PostActivityEntity postActivityEntityParent;
+    private PostActivityEntity detail;
 }

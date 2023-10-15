@@ -9,11 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostActivityDto {
+public class ActivityStatusDetail {
     private int id;
-    private String title;
     private String name;
-    private String desc;
     private String pic;
-    private ActivityStatusDetail detail;
+    private String desc;
 }
