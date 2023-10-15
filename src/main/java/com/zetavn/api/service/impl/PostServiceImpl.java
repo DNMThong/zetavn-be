@@ -68,10 +68,10 @@ public class PostServiceImpl implements PostService {
         post.setCreatedAt(currentDateTime);
         post.setUpdatedAt(currentDateTime);
 
-        if (postRequest.getCategoryId() != null) {
-            PostActivityEntity postActivity = postActivityRepository.getPostActivityById(postRequest.getCategoryId());
+        if (postRequest.getActivityId() != null) {
+            PostActivityEntity postActivity = postActivityRepository.getPostActivityById(postRequest.getActivityId());
             post.setPostActivityEntity(postActivity);
-            postRepository.save(post);
+
         }
 
         if (postRequest.getPostMedias() != null) {
@@ -99,7 +99,8 @@ public class PostServiceImpl implements PostService {
             postMentionRepository.saveAll(newList);
             post.setPostMentionEntityList(newList);
         }
-        return ApiResponse.success(HttpStatus.CREATED, "Created post success", PostMapper.entityToDto(post));
+        PostEntity postEntity = postRepository.save(post);
+        return ApiResponse.success(HttpStatus.CREATED, "Created post success", PostMapper.entityToDto(postEntity));
     }
 
     @Override
@@ -112,8 +113,8 @@ public class PostServiceImpl implements PostService {
         existingPost.setAccessModifier(updatedPostRequest.getAccessModifier());
         existingPost.setUpdatedAt(currentDateTime);
 
-        if (updatedPostRequest.getCategoryId() != null) {
-            PostActivityEntity postActivity = postActivityRepository.getPostActivityById(updatedPostRequest.getCategoryId());
+        if (updatedPostRequest.getActivityId() != null) {
+            PostActivityEntity postActivity = postActivityRepository.getPostActivityById(updatedPostRequest.getActivityId());
             existingPost.setPostActivityEntity(postActivity);
             postRepository.save(existingPost);
         } else {

@@ -9,25 +9,26 @@ import java.util.List;
 public class PostMapper {
     public static PostDto entityToDto(PostEntity entity) {
         PostDto dto = new PostDto();
-        dto.setPostId(entity.getPostId());
-        dto.setUserEntity(UserMentionMapper.entityToDto(entity.getUserEntity()));
+        dto.setId(entity.getPostId());
+        dto.setUser(UserMentionMapper.entityToDto(entity.getUserEntity()));
         dto.setContent(entity.getContent());
         dto.setAccessModifier(entity.getAccessModifier());
         dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdateAt(entity.getUpdatedAt());
 
         if (entity.getPostActivityEntity() != null) {
             PostActivityDto postActivityDto = PostActivityMapper.entityToDto(entity.getPostActivityEntity());
-            dto.setPostActivity(postActivityDto);
+            dto.setActivity(postActivityDto);
         }
 
         if (entity.getPostMediaEntityList() != null) {
             List<PostMediaDto> postMediaDtoList = PostMediaMapper.entityListToDtoList(entity.getPostMediaEntityList());
-            dto.setPostMedias(postMediaDtoList);
+            dto.setMedias(postMediaDtoList);
         }
 
         if (entity.getPostMentionEntityList() != null) {
             List<PostMentionDto> postMentionDtoList = PostMentionMapper.entityListToDtoList(entity.getPostMentionEntityList());
-            dto.setPostMentions(postMentionDtoList);
+            dto.setMentions(postMentionDtoList);
         }
         return dto;
     }

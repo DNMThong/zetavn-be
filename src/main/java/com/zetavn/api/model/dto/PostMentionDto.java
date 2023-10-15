@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostMentionDto {
-    private long mentionId;
-    private UserMentionDto userEntity;
+    private long id;
+    private UserMentionDto user;
 }

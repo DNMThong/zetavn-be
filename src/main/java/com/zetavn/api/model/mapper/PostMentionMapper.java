@@ -10,9 +10,9 @@ import java.util.List;
 public class PostMentionMapper {
     public static PostMentionDto entityToDto(PostMentionEntity entity) {
         PostMentionDto dto = new PostMentionDto();
-        dto.setMentionId(entity.getMentionId());
+        dto.setId(entity.getMentionId());
         UserMentionDto userMentionDto = UserMentionMapper.entityToDto(entity.getUserEntity());
-        dto.setUserEntity(userMentionDto);
+        dto.setUser(userMentionDto);
         return dto;
     }
 

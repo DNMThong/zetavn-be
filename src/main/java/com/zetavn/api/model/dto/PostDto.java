@@ -1,5 +1,6 @@
 package com.zetavn.api.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zetavn.api.enums.PostAccessModifierEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,12 +15,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostDto {
-    private String postId;
-    private UserMentionDto userEntity;
+    private String id;
+    private UserMentionDto user;
     private String content;
     private PostAccessModifierEnum accessModifier;
+    @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
     private LocalDateTime createdAt;
-    private PostActivityDto postActivity;
-    List<PostMediaDto> postMedias;
-    List<PostMentionDto> postMentions;
+    @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
+    private LocalDateTime updateAt;
+    private PostActivityDto activity;
+    List<PostMediaDto> medias;
+    List<PostMentionDto> mentions;
 }

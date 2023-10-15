@@ -17,7 +17,7 @@ public class PostRequest {
     private String userId;
     private String content;
     private PostAccessModifierEnum accessModifier;
-    private Integer categoryId;
+    private Integer activityId;
     private List<PostMediaRequest> postMedias;
     private List<PostMentionRequest> postMentions;
 }

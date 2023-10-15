@@ -127,17 +127,18 @@ public class AuthServiceImpl implements AuthService {
 
             // Add refresh token to Coookie
             Cookie c = new Cookie("refresh_token2", tokens.get("refresh_token"));
-            c.setMaxAge(900);
+            c.setMaxAge(90000);
             c.setHttpOnly(true);
+            c.setPath("/");
+            c.setSecure(false);
             res.addCookie(c);
-
 
             // Build the response containing JWT token and refresh token
             SignInResponse response = new SignInResponse();
-            JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
+//            JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
             UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
             response.setUserInfo(userResponse);
-            response.setTokens(jwtResponse);
+            response.setAccess_token(tokens.get("access_token"));
 
             return ApiResponse.success(HttpStatus.OK, "Login success", response);
         } else {
@@ -171,11 +172,11 @@ public class AuthServiceImpl implements AuthService {
 
                 tokens.put("access_token", access_token);
                 tokens.put("refresh_token", refresh_token);
-                JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
+//                JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
                 SignInResponse _res = new SignInResponse();
                 UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
                 _res.setUserInfo(userResponse);
-                _res.setTokens(jwtResponse);
+                _res.setAccess_token(tokens.get("access_token"));
                 return ApiResponse.success(HttpStatus.OK, "Refresh token Success", _res);
             } catch (TokenExpiredException e) {
                 response.setHeader("ERROR", e.getMessage());
@@ -203,10 +204,12 @@ public class AuthServiceImpl implements AuthService {
         String refresh_token = null;
         Cookie[] cookies = request.getCookies();
         for (Cookie c: cookies) {
+
             if (c.getName().equals("refresh_token2")) {
                 refresh_token = c.getValue();
             }
         }
+
         if (refresh_token != null && !refresh_token.equals("")) {
             try {
                 DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
