@@ -14,11 +14,12 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity
 
     RefreshTokenEntity findRefreshTokenEntityByToken(String token);
 
+    @Transactional
     void deleteRefreshTokenEntityByToken(String token);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM RefreshTokenEntity rt WHERE rt.ipAddress LIKE ?1 AND rt.userEntity.userId LIKE ?2")
+    @Query("DELETE FROM RefreshTokenEntity rt WHERE rt.ipAddress LIKE :ip AND rt.userEntity.userId LIKE :userId")
     void deleteRefreshTokenEntityByIpAddressAndUserId(String ip, String userId);
 
 }
