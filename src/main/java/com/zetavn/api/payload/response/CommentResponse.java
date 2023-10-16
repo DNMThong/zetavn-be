@@ -1,5 +1,7 @@
 package com.zetavn.api.payload.response;
 
+import com.zetavn.api.model.dto.PostMediaDto;
+import com.zetavn.api.model.dto.UserMentionDto;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,9 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CommentResponse {
-    private Long commentId;
-    private Long commentEntityParentId;
-    private String userId;
+    private Long id;
+    private OverallUserResponse user;
     private String content;
     private String mediaPath;
 }
