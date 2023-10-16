@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class FriendshipResponse {
     private Long id;
-    private String senderUserId;
-    private String receiverUserId;
+    private OverallUserResponse senderUser;
+    private OverallUserResponse receiverUser;
     private FriendStatusEnum status;
 }

@@ -3,6 +3,8 @@ package com.zetavn.api.controller.user;
 import com.zetavn.api.payload.request.FriendshipRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FriendshipResponse;
+import com.zetavn.api.payload.response.OverallUserResponse;
+import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.service.FriendshipService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +25,7 @@ public class FriendshipController {
     }
 
     @GetMapping("/friend-requests")
-    public ApiResponse<List<FriendshipResponse>> getRequest(@RequestParam String id) {
+    public ApiResponse<List<OverallUserResponse>> getRequest(@RequestParam String id) {
         return friendshipService.getReceiverFriendRequests(id);
     }
 
@@ -36,5 +38,15 @@ public class FriendshipController {
     @PutMapping("/friend-requests/reject")
     public ApiResponse<FriendshipResponse> reject(@RequestParam Long id) {
         return friendshipService.rejected(id);
+    }
+
+    @GetMapping("/friends")
+    public ApiResponse<List<OverallUserResponse>> friends(@RequestParam String id) {
+        return friendshipService.getFriendsByUserId(id);
+    }
+
+    @GetMapping("/suggestions")
+    public ApiResponse<List<OverallUserResponse>> friendSuggestions(@RequestParam String id) {
+        return friendshipService.getFriendSuggestions(id);
     }
 }
