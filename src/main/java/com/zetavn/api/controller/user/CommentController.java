@@ -21,9 +21,9 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    @GetMapping("/posts/{id}/comments")
-    public ApiResponse<List<CommentResponse>> getParentCommentsByPostId(@PathVariable String id) { //CommentResponse
-        return commentService.getCommentsByPostId(id);
+    @GetMapping("/posts/{postId}/comments")
+    public ApiResponse<List<CommentResponse>> getParentCommentsByPostId(@PathVariable String postId) { //CommentResponse
+        return commentService.getCommentsByPostId(postId);
     }
 
     @GetMapping("/comments/{commentId}/replies")
@@ -32,18 +32,18 @@ public class CommentController {
         return commentService.getParentCommentsByPostId(postId, commentId);
     }
 
-    @PutMapping("/comments/{id}")
-    public ApiResponse<CommentResponse> updateComment(@PathVariable("id") Long id,
-                                                      @RequestParam("content") String content,
-                                                      @RequestParam("media") String media) {
-        return commentService.updateComment(id, content, media);
+    @PutMapping("/comments/{commentId}")
+    public ApiResponse<CommentResponse> updateComment(@PathVariable("commentId") Long id,
+                                                      @RequestBody CommentRequest commentRequest) {
+        return commentService.updateComment(id, commentRequest);
     }
 
-    @PostMapping("/comments")
-    public ApiResponse<CommentResponse> addComment(@RequestParam("id") String id,
+    @PostMapping("/post/{postId}/comments/{commentId}")
+    public ApiResponse<CommentResponse> addComment(@PathVariable("postId") String postId,
+                                                 @PathVariable("commentId") Long commentId,
                                                  @RequestBody CommentRequest commentRequest) {
 
-        return commentService.addComment(id, commentRequest);
+        return commentService.addComment(postId, commentId, commentRequest);
     }
 
     @DeleteMapping("/comments/{commentId}")
