@@ -67,8 +67,8 @@ public class FriendshipServiceImpl implements FriendshipService {
                 existingFriendship.setCreatedAt(LocalDateTime.now());
 
                 FollowRequest follow = new FollowRequest();
-                follow.setFollowerId(existingFriendship.getSenderUserEntity().getUserId());
-                follow.setFollowingId(existingFriendship.getReceiverUserEntity().getUserId());
+                follow.setFollowerUserId(existingFriendship.getSenderUserEntity().getUserId());
+                follow.setFollowingUserId(existingFriendship.getReceiverUserEntity().getUserId());
                 followService.friendshipFollow(follow);
 
                 FriendshipEntity saveFriendship = friendshipRepository.save(existingFriendship);
@@ -82,8 +82,8 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendship.setCreatedAt(LocalDateTime.now());
 
         FollowRequest follow = new FollowRequest();
-        follow.setFollowerId(friendship.getSenderUserEntity().getUserId());
-        follow.setFollowingId(friendship.getReceiverUserEntity().getUserId());
+        follow.setFollowerUserId(friendship.getSenderUserEntity().getUserId());
+        follow.setFollowingUserId(friendship.getReceiverUserEntity().getUserId());
         followService.friendshipFollow(follow);
 
         FriendshipEntity saveFriendship = friendshipRepository.save(friendship);
@@ -113,8 +113,8 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendship.setStatus(FriendStatusEnum.ACCEPTED);
 
         FollowRequest follow = new FollowRequest();
-        follow.setFollowerId(friendship.getReceiverUserEntity().getUserId());
-        follow.setFollowingId(friendship.getSenderUserEntity().getUserId());
+        follow.setFollowerUserId(friendship.getReceiverUserEntity().getUserId());
+        follow.setFollowingUserId(friendship.getSenderUserEntity().getUserId());
         followService.friendshipFollow(follow);
 
         FriendshipEntity updatedFriendship = friendshipRepository.save(friendship);
