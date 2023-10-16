@@ -29,10 +29,7 @@ public class PostController {
         return ApiResponse.success(HttpStatus.OK, "Get post success", postService.getPostById(postId));
     }
 
-    @GetMapping("/user/{userId}")
-    public ApiResponse<?> getAllPostByUserId(@PathVariable String userId) {
-        return postService.getAllPostByUserId(userId);
-    }
+
 
     @PostMapping("")
     public ApiResponse<?> createPost(@RequestBody PostRequest postRequest) {

@@ -15,5 +15,5 @@ public interface PostService {
 
     ApiResponse<PostDto> updatePost(String postId, PostRequest updatedPostRequest);
 
-    ApiResponse<String> deletePost(String postId);
+    ApiResponse<?> deletePost(String postId);
 }

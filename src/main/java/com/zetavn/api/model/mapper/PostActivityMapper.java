@@ -6,12 +6,12 @@ import com.zetavn.api.model.entity.PostActivityEntity;
 public class PostActivityMapper {
     public static PostActivityDto entityToDto(PostActivityEntity entity) {
         PostActivityDto dto = new PostActivityDto();
-        dto.setPostActivityId(entity.getPostActivityId());
-        dto.setTitle(entity.getTitle());
-        dto.setName(entity.getName());
-        dto.setDescription(entity.getDescription());
-        dto.setIcon(entity.getIcon());
-        dto.setPostActivityEntityParent(entity.getPostActivityEntityParent());
+        dto.setId(entity.getDetail().getId());
+        dto.setTitle(entity.getDetail().getTitle());
+        dto.setName(entity.getDetail().getName());
+        dto.setDesc(entity.getDetail().getDesc());
+        dto.setPic(entity.getDetail().getPic());
+        dto.setDetail(ActivityStatusMapper.entityToDetailDto(entity));
         return dto;
     }
 }

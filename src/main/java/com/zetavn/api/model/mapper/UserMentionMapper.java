@@ -9,14 +9,14 @@ import java.util.stream.Collectors;
 public class UserMentionMapper {
     public static UserMentionDto entityToDto(UserEntity userEntity) {
         UserMentionDto userMentionDto = new UserMentionDto();
-        userMentionDto.setUserId(userEntity.getUserId());
+        userMentionDto.setId(userEntity.getUserId());
         userMentionDto.setUsername(userEntity.getUsername());
         userMentionDto.setFirstName(userEntity.getFirstName());
         userMentionDto.setLastName(userEntity.getLastName());
+        userMentionDto.setDisplay(userEntity.getFirstName()+" "+userEntity.getLastName());
         userMentionDto.setAvatar(userEntity.getAvatar());
         userMentionDto.setPoster(userEntity.getPoster());
-        userMentionDto.setRole(userEntity.getRole());
-        userMentionDto.setUserInfo(userEntity.getUserInfo());
+
 
         return userMentionDto;
     }
