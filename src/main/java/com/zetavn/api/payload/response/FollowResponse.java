@@ -11,4 +11,5 @@ public class FollowResponse {
     private String followerUserId;
     private String followingUserId;
     private FollowPriorityEnum priority;
+
 }

@@ -5,6 +5,7 @@ import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.payload.request.FollowRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FollowResponse;
+import com.zetavn.api.payload.response.OverallUserResponse;
 import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.FollowService;
@@ -37,18 +38,19 @@ public class FollowController {
     }
 
     @GetMapping("/following-users/{followerId}")//Lấy danh sách followerUserId(người dùng) đang theo dõi ai
-    public ApiResponse<List<UserResponse>> getFollowingUsers(@PathVariable("followerId") String followerId) {
+    public ApiResponse<List<OverallUserResponse>> getFollowingUsers(@PathVariable("followerId") String followerId) {
         return followService.getFollowingUsers(followerId);
     }
 
     @GetMapping("/users/{userId}/followers")//Lấy danh sách ai đang theo dõi UserId này
-    public ApiResponse<List<UserResponse>> getFollowers(@PathVariable("userId") String userId) {
+    public ApiResponse<List<OverallUserResponse>> getFollowers(@PathVariable("userId") String userId) {
         return followService.getFollower(userId);
     }
 
     @PutMapping("/follows/update-priority")
     public ApiResponse<FollowResponse> updatePriority(@RequestParam Long id, @RequestParam String priority) {
         return followService.updatePriority(id, priority);
+
     }
 
 }

@@ -25,6 +25,7 @@ public class FriendshipMapper {
         FriendshipResponse friendshipResponse = new FriendshipResponse();
         friendshipResponse.setId(friendshipEntity.getFriendshipId());
 
+
         OverallUserResponse userSender = OverallUserMapper.entityToDto(friendshipEntity.getSenderUserEntity());
         friendshipResponse.setSenderUser(userSender);
 
