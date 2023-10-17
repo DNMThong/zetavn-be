@@ -3,9 +3,11 @@ package com.zetavn.api.service.impl;
 import com.zetavn.api.enums.PostStatusEnum;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.dto.PostDto;
+import com.zetavn.api.model.dto.UserMentionDto;
 import com.zetavn.api.model.entity.*;
 import com.zetavn.api.model.mapper.PostMapper;
 import com.zetavn.api.model.mapper.UserMapper;
+import com.zetavn.api.model.mapper.UserMentionMapper;
 import com.zetavn.api.payload.request.PostMediaRequest;
 import com.zetavn.api.payload.request.PostMentionRequest;
 import com.zetavn.api.payload.request.PostRequest;
@@ -27,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.zetavn.api.utils.UUIDGenerator.generateRandomUUID;
 
@@ -47,6 +50,9 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private PostMentionRepository postMentionRepository;
+
+    @Autowired
+    private FriendshipRepository friendshipRepository;
 
     @Override
     public PostDto getPostById(String postId) {
@@ -80,8 +86,10 @@ public class PostServiceImpl implements PostService {
             if (postRequest.getActivityId() != null) {
                 PostActivityEntity postActivity = postActivityRepository.getActivityById(postRequest.getActivityId());
                 post.setPostActivityEntity(postActivity);
-                postRepository.save(post);
+            } else {
+                post.setPostActivityEntity(null);
             }
+            postRepository.save(post);
 
             if (postRequest.getMedias() != null) {
                 List<PostMediaEntity> newList = new ArrayList<>();
@@ -219,9 +227,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ApiResponse<Paginate<List<PostDto>>> getAllPostByUserFollow(String userId, Integer pageNumber, Integer pageSize) {
+        List<UserMentionDto> users = UserMentionMapper.entityListToDtoList(friendshipRepository.findFriendsReceivedByUser(userId));
+        List<String> listUserId = users.stream().map(UserMentionDto::getId).collect(Collectors.toList());
+        listUserId.add(userId);
         try {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<PostEntity> posts = postRepository.getAllPostByUserFollow(userId, pageable);
+            Page<PostEntity> posts = postRepository.getAllPostByUserList(listUserId, pageable);
             List<PostEntity> postList = posts.getContent();
             List<PostDto> postDtoList = PostMapper.entityListToDtoList(postList);
 
