@@ -5,15 +5,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostActivityDto {
+public class ActivityStatus {
     private int id;
     private String title;
     private String name;
     private String desc;
     private String pic;
-    private ActivityStatusDetail detail;
+    private List<ActivityStatusDetail> details;
 }

@@ -19,14 +19,12 @@ import com.zetavn.api.repository.UserInfoRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.AuthService;
 import com.zetavn.api.service.RefreshTokenService;
-import com.zetavn.api.utils.CookieHelper;
 import com.zetavn.api.utils.JwtHelper;
 import com.zetavn.api.utils.UUIDGenerator;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -126,19 +124,23 @@ public class AuthServiceImpl implements AuthService {
             Map<String, String> tokens = jwtHelper.generateTokens(user);
 
             // Store refresh token to db
-            log.info("Store refresh - Token: {}", tokens.get("refresh_token"));
+            log.info("_TOKEN: {}", tokens.get("refresh_token"));
             refreshTokenService.create(tokens.get("refresh_token"), user.getUserId(), "asdasd");
 
             // Add refresh token to Coookie
-            Cookie c = CookieHelper.addCookie(res, "refresh_token2", tokens.get("refresh_token"), -1, true);
-
+            Cookie c = new Cookie("refresh_token2", tokens.get("refresh_token"));
+            c.setMaxAge(90000);
+            c.setHttpOnly(true);
+            c.setPath("/");
+            c.setSecure(false);
+            res.addCookie(c);
 
             // Build the response containing JWT token and refresh token
             SignInResponse response = new SignInResponse();
-            JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
+//            JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
             UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
             response.setUserInfo(userResponse);
-            response.setTokens(jwtResponse);
+            response.setAccess_token(tokens.get("access_token"));
 
             return ApiResponse.success(HttpStatus.OK, "Login success", response);
         } else {
@@ -164,15 +166,11 @@ public class AuthServiceImpl implements AuthService {
                 // Generate new access token
                 String access_token = jwtHelper.generateToken(user);
 
-
-                JwtResponse jwtResponse = new JwtResponse();
-                jwtResponse.setAccess_token(access_token);
-
                 // response data for client
                 SignInResponse _res = new SignInResponse();
                 UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
                 _res.setUserInfo(userResponse);
-                _res.setTokens(jwtResponse);
+                _res.setAccess_token(access_token);
                 return ApiResponse.success(HttpStatus.OK, "Re-login success", _res);
             } catch (TokenExpiredException e) {
                 log.error("Error logging in: {}", e.getMessage());
@@ -200,12 +198,19 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ApiResponse<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String refresh_token = null;
-        refresh_token = CookieHelper.getCookie(request.getCookies(), "refresh_token2").getValue();
+        Cookie[] cookies = request.getCookies();
+        for (Cookie c: cookies) {
+
+            if (c.getName().equals("refresh_token2")) {
+                refresh_token = c.getValue();
+            }
+        }
+
         if (refresh_token != null && !refresh_token.equals("")) {
             try {
                 DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
                 if (decodedJWT.getExpiresAt().before(new Date())) {
-                    log.error("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
+                    log.info("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
                     throw new TokenExpiredException("The token has expired", decodedJWT.getExpiresAt().toInstant());
                 }
                 RefreshTokenEntity user = refreshTokenService.getRefreshTokenByToken(refresh_token);
@@ -217,9 +222,16 @@ public class AuthServiceImpl implements AuthService {
                 tokens.put("refresh_token", refresh_token);
                 JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
                 return ApiResponse.success(HttpStatus.OK, "Refresh token Success", jwtResponse);
+            } catch (TokenExpiredException e) {
+                response.setHeader("ERROR", e.getMessage());
+                response.setStatus(UNAUTHORIZED.value());
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "TokenExpired");
+                error.put("message", e.getMessage());
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                new ObjectMapper().writeValue(response.getOutputStream(), error);
             } catch (Exception e) {
-                log.error("Error logging in: {}", e.getMessage());
-                response.setHeader("ERROR", "The Token is invalid");
+                response.setHeader("ERROR", e.getMessage());
                 response.setStatus(UNAUTHORIZED.value());
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "TokenInvalid");
@@ -228,8 +240,9 @@ public class AuthServiceImpl implements AuthService {
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             }
         }
-//         else {
-//            Delete refresh token in database use IP and UserId
+//        else {
+//            // Do delete refresh token in db by ip and user id
+//            refreshTokenService.removeRefreshTokenByIpAddressAndUserId();
 //        }
         return ApiResponse.error(FORBIDDEN, "Refresh token is invalid");
     }

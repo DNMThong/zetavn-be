@@ -13,6 +13,6 @@ public class SignInResponse {
 
     private UserResponse userInfo;
 
-    private JwtResponse tokens;
+    private String access_token;
 
 }

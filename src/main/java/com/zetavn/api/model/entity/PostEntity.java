@@ -63,4 +63,12 @@ public class PostEntity {
     @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<PostSavedEntity> postSavedEntityList;
+
+    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    List<PostLikeEntity> postLikeEntityList;
+
+    @OneToMany(mappedBy = "postEntity", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    List<CommentEntity> commentEntityList;
 }
