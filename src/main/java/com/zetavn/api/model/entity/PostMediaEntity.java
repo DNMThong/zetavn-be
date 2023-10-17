@@ -17,7 +17,7 @@ public class PostMediaEntity {
     private long postMediaId;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "post_id", nullable = true)
     @JsonBackReference
     private PostEntity postEntity;
 
