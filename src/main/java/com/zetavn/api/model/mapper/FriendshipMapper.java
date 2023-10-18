@@ -47,7 +47,6 @@ public class FriendshipMapper {
         if(receiverUser.isEmpty()) throw new NotFoundException("Not found receiverUser with ID: " + friendshipRequest.getReceiverId());
         friendshipEntity.setReceiverUserEntity(receiverUser.get());
 
-        friendshipEntity.setStatus(friendshipRequest.getStatus());
         return friendshipEntity;
 
     }

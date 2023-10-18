@@ -30,12 +30,7 @@ public class PostController {
         return ApiResponse.success(HttpStatus.OK, "Get post success", postService.getPostById(postId));
     }
 
-    @GetMapping("/user/following")
-    public ApiResponse<?> getPostById(@RequestParam(name = "userId") String userId,
-                                      @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
-                                      @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
-        return postService.getAllPostByUserFollow(userId, pageNumber, pageSize);
-    }
+
 
     @PostMapping("")
     public ApiResponse<?> createPost(@RequestBody PostRequest postRequest) {

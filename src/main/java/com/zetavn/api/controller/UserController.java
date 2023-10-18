@@ -33,4 +33,11 @@ public class UserController {
     public ApiResponse<?> getAllPostByUserId(@PathVariable String userId) {
         return postService.getAllPostByUserId(userId);
     }
+
+    @GetMapping("/{id}/newsfeed")
+    public ApiResponse<?> getPostById(@PathVariable(name = "id") String userId,
+                                      @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+                                      @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
+        return postService.getAllPostByUserFollow(userId, pageNumber, pageSize);
+    }
 }

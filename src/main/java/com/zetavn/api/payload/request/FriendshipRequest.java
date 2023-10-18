@@ -9,5 +9,4 @@ import lombok.Setter;
 public class FriendshipRequest {
     private String senderId;
     private String receiverId;
-    private FriendStatusEnum status;
 }
