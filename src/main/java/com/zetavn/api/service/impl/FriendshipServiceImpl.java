@@ -7,35 +7,23 @@ import com.zetavn.api.model.entity.FollowEntity;
 import com.zetavn.api.model.entity.FriendshipEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.FriendshipMapper;
-import com.zetavn.api.model.mapper.OverallUserMapper;
-import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.FollowRequest;
 import com.zetavn.api.payload.request.FriendshipRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FriendshipResponse;
-import com.zetavn.api.payload.response.OverallUserResponse;
-import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.FriendshipRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.FollowService;
 import com.zetavn.api.service.FriendshipService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 public class FriendshipServiceImpl implements FriendshipService {
     private final FriendshipRepository friendshipRepository;
     private final FriendshipMapper friendshipMapper;
@@ -46,8 +34,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     FriendshipServiceImpl(FriendshipRepository friendshipRepository,
                           FriendshipMapper friendshipMapper,
                           FollowService followService,
-                          UserRepository userRepository
-                          ) {
+                          UserRepository userRepository) {
         this.friendshipRepository = friendshipRepository;
         this.friendshipMapper = friendshipMapper;
         this.followService = followService;
@@ -67,8 +54,8 @@ public class FriendshipServiceImpl implements FriendshipService {
                 existingFriendship.setCreatedAt(LocalDateTime.now());
 
                 FollowRequest follow = new FollowRequest();
-                follow.setFollowerUserId(existingFriendship.getSenderUserEntity().getUserId());
-                follow.setFollowingUserId(existingFriendship.getReceiverUserEntity().getUserId());
+                follow.setFollowerId(existingFriendship.getSenderUserEntity().getUserId());
+                follow.setFollowingId(existingFriendship.getReceiverUserEntity().getUserId());
                 followService.friendshipFollow(follow);
 
                 FriendshipEntity saveFriendship = friendshipRepository.save(existingFriendship);
@@ -76,21 +63,18 @@ public class FriendshipServiceImpl implements FriendshipService {
             }
         }
 
-        // Tạo mối quan hệ bạn bè mới
         FriendshipEntity friendship = friendshipMapper.friendshipRequestToEntity(friendshipRequest);
         friendship.setStatus(FriendStatusEnum.PENDING);
         friendship.setCreatedAt(LocalDateTime.now());
 
         FollowRequest follow = new FollowRequest();
-        follow.setFollowerUserId(friendship.getSenderUserEntity().getUserId());
-        follow.setFollowingUserId(friendship.getReceiverUserEntity().getUserId());
+        follow.setFollowerId(friendship.getSenderUserEntity().getUserId());
+        follow.setFollowingId(friendship.getReceiverUserEntity().getUserId());
         followService.friendshipFollow(follow);
 
         FriendshipEntity saveFriendship = friendshipRepository.save(friendship);
         return ApiResponse.success(HttpStatus.OK, "send request success!", friendshipMapper.entityToFriendshipResponse(saveFriendship));
     }
-
-
 
     @Override
     public ApiResponse<List<OverallUserResponse>> getReceiverFriendRequests(String receiverUserId) {
@@ -113,8 +97,8 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendship.setStatus(FriendStatusEnum.ACCEPTED);
 
         FollowRequest follow = new FollowRequest();
-        follow.setFollowerUserId(friendship.getReceiverUserEntity().getUserId());
-        follow.setFollowingUserId(friendship.getSenderUserEntity().getUserId());
+        follow.setFollowerId(friendship.getReceiverUserEntity().getUserId());
+        follow.setFollowingId(friendship.getSenderUserEntity().getUserId());
         followService.friendshipFollow(follow);
 
         FriendshipEntity updatedFriendship = friendshipRepository.save(friendship);
