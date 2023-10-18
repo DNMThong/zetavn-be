@@ -54,8 +54,10 @@ public class CommentServiceImpl implements CommentService {
         return ApiResponse.success(HttpStatus.OK, "Get parent comment by postId success", comments.stream().map(CommentMapper::entityToCommentResponse).collect(Collectors.toList()));
     }
 
+
+
     @Override
-    public ApiResponse<CommentResponse> addComment(String postId, Long parentId, CommentRequest commentRequest) {
+    public ApiResponse<CommentResponse> addSubComment(String postId, Long parentId, CommentRequest commentRequest) {
         Optional<PostEntity> p = postRepository.findById(postId);
         if(p.isEmpty()) {
             throw new NotFoundException("Not found post with postId: " + postId);
@@ -65,6 +67,30 @@ public class CommentServiceImpl implements CommentService {
         Optional<CommentEntity> p_comment = commentRepository.findById(parentId);
         comment.setCommentEntityParent(p_comment.get());
 
+        comment.setContent(commentRequest.getContent());
+        comment.setMediaPath(commentRequest.getPath());
+        comment.setCreatedAt(LocalDateTime.now());
+        comment.setUpdatedAt(LocalDateTime.now());
+
+        PostEntity post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found with ID: " + postId));
+        comment.setPostEntity(post);
+
+        Optional<UserEntity> user = userRepository.findById(commentRequest.getUserId());
+        comment.setUserEntity(user.get());
+
+        CommentEntity saveComment = commentRepository.save(comment);
+
+        return ApiResponse.success(HttpStatus.OK, "", CommentMapper.entityToCommentResponse(saveComment));
+    }
+
+    @Override
+    public ApiResponse<CommentResponse> addComment(String postId, CommentRequest commentRequest) {
+        Optional<PostEntity> p = postRepository.findById(postId);
+        if(p.isEmpty()) {
+            throw new NotFoundException("Not found post with postId: " + postId);
+        }
+        CommentEntity comment = new CommentEntity();
+        comment.setCommentEntityParent(null);
         comment.setContent(commentRequest.getContent());
         comment.setMediaPath(commentRequest.getPath());
         comment.setCreatedAt(LocalDateTime.now());

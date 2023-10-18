@@ -1,18 +1,20 @@
 package com.zetavn.api.model.mapper;
 
-import com.zetavn.api.model.dto.UserMentionDto;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.payload.response.OverallUserResponse;
+import org.springframework.stereotype.Component;
 
+@Component
 public class OverallUserMapper {
-    public static OverallUserResponse entityToDto(UserEntity userEntity) {
-        OverallUserResponse userMentionDto = new OverallUserResponse();
-        userMentionDto.setUserId(userEntity.getUserId());
-        userMentionDto.setUsername(userEntity.getUsername());
-        userMentionDto.setFirstName(userEntity.getFirstName());
-        userMentionDto.setLastName(userEntity.getLastName());
-        userMentionDto.setAvatar(userEntity.getAvatar());
-        userMentionDto.setPoster(userEntity.getPoster());
-        return userMentionDto;
+    public static OverallUserResponse entityToOverallUser(UserEntity userEntity) {
+        OverallUserResponse overallUser = new OverallUserResponse();
+        overallUser.setId(userEntity.getUserId());
+        overallUser.setUsername(userEntity.getUsername());
+        overallUser.setFirstName(userEntity.getFirstName());
+        overallUser.setLastName(userEntity.getLastName());
+        overallUser.setDisplay(userEntity.getFirstName()+" "+userEntity.getLastName());
+        overallUser.setAvatar(userEntity.getAvatar());
+        overallUser.setPoster(userEntity.getPoster());
+        return overallUser;
     }
 }
