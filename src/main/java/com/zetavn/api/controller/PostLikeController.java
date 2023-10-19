@@ -12,7 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class PostLikeController {
     @Autowired
     PostLikeService postLikeService;
-
+    @GetMapping("")
+    public ApiResponse<?> checkPostLike(@RequestParam(name = "userId") String userId,
+                                        @RequestParam(name = "postId") String postId){
+        return postLikeService.checkPostLike(userId,postId);
+    }
     @PostMapping("")
     public ApiResponse<?> createPostLike(@RequestBody PostLikeRequest postLikeRequest){
         return postLikeService.createPostLike(postLikeRequest);
