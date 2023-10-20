@@ -4,12 +4,14 @@ import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.FriendshipEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.payload.request.FriendshipRequest;
+import com.zetavn.api.payload.response.FriendRequestResponse;
 import com.zetavn.api.payload.response.FriendshipResponse;
 import com.zetavn.api.payload.response.OverallUserResponse;
 import com.zetavn.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
@@ -25,16 +27,25 @@ public class FriendshipMapper {
         FriendshipResponse friendshipResponse = new FriendshipResponse();
         friendshipResponse.setId(friendshipEntity.getFriendshipId());
 
-
-        OverallUserResponse userSender = OverallUserMapper.entityToDto(friendshipEntity.getSenderUserEntity());
+        OverallUserResponse userSender = OverallUserMapper.entityToOverallUser(friendshipEntity.getSenderUserEntity());
         friendshipResponse.setSenderUser(userSender);
 
-        OverallUserResponse userReceiver = OverallUserMapper.entityToDto(friendshipEntity.getReceiverUserEntity());
+        OverallUserResponse userReceiver = OverallUserMapper.entityToOverallUser(friendshipEntity.getReceiverUserEntity());
         friendshipResponse.setReceiverUser(userReceiver);
 
         friendshipResponse.setStatus(friendshipEntity.getStatus());
+        friendshipResponse.setCreatedAt(friendshipEntity.getCreatedAt());
         return friendshipResponse;
     }
+
+    public FriendRequestResponse entityToFriendRequest(UserEntity userEntity, LocalDateTime createAt) {
+        FriendRequestResponse friendRequest = new FriendRequestResponse();
+        friendRequest.setUser(OverallUserMapper.entityToOverallUser(userEntity));
+        friendRequest.setCreatedAt(createAt);
+        return friendRequest;
+    }
+
+
 
     public FriendshipEntity friendshipRequestToEntity(FriendshipRequest friendshipRequest) {
         FriendshipEntity friendshipEntity = new FriendshipEntity();
@@ -49,10 +60,7 @@ public class FriendshipMapper {
 
         friendshipEntity.setStatus(friendshipRequest.getStatus());
         return friendshipEntity;
-
     }
-
-
 
 }
 
