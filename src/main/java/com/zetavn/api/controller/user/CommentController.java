@@ -3,9 +3,11 @@ package com.zetavn.api.controller.user;
 import com.zetavn.api.payload.request.CommentRequest;
 import com.zetavn.api.payload.response.CommentResponse;
 import com.zetavn.api.payload.response.ApiResponse;
+import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,14 +24,18 @@ public class CommentController {
     }
 
     @GetMapping("/posts/{postId}/comments")
-    public ApiResponse<List<CommentResponse>> getParentCommentsByPostId(@PathVariable String postId) { //CommentResponse
-        return commentService.getCommentsByPostId(postId);
+    public ApiResponse<Paginate<List<CommentResponse>>> getParentCommentsByPostId(@PathVariable String postId,
+                                                                                  @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+                                                                                  @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
+        return commentService.getCommentsByPostId(postId, pageNumber, pageSize);
     }
 
     @GetMapping("/comments/{commentId}/replies")
-    public ApiResponse<List<CommentResponse>> getReply(@RequestParam(value = "postId") String postId, //CommentResponse
-                                                          @PathVariable("commentId")Long commentId) {
-        return commentService.getParentCommentsByPostId(postId, commentId);
+    public ApiResponse<Paginate<List<CommentResponse>>> getReply(@RequestParam(value = "postId") String postId,
+                                                       @PathVariable("commentId")Long commentId,
+                                                       @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+                                                       @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
+        return commentService.getParentCommentsByPostId(postId, commentId, pageNumber, pageSize);
     }
 
     @PutMapping("/comments/{commentId}")
@@ -43,6 +49,7 @@ public class CommentController {
                                                  @RequestBody CommentRequest commentRequest) {
         return commentService.addComment(postId, commentRequest);
     }
+
     @PostMapping("/post/{postId}/comments/{id}")
     public ApiResponse<CommentResponse> addComment(@PathVariable("postId") String postId,
                                                    @PathVariable("id") Long id,
@@ -50,9 +57,8 @@ public class CommentController {
         return commentService.addSubComment(postId, id,commentRequest);
     }
 
-
     @DeleteMapping("/comments/{commentId}")
     public ApiResponse<?> deleteComment(@PathVariable("commentId") Long commentId) {
-        return ApiResponse.success(HttpStatus.NO_CONTENT,"Comment has been deleted successfully", commentService.deleteComment(commentId));
+        return commentService.deleteComment(commentId);
     }
 }
