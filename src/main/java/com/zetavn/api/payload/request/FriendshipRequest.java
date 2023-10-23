@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FriendshipRequest {
-    private String senderUserId;
-    private String receiverUserId;
-    private FriendStatusEnum status;
+    private String senderId;
+    private String receiverId;
 }

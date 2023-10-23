@@ -19,8 +19,9 @@ public class PostController {
 
     @Autowired
     PostLikeService postLikeService;
+
     @GetMapping("{Id}/post-like")
-    public ApiResponse<?> getListLikedUserOfPost(@PathVariable("Id") String postId){
+    public ApiResponse<?> getListLikedUserOfPost(@PathVariable("Id") String postId) {
         return postLikeService.getListLikedUserOfPost(postId);
     }
 
@@ -29,10 +30,7 @@ public class PostController {
         return ApiResponse.success(HttpStatus.OK, "Get post success", postService.getPostById(postId));
     }
 
-    @GetMapping("/user/{userId}")
-    public ApiResponse<?> getAllPostByUserId(@PathVariable String userId) {
-        return postService.getAllPostByUserId(userId);
-    }
+
 
     @PostMapping("")
     public ApiResponse<?> createPost(@RequestBody PostRequest postRequest) {

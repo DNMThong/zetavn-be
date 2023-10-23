@@ -19,14 +19,12 @@ import com.zetavn.api.repository.UserInfoRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.AuthService;
 import com.zetavn.api.service.RefreshTokenService;
-import com.zetavn.api.utils.CookieHelper;
 import com.zetavn.api.utils.JwtHelper;
 import com.zetavn.api.utils.UUIDGenerator;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -135,10 +133,10 @@ public class AuthServiceImpl implements AuthService {
 
             // Build the response containing JWT token and refresh token
             SignInResponse response = new SignInResponse();
-            JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
+//            JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
             UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
             response.setUserInfo(userResponse);
-            response.setTokens(jwtResponse);
+            response.setAccess_token(tokens.get("access_token"));
 
             return ApiResponse.success(HttpStatus.OK, "Login success", response);
         } else {
@@ -164,15 +162,11 @@ public class AuthServiceImpl implements AuthService {
                 // Generate new access token
                 String access_token = jwtHelper.generateToken(user);
 
-
-                JwtResponse jwtResponse = new JwtResponse();
-                jwtResponse.setAccess_token(access_token);
-
                 // response data for client
                 SignInResponse _res = new SignInResponse();
                 UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
                 _res.setUserInfo(userResponse);
-                _res.setTokens(jwtResponse);
+                _res.setAccess_token(access_token);
                 return ApiResponse.success(HttpStatus.OK, "Re-login success", _res);
             } catch (TokenExpiredException e) {
                 log.error("Error logging in: {}", e.getMessage());
@@ -205,8 +199,6 @@ public class AuthServiceImpl implements AuthService {
             try {
                 DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
                 if (decodedJWT.getExpiresAt().before(new Date())) {
-                    // Delete Token in RefreshToken Table By Token
-                    // refreshTokenService.removeRefreshTokenByToken(refresh_token);
                     log.error("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
                     throw new TokenExpiredException("The token has expired", decodedJWT.getExpiresAt().toInstant());
                 }
@@ -230,8 +222,9 @@ public class AuthServiceImpl implements AuthService {
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             }
         }
-//         else {
-//            Delete refresh token in database use IP and UserId
+//        else {
+//            // Do delete refresh token in db by ip and user id
+//            refreshTokenService.removeRefreshTokenByIpAddressAndUserId();
 //        }
         return ApiResponse.error(FORBIDDEN, "Refresh token is invalid");
     }

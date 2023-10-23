@@ -2,32 +2,50 @@ package com.zetavn.api.model.mapper;
 
 import com.zetavn.api.model.dto.*;
 import com.zetavn.api.model.entity.PostEntity;
+import com.zetavn.api.model.entity.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostMapper {
     public static PostDto entityToDto(PostEntity entity) {
         PostDto dto = new PostDto();
-        dto.setPostId(entity.getPostId());
-        dto.setUserEntity(UserMentionMapper.entityToDto(entity.getUserEntity()));
+        dto.setId(entity.getPostId());
+        dto.setUser(UserMentionMapper.entityToDto(entity.getUserEntity()));
         dto.setContent(entity.getContent());
         dto.setAccessModifier(entity.getAccessModifier());
         dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdateAt(entity.getUpdatedAt());
 
         if (entity.getPostActivityEntity() != null) {
             PostActivityDto postActivityDto = PostActivityMapper.entityToDto(entity.getPostActivityEntity());
-            dto.setPostActivity(postActivityDto);
+            dto.setActivity(postActivityDto);
         }
 
         if (entity.getPostMediaEntityList() != null) {
             List<PostMediaDto> postMediaDtoList = PostMediaMapper.entityListToDtoList(entity.getPostMediaEntityList());
-            dto.setPostMedias(postMediaDtoList);
+            dto.setMedias(postMediaDtoList);
         }
 
         if (entity.getPostMentionEntityList() != null) {
-            List<PostMentionDto> postMentionDtoList = PostMentionMapper.entityListToDtoList(entity.getPostMentionEntityList());
-            dto.setPostMentions(postMentionDtoList);
+            List<UserEntity> users = entity.getPostMentionEntityList().stream().map(item -> item.getUserEntity()).collect(Collectors.toList());
+            dto.setMentions(UserMentionMapper.entityListToDtoList(users));
+        }
+
+        if (entity.getPostLikeEntityList() != null) {
+            dto.setCountLike(entity.getPostLikeEntityList().size());
+            List<UserMentionDto> userMentionDtoList = PostLikeMapper.entityListToUserDtoList(entity.getPostLikeEntityList());
+            dto.setUsersLike(userMentionDtoList.subList(0, Math.min(userMentionDtoList.size(), 4)));
+        } else {
+            dto.setCountLike(0);
+            dto.setUsersLike(null);
+        }
+
+        if (entity.getCommentEntityList() != null) {
+            dto.setCountComment(entity.getCommentEntityList().size());
+        } else {
+            dto.setCountComment(0);
         }
         return dto;
     }
