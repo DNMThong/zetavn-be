@@ -205,6 +205,8 @@ public class AuthServiceImpl implements AuthService {
             try {
                 DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
                 if (decodedJWT.getExpiresAt().before(new Date())) {
+                    // Delete Token in RefreshToken Table By Token
+                    // refreshTokenService.removeRefreshTokenByToken(refresh_token);
                     log.error("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
                     throw new TokenExpiredException("The token has expired", decodedJWT.getExpiresAt().toInstant());
                 }
@@ -232,6 +234,22 @@ public class AuthServiceImpl implements AuthService {
 //            Delete refresh token in database use IP and UserId
 //        }
         return ApiResponse.error(FORBIDDEN, "Refresh token is invalid");
+    }
+
+    @Override
+    public ApiResponse<?> logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Cookie c = CookieHelper.getCookie(request.getCookies(), "refresh_token2");
+        String token = c.getValue();
+        if (token.equals("")) {
+            log.error("Refresh token does not exist");
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Bad Request");
+        } else {
+            log.info("Delete token in database: {}", token);
+            refreshTokenService.removeRefreshTokenByToken(token);
+            log.info("Delete token in cookie: {}", token);
+            CookieHelper.removeCookie(request, response, c.getName());
+            return ApiResponse.success(HttpStatus.OK, "Logout Success", null);
+        }
     }
 
 }

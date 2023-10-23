@@ -90,4 +90,11 @@ public class AuthController {
     public ApiResponse<?> reLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
         return authService.reLogin(request, response);
     }
+
+    @GetMapping("/logout")
+    public ApiResponse<?> logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        return authService.logout(request, response);
+    }
+
+
 }

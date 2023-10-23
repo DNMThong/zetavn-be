@@ -20,4 +20,5 @@ public interface AuthService {
     ApiResponse<?> reLogin(HttpServletRequest request, HttpServletResponse response) throws IOException;
 
     ApiResponse<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
+    ApiResponse<?> logout(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }
