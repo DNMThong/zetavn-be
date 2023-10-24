@@ -2,20 +2,24 @@ package com.zetavn.api.service.impl;
 
 import com.zetavn.api.enums.FollowPriorityEnum;
 import com.zetavn.api.exception.NotFoundException;
+import com.zetavn.api.model.dto.UserMentionDto;
 import com.zetavn.api.model.entity.FollowEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.FollowMapper;
 import com.zetavn.api.model.mapper.OverallUserMapper;
-import com.zetavn.api.model.mapper.UserMapper;
+import com.zetavn.api.model.mapper.UserMentionMapper;
 import com.zetavn.api.payload.request.FollowRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FollowResponse;
 import com.zetavn.api.payload.response.OverallUserResponse;
-import com.zetavn.api.payload.response.UserResponse;
+import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.repository.FollowRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.FollowService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +42,8 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public ApiResponse<FollowResponse> createFollow(FollowRequest followRequest) {
-        Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerUserId(), followRequest.getFollowingUserId());
-        if (check.isEmpty()) {
+        Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerId(), followRequest.getFollowingId());
+        if (check.isPresent()) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Friend request already exists", null);
         }
         FollowEntity followEntity = followMapper.commentRequestToEntity(followRequest);
@@ -71,7 +75,7 @@ public class FollowServiceImpl implements FollowService {
         boolean isFollowing = followRepository.existsByFollowerIdAndFollowingId(followerUserId, followingUserId);
         String message = followerUserId + " unfollow " + followingUserId;
 
-        if (isFollowing) {
+        if (!isFollowing) {
             return ApiResponse.success(HttpStatus.OK, message, null);
         } else {
             return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found follows", null);
@@ -79,26 +83,55 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public ApiResponse<List<OverallUserResponse>> getFollowingUsers(String followerUserId) {
+    public ApiResponse<Paginate<List<OverallUserResponse>>> getFollowingUsers(String followerUserId, Integer pageNumber, Integer pageSize) {
         Optional<UserEntity> u = userRepository.findById(followerUserId);
         if(u.isEmpty()) {
             throw new NotFoundException("Not found user with userId: " + u);
         }
-        List<UserEntity> user = followRepository.getFollowingUsers(followerUserId);
-        List<OverallUserResponse> userResponses = user.stream().map(OverallUserMapper::entityToDto).toList();
-        return ApiResponse.success(HttpStatus.OK, "", userResponses);
+        try {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Page<UserEntity> user = followRepository.getFollowingUsers(followerUserId, pageable);
+            List<UserEntity> users = user.getContent();
+            List<OverallUserResponse> overallUserResponses = users.stream().map(OverallUserMapper::entityToOverallUser).toList();
+            Paginate<List<OverallUserResponse>> dataResponse = new Paginate<>(
+                    user.getNumber(),
+                    user.getSize(),
+                    user.getTotalElements(),
+                    user.getTotalPages(),
+                    user.isLast(),
+                    overallUserResponses
+            );
+            return ApiResponse.success(HttpStatus.OK, "", dataResponse);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid param!");
+        }
     }
 
     @Override
-    public ApiResponse<List<OverallUserResponse>> getFollower(String userId) {
+    public ApiResponse<Paginate<List<OverallUserResponse>>> getFollower(String userId, Integer pageNumber, Integer pageSize) {
         Optional<UserEntity> u = userRepository.findById(userId);
         if(u.isEmpty()) {
             throw new NotFoundException("Not found user with userId: " + u);
         }
-        List<UserEntity> user = followRepository.getFollowers(userId);
-        List<OverallUserResponse> userResponses = user.stream().map(OverallUserMapper::entityToDto).toList();
-        return ApiResponse.success(HttpStatus.OK, "", userResponses);
+        try {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Page<UserEntity> user = followRepository.getFollowers(userId, pageable);
+            List<UserEntity> users = user.getContent();
+            List<OverallUserResponse> overallUserResponses = users.stream().map(OverallUserMapper::entityToOverallUser).toList();
+            Paginate<List<OverallUserResponse>> dataResponse = new Paginate<>(
+                    user.getNumber(),
+                    user.getSize(),
+                    user.getTotalElements(),
+                    user.getTotalPages(),
+                    user.isLast(),
+                    overallUserResponses
+            );
+            return ApiResponse.success(HttpStatus.OK, "", dataResponse);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid param!");
+        }
     }
+
 
     @Override
     public void friendshipFollow(FollowRequest followRequest) {
