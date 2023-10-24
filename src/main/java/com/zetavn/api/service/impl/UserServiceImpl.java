@@ -5,7 +5,7 @@ import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.SignUpRequest;
 import com.zetavn.api.payload.response.ApiResponse;
-import com.zetavn.api.payload.response.PaginateResponse;
+import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.UserService;
@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
             try {
                 List<UserEntity> userEntities = users.getContent();
                 List<UserResponse> userResponses = userEntities.stream().map(UserMapper::userEntityToUserResponse).toList();
-                PaginateResponse<List<UserResponse>> dataResponse = new PaginateResponse<>();
+                Paginate<List<UserResponse>> dataResponse = new Paginate<>();
                 dataResponse.setData(userResponses);
                 dataResponse.setPageNumber(users.getNumber());
                 dataResponse.setPageSize(users.getSize());

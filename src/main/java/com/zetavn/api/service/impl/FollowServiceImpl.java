@@ -38,7 +38,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public ApiResponse<FollowResponse> createFollow(FollowRequest followRequest) {
-        Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerUserId(), followRequest.getFollowingUserId());
+        Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerId(), followRequest.getFollowingId());
         if (check.isEmpty()) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Friend request already exists", null);
         }
@@ -85,7 +85,7 @@ public class FollowServiceImpl implements FollowService {
             throw new NotFoundException("Not found user with userId: " + u);
         }
         List<UserEntity> user = followRepository.getFollowingUsers(followerUserId);
-        List<OverallUserResponse> userResponses = user.stream().map(OverallUserMapper::entityToDto).toList();
+        List<OverallUserResponse> userResponses = user.stream().map(OverallUserMapper::entityToOverallUser).toList();
         return ApiResponse.success(HttpStatus.OK, "", userResponses);
     }
 
@@ -96,7 +96,7 @@ public class FollowServiceImpl implements FollowService {
             throw new NotFoundException("Not found user with userId: " + u);
         }
         List<UserEntity> user = followRepository.getFollowers(userId);
-        List<OverallUserResponse> userResponses = user.stream().map(OverallUserMapper::entityToDto).toList();
+        List<OverallUserResponse> userResponses = user.stream().map(OverallUserMapper::entityToOverallUser).toList();
         return ApiResponse.success(HttpStatus.OK, "", userResponses);
     }
 

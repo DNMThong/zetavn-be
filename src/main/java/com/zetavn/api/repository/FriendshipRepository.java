@@ -49,5 +49,22 @@ public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Lo
             "AND u.userId <> :userId")
     Page<UserEntity> findSuggestionsForUser(@Param("userId") String userId, Pageable pageable);
 
+    @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
+            "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED' AND (f.receiverUserEntity.firstName LIKE %:kw% OR f.receiverUserEntity.lastName LIKE %:kw%)")
+    Page<UserEntity> findFriendsSentByKeyword(@Param("userId") String userId, @Param("kw") String kw, Pageable pageable);
+
+    @Query("SELECT f.receiverUserEntity FROM FriendshipEntity f " +
+            "WHERE f.senderUserEntity.userId = :userId AND f.status = 'ACCEPTED' AND (f.senderUserEntity.firstName LIKE %:kw% OR f.senderUserEntity.lastName LIKE %:kw%)")
+    Page<UserEntity> findFriendsReceivedByKeyword(@Param("userId") String userId, @Param("kw") String kw, Pageable pageable);
+
+    @Query("SELECT u " +
+            "FROM UserEntity u " +
+            "WHERE u.userId <> :userId " +
+            "AND (u.userId NOT IN " +
+            "(SELECT f.senderUserEntity.userId FROM FriendshipEntity f WHERE f.receiverUserEntity.userId = :userId) " +
+            "AND u.userId NOT IN " +
+            "(SELECT f.receiverUserEntity.userId FROM FriendshipEntity f WHERE f.senderUserEntity.userId = :userId)) " +
+            "AND (u.lastName LIKE %:kw% OR u.firstName LIKE %:kw%)")
+    Page<UserEntity> findStrangersByKeyword(@Param("userId") String userId, @Param("kw") String kw, Pageable pageable);
 
 }

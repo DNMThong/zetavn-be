@@ -14,18 +14,9 @@ import java.util.Optional;
 @RequestMapping("/api/v0/user-info")
 public class UserInfoController {
 
-    @Autowired
-    private UserInfoService userInfoService;
 
-    @GetMapping("/{userId}")
-    public ApiResponse<?> getUserInfo(@PathVariable(name = "userId", required = true) Optional<String> userId) {
-        return ApiResponse.success(HttpStatus.OK, "userId", userId);
-    }
 
-    @PutMapping("/{userId}")
-    public ApiResponse<?> updateUserInfo(@PathVariable(name = "userId", required = true) Optional<String> userId, @RequestBody UserInfoRequest userInfoRequest) {
-        if (userId.isEmpty())
-            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Missing userId");
-        return userInfoService.update(userId.orElse(null), userInfoRequest);
-    }
+
+
+
 }

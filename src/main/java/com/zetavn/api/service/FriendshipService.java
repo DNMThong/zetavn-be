@@ -17,4 +17,8 @@ public interface FriendshipService {
     ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserId(String userId,  Integer pageNumber, Integer pageSize);
 
     ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendSuggestions(String userId,  Integer pageNumber, Integer pageSize);
+
+    ApiResponse<?> getFriendsByKeyword(String userId, String kw, Integer pageNumber, Integer pageSize);
+
+    ApiResponse<?> getStrangersByKeyword(String userId, String kw, Integer pageNumber, Integer pageSize);
 }

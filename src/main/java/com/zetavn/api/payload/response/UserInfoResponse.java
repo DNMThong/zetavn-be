@@ -24,5 +24,9 @@ public class UserInfoResponse {
 
     @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
     private LocalDateTime updateAt;
+    private Long totalFriends;
+    private Long totalPosts;
+    private Long countLikesOfPosts;
+    private Long followers;
 
 }

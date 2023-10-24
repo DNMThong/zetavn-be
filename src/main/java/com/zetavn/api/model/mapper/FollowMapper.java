@@ -21,16 +21,16 @@ public class FollowMapper {
     public FollowResponse entityToFollowResponse(FollowEntity followEntity) {
         FollowResponse followResponse = new FollowResponse();
         followResponse.setFollowId(followEntity.getFollowsId());
-        followResponse.setFollowerUserId(followEntity.getFollowerUserEntity().getUserId());
-        followResponse.setFollowingUserId(followEntity.getFollowingUserEntity().getUserId());
+        followResponse.setFollowerId(followEntity.getFollowerUserEntity().getUserId());
+        followResponse.setFollowingId(followEntity.getFollowingUserEntity().getUserId());
         followResponse.setPriority(followEntity.getPriority());
         return followResponse;
     }
     public FollowEntity commentRequestToEntity(FollowRequest followRequest) {
         FollowEntity followEntity = new FollowEntity();
-        Optional<UserEntity> userFollower = userRepository.findById(followRequest.getFollowerUserId());
+        Optional<UserEntity> userFollower = userRepository.findById(followRequest.getFollowerId());
         followEntity.setFollowerUserEntity(userFollower.get());
-        Optional<UserEntity> userFollowing = userRepository.findById(followRequest.getFollowingUserId());
+        Optional<UserEntity> userFollowing = userRepository.findById(followRequest.getFollowingId());
         followEntity.setFollowingUserEntity(userFollowing.get());
         followEntity.setPriority(followRequest.getPriority());
         return followEntity;

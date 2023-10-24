@@ -12,4 +12,6 @@ public interface UserInfoService {
 
     ApiResponse<?> remove();
 
+    ApiResponse<?> getUserInfoByUserId(String userId);
+
 }

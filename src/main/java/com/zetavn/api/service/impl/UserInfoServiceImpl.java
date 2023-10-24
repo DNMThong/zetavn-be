@@ -1,8 +1,10 @@
 package com.zetavn.api.service.impl;
 
 import com.zetavn.api.model.entity.UserInfoEntity;
+import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.UserInfoRequest;
 import com.zetavn.api.payload.response.ApiResponse;
+import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.UserInfoRepository;
 import com.zetavn.api.service.UserInfoService;
 import lombok.extern.slf4j.Slf4j;
@@ -53,5 +55,11 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     public ApiResponse<?> remove() {
         return null;
+    }
+
+    @Override
+    public ApiResponse<?> getUserInfoByUserId(String userId) {
+
+        return ApiResponse.success(HttpStatus.OK, "Get user information success", UserMapper.userInfoToUserResponse(userInfoRepository.findByUserEntity_UserId(userId)));
     }
 }

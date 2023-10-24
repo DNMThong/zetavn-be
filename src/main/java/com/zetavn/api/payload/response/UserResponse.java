@@ -21,6 +21,7 @@ public class UserResponse {
     private String avatar;
     private String poster;
     private Boolean isAuthorized;
+    private UserInfoResponse information;
 
     @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
     private LocalDateTime createdAt;
