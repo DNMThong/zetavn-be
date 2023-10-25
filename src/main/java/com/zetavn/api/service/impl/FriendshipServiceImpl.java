@@ -93,7 +93,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 FriendshipEntity friendshipEntity = friendshipRepository.findFriendshipBySenderUserAndReceiverUser(userEntity, user.get());
                 if (friendshipEntity != null) {
                     FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
-                    friendRequestResponse.setUser(OverallUserMapper.entityToOverallUser(userEntity));
+                    friendRequestResponse.setUser(OverallUserMapper.entityToDto(userEntity));
                     friendRequestResponse.setCreatedAt(friendshipEntity.getCreatedAt());
                     friendRequestResponses.add(friendRequestResponse);
                 }
@@ -167,7 +167,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
             for (UserEntity friend : allFriends) {
                 FriendRequestResponse friendResponse = new FriendRequestResponse();
-                friendResponse.setUser(OverallUserMapper.entityToOverallUser(friend));
+                friendResponse.setUser(OverallUserMapper.entityToDto(friend));
                 friendResponse.setCreatedAt(null);
                 friendResponses.add(friendResponse);
             }
@@ -197,7 +197,7 @@ public class FriendshipServiceImpl implements FriendshipService {
             for (UserEntity suggestion : users) {
                 // Ánh xạ từ UserEntity sang FriendRequestResponse
                 FriendRequestResponse suggestionResponse = new FriendRequestResponse();
-                suggestionResponse.setUser(OverallUserMapper.entityToOverallUser(suggestion));
+                suggestionResponse.setUser(OverallUserMapper.entityToDto(suggestion));
                 suggestionResponse.setCreatedAt(null);
                 suggestionResponses.add(suggestionResponse);
             }
@@ -234,7 +234,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
             for (UserEntity suggestion : allFriends) {
                 // Ánh xạ từ UserEntity sang FriendRequestResponse
-                OverallUserResponse response = OverallUserMapper.entityToOverallUser(suggestion);
+                OverallUserResponse response = OverallUserMapper.entityToDto(suggestion);
                 response.setTotalPosts(suggestion.getUserPostListEntity().size());
                 Integer likes = 0;
                 List<PostEntity> posts = suggestion.getUserPostListEntity();
@@ -270,7 +270,7 @@ public class FriendshipServiceImpl implements FriendshipService {
             List<OverallUserResponse> strangersResponse = new ArrayList<>();
             for (UserEntity suggestion : users) {
                 // Ánh xạ từ UserEntity sang FriendRequestResponse
-                OverallUserResponse response = OverallUserMapper.entityToOverallUser(suggestion);
+                OverallUserResponse response = OverallUserMapper.entityToDto(suggestion);
                 response.setTotalPosts(suggestion.getUserPostListEntity().size());
                 Integer likes = 0;
                 List<PostEntity> posts = suggestion.getUserPostListEntity();

@@ -27,10 +27,10 @@ public class FriendshipMapper {
         FriendshipResponse friendshipResponse = new FriendshipResponse();
         friendshipResponse.setId(friendshipEntity.getFriendshipId());
 
-        OverallUserResponse userSender = OverallUserMapper.entityToOverallUser(friendshipEntity.getSenderUserEntity());
+        OverallUserResponse userSender = OverallUserMapper.entityToDto(friendshipEntity.getSenderUserEntity());
         friendshipResponse.setSenderUser(userSender);
 
-        OverallUserResponse userReceiver = OverallUserMapper.entityToOverallUser(friendshipEntity.getReceiverUserEntity());
+        OverallUserResponse userReceiver = OverallUserMapper.entityToDto(friendshipEntity.getReceiverUserEntity());
         friendshipResponse.setReceiverUser(userReceiver);
 
         friendshipResponse.setStatus(friendshipEntity.getStatus());
@@ -40,7 +40,7 @@ public class FriendshipMapper {
 
     public FriendRequestResponse entityToFriendRequest(UserEntity userEntity, LocalDateTime createAt) {
         FriendRequestResponse friendRequest = new FriendRequestResponse();
-        friendRequest.setUser(OverallUserMapper.entityToOverallUser(userEntity));
+        friendRequest.setUser(OverallUserMapper.entityToDto(userEntity));
         friendRequest.setCreatedAt(createAt);
         return friendRequest;
     }
