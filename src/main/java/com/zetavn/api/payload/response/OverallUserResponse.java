@@ -17,4 +17,8 @@ public class OverallUserResponse {
     private String display;
     private String avatar;
     private String poster;
+    private Integer totalFriends;
+    private Integer totalPosts;
+    private Integer countLikesOfPosts;
+    private Integer followers;
 }

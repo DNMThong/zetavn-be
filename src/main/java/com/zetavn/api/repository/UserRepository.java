@@ -17,4 +17,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     @Query("SELECT o FROM UserEntity o WHERE o.lastName LIKE %?1% OR o.firstName LIKE %?1%")
     Page<UserEntity> findUserEntityByKeyword(String keyword,
                                              Pageable pageable);
+
+//    @Query("SELECT o FROM UserEntity ")
+//    Page<?> findUserEntitiesByFriendship(String kw, String id, Pageable pageable);
 }

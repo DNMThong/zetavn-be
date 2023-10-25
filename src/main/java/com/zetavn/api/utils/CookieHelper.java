@@ -1,6 +1,7 @@
 package com.zetavn.api.utils;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class CookieHelper {
@@ -21,6 +22,14 @@ public class CookieHelper {
         cookie.setHttpOnly(httpOnly);
         response.addCookie(cookie);
         return cookie;
+    }
+
+    public static void removeCookie(HttpServletRequest request, HttpServletResponse response, String name) {
+        Cookie c = getCookie(request.getCookies(), name);
+        c.setPath("/");
+        c.setValue("");
+        c.setMaxAge(0);
+        response.addCookie(c);
     }
 
 }

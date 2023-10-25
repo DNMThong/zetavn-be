@@ -1,6 +1,7 @@
 package com.zetavn.api.service.impl;
 
 import com.zetavn.api.exception.NotFoundException;
+import com.zetavn.api.model.dto.PostDto;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.payload.request.CommentRequest;
 import com.zetavn.api.payload.response.ApiResponse;
@@ -8,15 +9,21 @@ import com.zetavn.api.payload.response.CommentResponse;
 import com.zetavn.api.model.entity.CommentEntity;
 import com.zetavn.api.model.entity.PostEntity;
 import com.zetavn.api.model.mapper.CommentMapper;
+import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.repository.CommentRepository;
 import com.zetavn.api.repository.PostRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,25 +42,58 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public ApiResponse<List<CommentResponse>> getCommentsByPostId(String postId) {
+    public ApiResponse<Paginate<List<CommentResponse>>> getCommentsByPostId(String postId, Integer pageNumber, Integer pageSize) {
         Optional<PostEntity> p = postRepository.findById(postId);
         if(p.isEmpty()) {
             throw new NotFoundException("Not found post with postId: " + postId);
         }
-        List<CommentEntity> comments = commentRepository.findCommentsByPostId(postId);
-        return ApiResponse.success(HttpStatus.OK, "Get comment by postId success! ", comments.stream().map(CommentMapper::entityToCommentResponse).collect(Collectors.toList()));
+        try {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Page<CommentEntity> comments =  commentRepository.findCommentsByPostId(postId, pageable);
+            List<CommentEntity> cm =  comments.getContent();
+            List<CommentResponse> c = cm.stream().map(CommentMapper::entityToCommentResponse).collect(Collectors.toList());
+            Paginate<List<CommentResponse>> dataResponse = new Paginate<>(
+                    comments.getNumber(),
+                    comments.getSize(),
+                    comments.getTotalElements(),
+                    comments.getTotalPages(),
+                    comments.isLast(),
+                    c
+            );
+            return ApiResponse.success(HttpStatus.OK, "Get comment by postId success! ", dataResponse);
+
+        } catch (Exception e) {
+            System.out.println(e);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid Param");
+        }
     }
 
     @Override
-    public ApiResponse<List<CommentResponse>> getParentCommentsByPostId(String postId, Long parentCommentId) {
+    public ApiResponse<Paginate<List<CommentResponse>>> getParentCommentsByPostId(String postId, Long parentCommentId, Integer pageNumber, Integer pageSize) {
         Optional<PostEntity> p = postRepository.findById(postId);
         if(p.isEmpty()) {
             throw new NotFoundException("Not found post with postId: " + postId);
         }
-        List<CommentEntity> comments = this.commentRepository.findCommentsByCommentParentIdAndPostPostId(postId, parentCommentId);
-        return ApiResponse.success(HttpStatus.OK, "Get parent comment by postId success", comments.stream().map(CommentMapper::entityToCommentResponse).collect(Collectors.toList()));
-    }
+        try {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Page<CommentEntity> comments =  commentRepository.findCommentsByCommentParentIdAndPostPostId(postId, parentCommentId, pageable);
+            List<CommentEntity> cm = comments.getContent();
+            List<CommentResponse> c = cm.stream().map(CommentMapper::entityToCommentResponse).collect(Collectors.toList());
+            Paginate<List<CommentResponse>> dataResponse = new Paginate<>(
+                    comments.getNumber(),
+                    comments.getSize(),
+                    comments.getTotalElements(),
+                    comments.getTotalPages(),
+                    comments.isLast(),
+                    c
+            );
+            return ApiResponse.success(HttpStatus.OK, "Get comment by postId success! ", dataResponse);
 
+        } catch (Exception e) {
+            System.out.println(e);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid Param");
+        }
+    }
 
 
     @Override
@@ -120,14 +160,16 @@ public class CommentServiceImpl implements CommentService {
         return ApiResponse.success(HttpStatus.OK, "Update comment success", CommentMapper.entityToCommentResponse(saveComment));
     }
 
+    @Transactional
     @Override
-    public boolean deleteComment(Long commentId) {
+    public ApiResponse<?> deleteComment(Long commentId) {
         Optional<CommentEntity> c = commentRepository.findById(commentId);
         if(c.isEmpty()) {
             throw new NotFoundException("Not found comment!");
         }
-        commentRepository.deleteById(commentId);
-        Optional<CommentEntity> comment = commentRepository.findById(commentId);
-        return comment.isEmpty();
+
+        commentRepository.deleteCommentAndReplies(commentId);
+
+        return ApiResponse.success(HttpStatus.OK, "Delete success", null);
     }
 }

@@ -21,8 +21,8 @@ public class FollowMapper {
     public FollowResponse entityToFollowResponse(FollowEntity followEntity) {
         FollowResponse followResponse = new FollowResponse();
         followResponse.setFollowId(followEntity.getFollowsId());
-        followResponse.setFollowerUserId(followEntity.getFollowerUserEntity().getUserId());
-        followResponse.setFollowingUserId(followEntity.getFollowingUserEntity().getUserId());
+        followResponse.setFollowerId(followEntity.getFollowerUserEntity().getUserId());
+        followResponse.setFollowingId(followEntity.getFollowingUserEntity().getUserId());
         followResponse.setPriority(followEntity.getPriority());
         return followResponse;
     }
