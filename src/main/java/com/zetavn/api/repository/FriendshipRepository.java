@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Long> {
+    @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
+            "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED'")
+    List<UserEntity> findFriendsSentToUser(@Param("userId") String userId);
     @Query("select f.senderUserEntity from FriendshipEntity f where f.receiverUserEntity.userId = :receiverUserId and f.status = 'PENDING'" +
             "ORDER BY f.createdAt DESC")
     Page<UserEntity> getReceivedFriendRequests(String receiverUserId, Pageable pageable);
@@ -27,7 +30,7 @@ public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Lo
 
     @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
             "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED'")
-    Page<UserEntity> findFriendsSentToUser(@Param("userId") String userId, Pageable pageable);
+    Page<UserEntity> findFriendsSentToUserPageable(@Param("userId") String userId, Pageable pageable);
 
     @Query("SELECT f.receiverUserEntity FROM FriendshipEntity f " +
             "WHERE f.senderUserEntity.userId = :userId AND f.status = 'ACCEPTED'")
@@ -56,6 +59,7 @@ public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Lo
     @Query("SELECT f.receiverUserEntity FROM FriendshipEntity f " +
             "WHERE f.senderUserEntity.userId = :userId AND f.status = 'ACCEPTED' AND (f.senderUserEntity.firstName LIKE %:kw% OR f.senderUserEntity.lastName LIKE %:kw%)")
     Page<UserEntity> findFriendsReceivedByKeyword(@Param("userId") String userId, @Param("kw") String kw, Pageable pageable);
+
 
     @Query("SELECT u " +
             "FROM UserEntity u " +

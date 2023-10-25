@@ -2,6 +2,8 @@ package com.zetavn.api.controller;
 
 import com.zetavn.api.payload.request.UserInfoRequest;
 import com.zetavn.api.payload.response.ApiResponse;
+import com.zetavn.api.payload.response.FriendRequestResponse;
+import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.service.FriendshipService;
 import com.zetavn.api.service.PostService;
 import com.zetavn.api.service.UserInfoService;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -35,13 +38,13 @@ public class UserController {
     }
     @GetMapping("/search")
     public ApiResponse<?> getUsersByKeyword(
-                                            @RequestParam(name = "id") String id,
+                                            @RequestParam(name = "userId") String id,
                                             @RequestParam(name = "kw") String kw,
                                             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                             @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize,
                                             @RequestParam(name = "option", defaultValue = "all", required = false) String option) {
         switch (option) {
-            case "friend": {
+            case "friends": {
                 return friendshipService.getFriendsByKeyword(id, kw, pageNumber, pageSize);
             }
             case "strange": {
@@ -78,5 +81,10 @@ public class UserController {
         if (userId.isEmpty())
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Missing userId");
         return userInfoService.update(userId.orElse(null), userInfoRequest);
+    }
+
+    @GetMapping("/{id}/friends")
+    public ApiResponse<List<FriendRequestResponse>> getFriends(@PathVariable("id") String id) {
+        return friendshipService.getFriendsByUserId(id);
     }
 }

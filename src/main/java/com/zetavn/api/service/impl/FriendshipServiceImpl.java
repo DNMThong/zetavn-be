@@ -8,6 +8,7 @@ import com.zetavn.api.model.entity.PostEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.FriendshipMapper;
 import com.zetavn.api.model.mapper.OverallUserMapper;
+import com.zetavn.api.model.mapper.UserSearchMapper;
 import com.zetavn.api.payload.request.FollowRequest;
 import com.zetavn.api.payload.request.FriendshipRequest;
 import com.zetavn.api.payload.response.*;
@@ -150,10 +151,10 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserId(String userId, Integer pageNumber, Integer pageSize) {
+    public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPaginate(String userId, Integer pageNumber, Integer pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUser(userId, pageable);
+            Page<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUserPageable(userId, pageable);
             Page<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(userId, pageable);
             List<UserEntity> allFriends = new ArrayList<>(friendsSentToUser.getContent());
             allFriends.addAll(friendsReceivedByUser.getContent());
@@ -232,19 +233,19 @@ public class FriendshipServiceImpl implements FriendshipService {
             int totalPages = Math.max(friendsSentToUser.getTotalPages(), friendsReceivedByUser.getTotalPages());
             boolean isLast = friendsSentToUser.isLast() && friendsReceivedByUser.isLast();
 
-            for (UserEntity suggestion : allFriends) {
-                // Ánh xạ từ UserEntity sang FriendRequestResponse
-                OverallUserResponse response = OverallUserMapper.entityToDto(suggestion);
-                response.setTotalPosts(suggestion.getUserPostListEntity().size());
-                Integer likes = 0;
-                List<PostEntity> posts = suggestion.getUserPostListEntity();
-                for (PostEntity p : posts) {
-                    likes += p.getPostLikeEntityList().size();
-                }
-                response.setCountLikesOfPosts(likes);
-                response.setTotalFriends(suggestion.getUserReceiverList().size() + suggestion.getUserSenderList().size());
-                friendResponses.add(response);
-            }
+//            for (UserEntity suggestion : allFriends) {
+//                // Ánh xạ từ UserEntity sang FriendRequestResponse
+//                OverallUserResponse response = OverallUserMapper.entityToDto(suggestion);
+//                response.setTotalPosts(suggestion.getUserPostListEntity().size());
+//                Integer likes = 0;
+//                List<PostEntity> posts = suggestion.getUserPostListEntity();
+//                for (PostEntity p : posts) {
+//                    likes += p.getPostLikeEntityList().size();
+//                }
+//                response.setCountLikesOfPosts(likes);
+//                response.setTotalFriends(suggestion.getUserReceiverList().size() + suggestion.getUserSenderList().size());
+//                friendResponses.add(response);
+//            }
 
             Paginate<List<OverallUserResponse>> dataResponse = new Paginate<>(
                     number,
@@ -262,15 +263,15 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public ApiResponse<Paginate<List<OverallUserResponse>>> getStrangersByKeyword(String userId, String kw, Integer pageNumber, Integer pageSize) {
+    public ApiResponse<Paginate<List<UserSearchResponse>>> getStrangersByKeyword(String userId, String kw, Integer pageNumber, Integer pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
             Page<UserEntity> strangers = friendshipRepository.findStrangersByKeyword(userId, kw, pageable);
             List<UserEntity> users = strangers.getContent();
-            List<OverallUserResponse> strangersResponse = new ArrayList<>();
+            List<UserSearchResponse> strangersResponse = new ArrayList<>();
             for (UserEntity suggestion : users) {
                 // Ánh xạ từ UserEntity sang FriendRequestResponse
-                OverallUserResponse response = OverallUserMapper.entityToDto(suggestion);
+                UserSearchResponse response = UserSearchMapper.entityToDto(suggestion);
                 response.setTotalPosts(suggestion.getUserPostListEntity().size());
                 Integer likes = 0;
                 List<PostEntity> posts = suggestion.getUserPostListEntity();
@@ -281,7 +282,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 response.setTotalFriends(suggestion.getUserReceiverList().size() + suggestion.getUserSenderList().size());
                 strangersResponse.add(response);
             }
-            Paginate<List<OverallUserResponse>> dataResponse = new Paginate<>(
+            Paginate<List<UserSearchResponse>> dataResponse = new Paginate<>(
                     strangers.getNumber(),
                     strangers.getSize(),
                     strangers.getTotalElements(),
@@ -296,23 +297,23 @@ public class FriendshipServiceImpl implements FriendshipService {
         }
     }
 
-//    @Override
-//    public ApiResponse<List<FriendRequestResponse>> getFriendsByUserId(String userId) {
-//        List<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUser(userId);
-//        List<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(userId);
-//
-//        List<UserEntity> allFriends = new ArrayList<>(friendsSentToUser);
-//        allFriends.addAll(friendsReceivedByUser);
-//        List<FriendRequestResponse> friendResponses = new ArrayList<>();
-//        for (UserEntity friend : allFriends) {
-//            // Ánh xạ từ UserEntity sang FriendRequestResponse
-//            FriendRequestResponse friendResponse = new FriendRequestResponse();  // Không có createdAt
-//            friendResponse.setUser(OverallUserMapper.entityToOverallUser(friend));
-//            friendResponse.setCreatedAt(null);
-//            friendResponses.add(friendResponse);
-//        }
-//        return ApiResponse.success(HttpStatus.OK , "List of friends", friendResponses);
-//    }
+    @Override
+    public ApiResponse<List<FriendRequestResponse>> getFriendsByUserId(String userId) {
+        List<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUser(userId);
+        List<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(userId);
+
+        List<UserEntity> allFriends = new ArrayList<>(friendsSentToUser);
+        allFriends.addAll(friendsReceivedByUser);
+        List<FriendRequestResponse> friendResponses = new ArrayList<>();
+        for (UserEntity friend : allFriends) {
+            // Ánh xạ từ UserEntity sang FriendRequestResponse
+            FriendRequestResponse friendResponse = new FriendRequestResponse();  // Không có createdAt
+            friendResponse.setUser(OverallUserMapper.entityToDto(friend));
+            friendResponse.setCreatedAt(null);
+            friendResponses.add(friendResponse);
+        }
+        return ApiResponse.success(HttpStatus.OK , "List of friends", friendResponses);
+    }
 //
 //    @Override
 //    public ApiResponse<List<FriendRequestResponse>> getFriendSuggestions(String userId) {

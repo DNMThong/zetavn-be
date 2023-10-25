@@ -47,7 +47,7 @@ public class FriendshipController {
     public ApiResponse<Paginate<List<FriendRequestResponse>>> friends(@RequestParam String id,
                                                             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                                             @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
-        return friendshipService.getFriendsByUserId(id, pageNumber, pageSize);
+        return friendshipService.getFriendsByUserIdPaginate(id, pageNumber, pageSize);
     }
 
     @GetMapping("/suggestions")
