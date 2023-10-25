@@ -81,4 +81,19 @@ public class PostLikeServiceImpl implements PostLikeService {
         }
      }
 
+    @Override
+    public ApiResponse<?> checkPostLike(String userId, String postId)  {
+        try{
+            PostEntity post = postRepository.findById(postId).orElseThrow(NullPointerException::new);
+            UserEntity user = userRepository.findById(userId).orElseThrow(NullPointerException::new);
+            PostLikeEntity postLikeCheck = postLikeRepository.findPostLikeEntityByPostEntityAndUserEntity(post,user);
+            if(postLikeCheck==null){
+                return  ApiResponse.success(HttpStatus.OK,"User not like",false);
+            }else {
+                return  ApiResponse.success(HttpStatus.OK,"User liked",true);
+            }
+        }catch (Exception e){
+            return  ApiResponse.error(HttpStatus.BAD_REQUEST,"Error",e.getMessage());
+        }
+    }
 }

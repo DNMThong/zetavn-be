@@ -40,4 +40,6 @@ public class UserController {
                                       @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
         return postService.getAllPostByUserFollow(userId, pageNumber, pageSize);
     }
+
+
 }

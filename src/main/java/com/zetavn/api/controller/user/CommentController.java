@@ -38,12 +38,12 @@ public class CommentController {
         return commentService.updateComment(id, commentRequest);
     }
 
-    @PostMapping("/post/{postId}/comments")
+    @PostMapping("/posts/{postId}/comments")
     public ApiResponse<CommentResponse> addComment(@PathVariable("postId") String postId,
                                                  @RequestBody CommentRequest commentRequest) {
         return commentService.addComment(postId, commentRequest);
     }
-    @PostMapping("/post/{postId}/comments/{id}")
+    @PostMapping("/posts/{postId}/comments/{id}")
     public ApiResponse<CommentResponse> addComment(@PathVariable("postId") String postId,
                                                    @PathVariable("id") Long id,
                                                    @RequestBody CommentRequest commentRequest) {

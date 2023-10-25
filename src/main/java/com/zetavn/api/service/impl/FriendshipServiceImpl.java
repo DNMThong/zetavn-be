@@ -7,10 +7,12 @@ import com.zetavn.api.model.entity.FollowEntity;
 import com.zetavn.api.model.entity.FriendshipEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.FriendshipMapper;
+import com.zetavn.api.model.mapper.OverallUserMapper;
 import com.zetavn.api.payload.request.FollowRequest;
 import com.zetavn.api.payload.request.FriendshipRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FriendshipResponse;
+import com.zetavn.api.payload.response.OverallUserResponse;
 import com.zetavn.api.repository.FriendshipRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.FollowService;
@@ -20,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

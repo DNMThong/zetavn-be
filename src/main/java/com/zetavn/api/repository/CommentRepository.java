@@ -10,7 +10,7 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
     @Query("SELECT c FROM CommentEntity c WHERE c.commentId = :commentParentId")
     CommentEntity getCommentEntityByCommentParentId(Long commentParentId);
-    @Query("select o from CommentEntity o where o.postEntity.postId = ?1 AND o.commentEntityParent.commentId IS NULL")
+    @Query("SELECT o FROM CommentEntity o WHERE o.postEntity.postId = ?1 AND o.commentEntityParent.commentId IS NULL ORDER BY o.createdAt DESC")
     List<CommentEntity> findCommentsByPostId(String postId);
 
     @Query("select o from CommentEntity o where o.postEntity.postId = ?1 AND o.commentEntityParent.commentId= ?2")

@@ -38,7 +38,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public ApiResponse<FollowResponse> createFollow(FollowRequest followRequest) {
-        Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerUserId(), followRequest.getFollowingUserId());
+        Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerId(), followRequest.getFollowingId());
         if (check.isEmpty()) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Friend request already exists", null);
         }

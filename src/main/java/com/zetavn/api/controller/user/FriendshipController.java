@@ -40,8 +40,8 @@ public class FriendshipController {
         return friendshipService.rejected(id);
     }
 
-    @GetMapping("/friends")
-    public ApiResponse<List<OverallUserResponse>> friends(@RequestParam String id) {
+    @GetMapping("/users/{id}/friends")
+    public ApiResponse<List<OverallUserResponse>> friends(@PathVariable("id") String id) {
         return friendshipService.getFriendsByUserId(id);
     }
 

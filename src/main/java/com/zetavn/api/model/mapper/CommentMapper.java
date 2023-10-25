@@ -14,7 +14,7 @@ public class CommentMapper {
         commentResponse.setId(comment.getCommentId());
         commentResponse.setContent(comment.getContent());
 
-        OverallUserResponse u = OverallUserMapper.entityToOverallUser(comment.getUserEntity());
+        OverallUserResponse u = OverallUserMapper.entityToDto(comment.getUserEntity());
         commentResponse.setUser(u);
 
         commentResponse.setMediaPath(comment.getMediaPath());
