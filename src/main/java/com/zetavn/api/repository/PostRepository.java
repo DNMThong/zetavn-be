@@ -1,6 +1,7 @@
 package com.zetavn.api.repository;
 
 import com.zetavn.api.model.entity.PostEntity;
+import com.zetavn.api.model.entity.UserEntity;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,4 +25,10 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
 
     @Query("SELECT p FROM PostEntity p WHERE p.userEntity.userId IN :listUserId ORDER BY p.createdAt DESC")
     Page<PostEntity> getAllPostByUserList(List<String> listUserId, Pageable pageable);
+
+    Long countPostEntityByUserEntityUserId(String id);
+
+    @Query("SELECT COUNT(pl) FROM PostLikeEntity pl " +
+            "WHERE pl.userEntity.userId = :id")
+    Long getTotalLikesByUserId(@Param("id") String id);
 }

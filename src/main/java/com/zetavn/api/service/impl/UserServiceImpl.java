@@ -1,12 +1,16 @@
 package com.zetavn.api.service.impl;
 
+import com.zetavn.api.enums.FriendStatusEnum;
+import com.zetavn.api.enums.StatusFriendsEnum;
 import com.zetavn.api.enums.UserStatusEnum;
+import com.zetavn.api.model.entity.FriendshipEntity;
 import com.zetavn.api.model.entity.UserEntity;
+import com.zetavn.api.model.mapper.OverallUserMapper;
 import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.SignUpRequest;
-import com.zetavn.api.payload.response.ApiResponse;
-import com.zetavn.api.payload.response.Paginate;
-import com.zetavn.api.payload.response.UserResponse;
+import com.zetavn.api.payload.response.*;
+import com.zetavn.api.repository.FriendshipRepository;
+import com.zetavn.api.repository.PostRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.UserService;
 import com.zetavn.api.utils.UUIDGenerator;
@@ -21,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -32,6 +36,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private FriendshipRepository friendshipRepository;
+
+    @Autowired
+    private PostRepository postRepository;
 
     @Override
     public ApiResponse<?> create(SignUpRequest signUpRequest) {
@@ -122,9 +132,34 @@ public class UserServiceImpl implements UserService {
             }
             try {
                 List<UserEntity> userEntities = users.getContent();
-                List<UserResponse> userResponses = userEntities.stream().map(UserMapper::userEntityToUserResponse).toList();
-                Paginate<List<UserResponse>> dataResponse = new Paginate<>();
-                dataResponse.setData(userResponses);
+                List<UserSearchResponse> userSearchResponses = new ArrayList<>();
+                for(UserEntity u : userEntities) {
+                    UserSearchResponse user = new UserSearchResponse();
+                    OverallUserResponse userResponses = OverallUserMapper.entityToDto(u);
+                    user.setUser(userResponses);
+                    user.setTotalFriends(friendshipRepository.countFriends(u.getUserId()));
+                    user.setTotalPosts(postRepository.countPostEntityByUserEntityUserId(u.getUserId()));
+                    user.setCountLikesOfPosts(postRepository.getTotalLikesByUserId(u.getUserId()));
+                    FriendshipEntity statusFriendsEnum = friendshipRepository.checkFriendshipStatus(sourceId, u.getUserId());
+                    if(statusFriendsEnum != null) {
+                        if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.ACCEPTED)) {
+                            user.setStatus(StatusFriendsEnum.FRIEND);
+                        } else if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.PENDING)) {
+                            if (statusFriendsEnum.getSenderUserEntity().getUserId().equals(sourceId)) {
+                                user.setStatus(StatusFriendsEnum.SENDER);
+                            } else {
+                                user.setStatus(StatusFriendsEnum.RECEIVER);
+                            }
+                        } else {
+                            user.setStatus(StatusFriendsEnum.NONE);
+                        }
+                    } else {
+                        user.setStatus(StatusFriendsEnum.NONE);
+                    }
+                    userSearchResponses.add(user);
+                }
+                Paginate<List<UserSearchResponse>> dataResponse = new Paginate<>();
+                dataResponse.setData(userSearchResponses);
                 dataResponse.setPageNumber(users.getNumber());
                 dataResponse.setPageSize(users.getSize());
                 dataResponse.setTotalElements(users.getTotalElements());
@@ -132,10 +167,113 @@ public class UserServiceImpl implements UserService {
                 dataResponse.setLastPage(users.isLast());
                 return ApiResponse.success(HttpStatus.OK, "Success", dataResponse);
             } catch (Exception e) {
-                log.error("Error Logging: pageNumber: {}, pageSize: {}, keyword: {}, error_message: {}", pageNumber, pageSize, keyword, e.getMessage());
+                log.error("Error Logging: pageNumber: {}, pageSize: {}, keyword: {}, error_message: {}, param_id: {}", pageNumber, pageSize, keyword, e.getMessage(), sourceId);
                 return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid Param");
             }
         }
-
     }
+
+    @Override
+    public ApiResponse<?> getAllFriendsByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize) {
+        log.info("Try to find Users by keyword {} at page number {} and page size {}", keyword, pageNumber, pageSize);
+        if (pageNumber < 0 || pageSize < 0) {
+            log.error("Error Logging: pageNumber {} < 0 || pageSize {} < 0 with keyword {}", pageNumber, pageSize, keyword);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Page number and page size must be positive");
+        } else {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Optional<UserEntity> source = userRepository.findById(sourceId);
+            Set<String> friendIdList = new HashSet<>();
+            friendIdList.addAll(source.get().getUserReceiverList().stream().map(u -> u.getSenderUserEntity().getUserId()).toList());
+            friendIdList.addAll(source.get().getUserSenderList().stream().map(u -> u.getReceiverUserEntity().getUserId()).toList());
+            Page<UserEntity> users = userRepository.findUserEntitiesByFriendList(sourceId, friendIdList.stream().toList(), keyword, pageable);
+            if (pageNumber > users.getTotalPages()) {
+                log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, users.getNumber());
+                throw new InvalidParameterException("pageNumber is out of total Page");
+            }
+            try {
+                List<UserEntity> userEntities = users.getContent();
+                List<UserSearchResponse> userSearchResponses = new ArrayList<>();
+                for(UserEntity u : userEntities) {
+                    UserSearchResponse user = new UserSearchResponse();
+                    OverallUserResponse userResponses = OverallUserMapper.entityToDto(u);
+                    user.setUser(userResponses);
+                    user.setTotalFriends(friendshipRepository.countFriends(u.getUserId()));
+                    user.setTotalPosts(postRepository.countPostEntityByUserEntityUserId(u.getUserId()));
+                    user.setCountLikesOfPosts(postRepository.getTotalLikesByUserId(u.getUserId()));
+                    user.setStatus(StatusFriendsEnum.FRIEND);
+                    userSearchResponses.add(user);
+                }
+                Paginate<List<UserSearchResponse>> dataResponse = new Paginate<>();
+                dataResponse.setData(userSearchResponses);
+                dataResponse.setPageNumber(users.getNumber());
+                dataResponse.setPageSize(users.getSize());
+                dataResponse.setTotalElements(users.getTotalElements());
+                dataResponse.setTotalPages(users.getTotalPages());
+                dataResponse.setLastPage(users.isLast());
+                return ApiResponse.success(HttpStatus.OK, "Success", dataResponse);
+            } catch (Exception e) {
+                log.error("Error Logging: pageNumber: {}, pageSize: {}, keyword: {}, error_message: {}, param_id: {}", pageNumber, pageSize, keyword, e.getMessage(), sourceId);
+                return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid Param");
+            }
+        }
+    }
+
+    @Override
+    public ApiResponse<?> getStrangersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize) {
+        log.info("Try to find Users by keyword {} at page number {} and page size {}", keyword, pageNumber, pageSize);
+        if (pageNumber < 0 || pageSize < 0) {
+            log.error("Error Logging: pageNumber {} < 0 || pageSize {} < 0 with keyword {}", pageNumber, pageSize, keyword);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Page number and page size must be positive");
+        } else {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Optional<UserEntity> source = userRepository.findById(sourceId);
+            Set<String> friendIdList = new HashSet<>();
+            friendIdList.addAll(source.get().getUserReceiverList().stream().map(u -> u.getSenderUserEntity().getUserId()).toList());
+            friendIdList.addAll(source.get().getUserSenderList().stream().map(u -> u.getReceiverUserEntity().getUserId()).toList());
+            Page<UserEntity> users = userRepository.findStrangersByKeyword(sourceId, friendIdList.stream().toList(), keyword, pageable);
+            if (pageNumber > users.getTotalPages()) {
+                log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, users.getNumber());
+                throw new InvalidParameterException("pageNumber is out of total Page");
+            }
+            try {
+                List<UserEntity> userEntities = users.getContent();
+                List<UserSearchResponse> userSearchResponses = new ArrayList<>();
+                for(UserEntity u : userEntities) {
+                    UserSearchResponse user = new UserSearchResponse();
+                    OverallUserResponse userResponses = OverallUserMapper.entityToDto(u);
+                    user.setUser(userResponses);
+                    user.setTotalFriends(friendshipRepository.countFriends(u.getUserId()));
+                    user.setTotalPosts(postRepository.countPostEntityByUserEntityUserId(u.getUserId()));
+                    user.setCountLikesOfPosts(postRepository.getTotalLikesByUserId(u.getUserId()));
+                    FriendshipEntity statusFriendsEnum = friendshipRepository.checkFriendshipStatus(sourceId, u.getUserId());
+                    if(statusFriendsEnum != null) {
+                        if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.PENDING)) {
+                            if (statusFriendsEnum.getSenderUserEntity().getUserId().equals(sourceId)) {
+                                user.setStatus(StatusFriendsEnum.SENDER);
+                            } else {
+                                user.setStatus(StatusFriendsEnum.RECEIVER);
+                            }
+                        } else {
+                            user.setStatus(StatusFriendsEnum.NONE);
+                        }
+                    } else {
+                        user.setStatus(StatusFriendsEnum.NONE);
+                    }
+                    userSearchResponses.add(user);
+                }
+                Paginate<List<UserSearchResponse>> dataResponse = new Paginate<>();
+                dataResponse.setData(userSearchResponses);
+                dataResponse.setPageNumber(users.getNumber());
+                dataResponse.setPageSize(users.getSize());
+                dataResponse.setTotalElements(users.getTotalElements());
+                dataResponse.setTotalPages(users.getTotalPages());
+                dataResponse.setLastPage(users.isLast());
+                return ApiResponse.success(HttpStatus.OK, "Success", dataResponse);
+            } catch (Exception e) {
+                log.error("Error Logging: pageNumber: {}, pageSize: {}, keyword: {}, error_message: {}, param_id: {}", pageNumber, pageSize, keyword, e.getMessage(), sourceId);
+                return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid Param");
+            }
+        }
+    }
+
 }

@@ -38,7 +38,7 @@ public class UserController {
     }
     @GetMapping("/search")
     public ApiResponse<?> getUsersByKeyword(
-                                            @RequestParam(name = "userId") String id,
+                                            @RequestParam(name = "id") String id,
                                             @RequestParam(name = "kw") String kw,
                                             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                             @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize,

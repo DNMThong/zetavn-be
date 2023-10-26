@@ -1,5 +1,6 @@
 package com.zetavn.api.payload.response;
 
+import com.zetavn.api.enums.StatusFriendsEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,15 +11,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSearchResponse {
-    private String id;
-    private String username;
-    private String firstName;
-    private String lastName;
-    private String display;
-    private String avatar;
-    private String poster;
-    private Integer totalFriends;
-    private Integer totalPosts;
-    private Integer countLikesOfPosts;
-    private Integer followers;
+    private OverallUserResponse user;
+    private Long totalFriends;
+    private Long totalPosts;
+    private Long countLikesOfPosts;
+    private StatusFriendsEnum status;
 }

@@ -33,14 +33,16 @@ public class FriendshipController {
     }
 
     @PutMapping("/friend-requests/accept")
-    public ApiResponse<FriendshipResponse> accept(@RequestParam Long id) {
-        return friendshipService.accept(id);
+    public ApiResponse<FriendshipResponse> accept(@RequestParam String senderId,
+                                                  @RequestParam String receiverId) {
+        return friendshipService.accept(senderId, receiverId);
     }
 
     @Transactional
     @PutMapping("/friend-requests/reject")
-    public ApiResponse<FriendshipResponse> reject(@RequestParam Long id) {
-        return friendshipService.rejected(id);
+    public ApiResponse<FriendshipResponse> reject(@RequestParam String senderId,
+                                                  @RequestParam String receiverId) {
+        return friendshipService.rejected(senderId, receiverId);
     }
 
     @GetMapping("/friends")
@@ -50,6 +52,10 @@ public class FriendshipController {
         return friendshipService.getFriendsByUserIdPaginate(id, pageNumber, pageSize);
     }
 
+    @GetMapping("/f")
+    public ApiResponse<List<FriendRequestResponse>> f(@RequestParam String id) {
+        return friendshipService.getFriendsByUserId(id);
+    }
     @GetMapping("/suggestions")
     public ApiResponse<Paginate<List<FriendRequestResponse>>> friendSuggestions(@RequestParam String id,
                                                                       @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
