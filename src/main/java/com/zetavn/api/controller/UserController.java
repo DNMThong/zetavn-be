@@ -45,13 +45,13 @@ public class UserController {
                                             @RequestParam(name = "option", defaultValue = "all", required = false) String option) {
         switch (option) {
             case "friends": {
-                return friendshipService.getFriendsByKeyword(id, kw, pageNumber, pageSize);
+                return userService.getAllFriendsByKeyword(id, kw, pageNumber, pageSize);
             }
-            case "strange": {
-                return friendshipService.getStrangersByKeyword(id, kw, pageNumber, pageSize);
+            case "strangers": {
+                return userService.getStrangersByKeyword(id, kw, pageNumber, pageSize);
             }
             case "all": {
-                return userService.getAllUsersByKeyword(kw, pageNumber, pageSize);
+                return userService.getAllUsersByKeyword(id ,kw, pageNumber, pageSize);
             }
             default: {
                 return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid option: Option(friends, strange, ?all)");

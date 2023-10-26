@@ -22,7 +22,7 @@ public interface UserService {
 
     ApiResponse<UserResponse> getUserByEmailOrUsername(String username, String email);
 
-    ApiResponse<?> getAllUsersByKeyword(String keyword, Integer pageNumber, Integer pageSize);
+    ApiResponse<?> getAllUsersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize);
 
 //    ApiResponse<?>
 }

@@ -118,14 +118,14 @@ public class UserServiceImpl implements UserService {
         }
     }
     @Override
-    public ApiResponse<?> getAllUsersByKeyword(String keyword, Integer pageNumber, Integer pageSize) {
+    public ApiResponse<?> getAllUsersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize) {
         log.info("Try to find Users by keyword {} at page number {} and page size {}", keyword, pageNumber, pageSize);
         if (pageNumber < 0 || pageSize < 0) {
             log.error("Error Logging: pageNumber {} < 0 || pageSize {} < 0 with keyword {}", pageNumber, pageSize, keyword);
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Page number and page size must be positive");
         } else {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<UserEntity> users = userRepository.findUserEntityByKeyword(keyword, pageable);
+            Page<UserEntity> users = userRepository.findUserEntityByKeyword(sourceId, keyword, pageable);
             if (pageNumber > users.getTotalPages()) {
                 log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, users.getNumber());
                 throw new InvalidParameterException("pageNumber is out of total Page");

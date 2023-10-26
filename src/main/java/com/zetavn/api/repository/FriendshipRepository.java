@@ -57,12 +57,14 @@ public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Lo
     Page<UserEntity> findSuggestionsForUser(@Param("userId") String userId, Pageable pageable);
 
     @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
-            "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED' AND (f.receiverUserEntity.firstName LIKE %:kw% OR f.receiverUserEntity.lastName LIKE %:kw%)")
+            "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED' AND (LOWER(CONCAT(f.receiverUserEntity.firstName, ' ', f.receiverUserEntity.lastName)) LIKE CONCAT('%', LOWER(:kw), '%'))")
     Page<UserEntity> findFriendsSentByKeyword(@Param("userId") String userId, @Param("kw") String kw, Pageable pageable);
 
     @Query("SELECT f.receiverUserEntity FROM FriendshipEntity f " +
-            "WHERE f.senderUserEntity.userId = :userId AND f.status = 'ACCEPTED' AND (f.senderUserEntity.firstName LIKE %:kw% OR f.senderUserEntity.lastName LIKE %:kw%)")
+            "WHERE f.senderUserEntity.userId = :userId AND f.status = 'ACCEPTED' AND (LOWER(CONCAT(f.senderUserEntity.firstName, ' ', f.senderUserEntity.lastName)) LIKE CONCAT('%', LOWER(:kw), '%'))")
     Page<UserEntity> findFriendsReceivedByKeyword(@Param("userId") String userId, @Param("kw") String kw, Pageable pageable);
+
+//    (f.senderUserEntity.firstName LIKE %:kw% OR f.senderUserEntity.lastName LIKE %:kw/)
 
 
     @Query("SELECT u " +
