@@ -17,9 +17,8 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     @Query("SELECT o FROM UserEntity o WHERE o.username LIKE ?1 OR o.email LIKE ?2")
     UserEntity findUserEntityByUsernameAndEmail(String username, String email);
-    @Query("SELECT o FROM UserEntity o WHERE o.lastName LIKE %?1% OR o.firstName LIKE %?1%")
-    Page<UserEntity> findUserEntityByKeyword(String keyword,
-                                             Pageable pageable);
+    @Query("SELECT DISTINCT (o) FROM UserEntity o WHERE (LOWER(CONCAT(o.firstName, ' ', o.lastName)) LIKE CONCAT('%', LOWER(:keyword), '%')) AND o.userId <> :sourceId")
+    Page<UserEntity> findUserEntityByKeyword(@Param("sourceId") String sourceId, @Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT DISTINCT (o) FROM UserEntity o WHERE o.userId IN :listId AND (LOWER(CONCAT(o.firstName, ' ', o.lastName)) LIKE CONCAT('%', LOWER(:keyword), '%')) AND o.userId <> :sourceId")
     Page<UserEntity> findUserEntitiesByFriendList(@Param("sourceId") String sourceId, @Param("listId") List<String> listId, @Param("keyword") String keyword, Pageable pageable);

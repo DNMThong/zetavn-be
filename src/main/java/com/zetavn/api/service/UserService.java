@@ -24,5 +24,7 @@ public interface UserService {
 
     ApiResponse<?> getAllUsersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize);
 
-//    ApiResponse<?>
+    ApiResponse<?> getAllFriendsByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize);
+
+    ApiResponse<?> getStrangersByKeyword(String sourceId, String keyword, Integer pageNumebr, Integer pageSize);
 }
