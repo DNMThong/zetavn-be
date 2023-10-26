@@ -15,6 +15,6 @@ public interface FriendshipService {
     ApiResponse<FriendshipResponse> rejected(String senderId, String receiverId);
 
     ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPaginate(String userId,  Integer pageNumber, Integer pageSize);
-    ApiResponse<List<FriendRequestResponse>> getFriendsByUserId(String userId);
+    ApiResponse<List<OverallUserResponse>> getFriendsByUserId(String userId);
     ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendSuggestions(String userId,  Integer pageNumber, Integer pageSize);
 }

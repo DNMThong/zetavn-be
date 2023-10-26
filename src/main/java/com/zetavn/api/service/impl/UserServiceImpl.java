@@ -184,8 +184,21 @@ public class UserServiceImpl implements UserService {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
             Optional<UserEntity> source = userRepository.findById(sourceId);
             Set<String> friendIdList = new HashSet<>();
-            friendIdList.addAll(source.get().getUserReceiverList().stream().map(u -> u.getSenderUserEntity().getUserId()).toList());
-            friendIdList.addAll(source.get().getUserSenderList().stream().map(u -> u.getReceiverUserEntity().getUserId()).toList());
+//            friendIdList.addAll(source.get().getUserReceiverList().stream().map(u -> u.getSenderUserEntity().getUserId()).toList());
+//            friendIdList.addAll(source.get().getUserSenderList().stream().map(u -> u.getReceiverUserEntity().getUserId()).toList());
+
+            source.get().getUserReceiverList().forEach((item) -> {
+                if(item.getStatus()==FriendStatusEnum.ACCEPTED) {
+                    friendIdList.add(item.getSenderUserEntity().getUserId());
+                }
+            });
+
+            source.get().getUserSenderList().forEach((item) -> {
+                if(item.getStatus()==FriendStatusEnum.ACCEPTED) {
+                    friendIdList.add(item.getReceiverUserEntity().getUserId());
+                }
+            });
+
             Page<UserEntity> users = userRepository.findUserEntitiesByFriendList(sourceId, friendIdList.stream().toList(), keyword, pageable);
             if (pageNumber > users.getTotalPages()) {
                 log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, users.getNumber());

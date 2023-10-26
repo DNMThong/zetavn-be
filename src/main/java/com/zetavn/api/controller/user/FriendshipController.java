@@ -13,36 +13,34 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v0")
+@RequestMapping("/api/v0/friendship")
 public class FriendshipController {
     private final FriendshipService friendshipService;
     FriendshipController(FriendshipService friendshipService) {
         this.friendshipService = friendshipService;
     }
 
-    @PostMapping("/add-friend")
+    @PostMapping("")
     public ApiResponse<FriendshipResponse> sendRequest(@RequestBody FriendshipRequest friendshipRequest) {
         return friendshipService.sendRequest(friendshipRequest);
     }
 
-    @GetMapping("/friend-requests")
+    @GetMapping("")
     public ApiResponse<Paginate<List<FriendRequestResponse>>> getRequest(@RequestParam String id,
                                                                          @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                                                          @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
         return friendshipService.getReceiverFriendRequests(id, pageNumber, pageSize);
     }
 
-    @PutMapping("/friend-requests/accept")
-    public ApiResponse<FriendshipResponse> accept(@RequestParam String senderId,
-                                                  @RequestParam String receiverId) {
-        return friendshipService.accept(senderId, receiverId);
+    @PutMapping("/accept")
+    public ApiResponse<FriendshipResponse> accept(@RequestBody FriendshipRequest friendshipRequest) {
+        return friendshipService.accept(friendshipRequest.getSenderId(), friendshipRequest.getReceiverId());
     }
 
     @Transactional
-    @PutMapping("/friend-requests/reject")
-    public ApiResponse<FriendshipResponse> reject(@RequestParam String senderId,
-                                                  @RequestParam String receiverId) {
-        return friendshipService.rejected(senderId, receiverId);
+    @PutMapping("/reject")
+    public ApiResponse<FriendshipResponse> reject(@RequestBody FriendshipRequest friendshipRequest) {
+        return friendshipService.rejected(friendshipRequest.getSenderId(), friendshipRequest.getReceiverId());
     }
 
     @GetMapping("/friends")
@@ -52,10 +50,6 @@ public class FriendshipController {
         return friendshipService.getFriendsByUserIdPaginate(id, pageNumber, pageSize);
     }
 
-    @GetMapping("/f")
-    public ApiResponse<List<FriendRequestResponse>> f(@RequestParam String id) {
-        return friendshipService.getFriendsByUserId(id);
-    }
     @GetMapping("/suggestions")
     public ApiResponse<Paginate<List<FriendRequestResponse>>> friendSuggestions(@RequestParam String id,
                                                                       @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,

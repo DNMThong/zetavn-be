@@ -252,22 +252,17 @@ public class FriendshipServiceImpl implements FriendshipService {
 
 
     @Override
-    public ApiResponse<List<FriendRequestResponse>> getFriendsByUserId(String userId) {
+    public ApiResponse<List<OverallUserResponse>> getFriendsByUserId(String userId) {
         List<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUser(userId);
         List<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(userId);
 
         List<UserEntity> allFriends = new ArrayList<>(friendsSentToUser);
         allFriends.addAll(friendsReceivedByUser);
-        List<FriendRequestResponse> friendResponses = new ArrayList<>();
+        List<OverallUserResponse> friendResponses = new ArrayList<>();
 
         for (UserEntity friend : allFriends) {
-            // Ánh xạ từ UserEntity sang FriendRequestResponse
-            FriendRequestResponse friendResponse = new FriendRequestResponse();  // Không có createdAt
-
             OverallUserResponse overallUserResponse = OverallUserMapper.entityToDto(friend);
-            friendResponse.setUser(overallUserResponse);
-            friendResponse.setCreatedAt(null);
-            friendResponses.add(friendResponse);
+            friendResponses.add(overallUserResponse);
         }
         return ApiResponse.success(HttpStatus.OK , "List of friends", friendResponses);
     }

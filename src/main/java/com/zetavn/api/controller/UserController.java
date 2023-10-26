@@ -3,6 +3,7 @@ package com.zetavn.api.controller;
 import com.zetavn.api.payload.request.UserInfoRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FriendRequestResponse;
+import com.zetavn.api.payload.response.OverallUserResponse;
 import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.service.FriendshipService;
 import com.zetavn.api.service.PostService;
@@ -38,7 +39,7 @@ public class UserController {
     }
     @GetMapping("/search")
     public ApiResponse<?> getUsersByKeyword(
-                                            @RequestParam(name = "id") String id,
+                                            @RequestParam(name = "userId") String id,
                                             @RequestParam(name = "kw") String kw,
                                             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                             @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize,
@@ -84,7 +85,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public ApiResponse<List<FriendRequestResponse>> getFriends(@PathVariable("id") String id) {
+    public ApiResponse<List<OverallUserResponse>> getFriends(@PathVariable("id") String id) {
         return friendshipService.getFriendsByUserId(id);
     }
 }
