@@ -55,16 +55,7 @@ public class FriendshipServiceImpl implements FriendshipService {
             if (existingFriendship.getStatus() == FriendStatusEnum.PENDING) {
                 return ApiResponse.error(HttpStatus.BAD_REQUEST, "Friend request already exists", null);
             } else if (existingFriendship.getStatus() == FriendStatusEnum.REJECTED) {
-                existingFriendship.setStatus(FriendStatusEnum.PENDING);
-                existingFriendship.setCreatedAt(LocalDateTime.now());
-
-                FollowRequest follow = new FollowRequest();
-                follow.setFollowerId(existingFriendship.getSenderUserEntity().getUserId());
-                follow.setFollowingId(existingFriendship.getReceiverUserEntity().getUserId());
-                followService.friendshipFollow(follow);
-
-                FriendshipEntity saveFriendship = friendshipRepository.save(existingFriendship);
-                return ApiResponse.success(HttpStatus.OK, "send request success!", friendshipMapper.entityToFriendshipResponse(saveFriendship));
+                friendshipRepository.deleteById(existingFriendship.getFriendshipId());
             }
         }
 

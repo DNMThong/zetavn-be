@@ -30,7 +30,8 @@ public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Lo
     @Query("SELECT f FROM FriendshipEntity f WHERE f.senderUserEntity = :senderUser AND f.receiverUserEntity = :receiverUser")
     FriendshipEntity findFriendshipBySenderUserAndReceiverUser(UserEntity senderUser, UserEntity receiverUser);
 
-    @Query("select f from FriendshipEntity f where f.senderUserEntity.userId = :senderUserEntity_userId and f.receiverUserEntity.userId = :receiverUserEntity_userId")
+    @Query("select f from FriendshipEntity f where f.senderUserEntity.userId = :senderUserEntity_userId " +
+            "                                  and f.receiverUserEntity.userId = :receiverUserEntity_userId or f.senderUserEntity.userId = :receiverUserEntity_userId and f.receiverUserEntity.userId = :senderUserEntity_userId")
     FriendshipEntity getFriendshipByUserID(String senderUserEntity_userId, String receiverUserEntity_userId);
 
     @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
