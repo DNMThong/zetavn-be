@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface FriendshipService {
     ApiResponse<FriendshipResponse> sendRequest(FriendshipRequest friendshipRequest);
-    ApiResponse<Paginate<List<FriendRequestResponse>>> getReceiverFriendRequests(String receiverUserId,  Integer pageNumber, Integer pageSize);
+    ApiResponse<Paginate<List<FriendRequestResponse>>> friendRequestState (String id,  Integer pageNumber, Integer pageSize);
 //    ApiResponse<FriendshipResponse> accept(Long friendshipId);
     ApiResponse<FriendshipResponse> accept(String senderId, String receiverId);
 //    ApiResponse<FriendshipResponse> rejected(Long friendshipId);

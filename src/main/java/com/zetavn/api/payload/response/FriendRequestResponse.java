@@ -1,6 +1,8 @@
 package com.zetavn.api.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.zetavn.api.enums.FriendStatusEnum;
+import com.zetavn.api.enums.NotiFriendRequestEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,4 +19,6 @@ public class FriendRequestResponse {
 
     @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
     private LocalDateTime createdAt;
+
+    private NotiFriendRequestEnum status;
 }
