@@ -29,7 +29,7 @@ public class FriendshipController {
     public ApiResponse<Paginate<List<FriendRequestResponse>>> getRequest(@RequestParam String id,
                                                                          @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                                                          @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
-        return friendshipService.getReceiverFriendRequests(id, pageNumber, pageSize);
+        return friendshipService.friendRequestState(id, pageNumber, pageSize);
     }
 
     @PutMapping("/accept")
