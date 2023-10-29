@@ -1,6 +1,7 @@
 package com.zetavn.api.service.impl;
 
 import com.zetavn.api.enums.FriendStatusEnum;
+import com.zetavn.api.enums.NotiFriendRequestEnum;
 import com.zetavn.api.exception.DuplicateRecordException;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.FriendshipEntity;
@@ -73,29 +74,44 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public ApiResponse<Paginate<List<FriendRequestResponse>>> getReceiverFriendRequests(String receiverUserId,  Integer pageNumber, Integer pageSize) {
-        Optional<UserEntity> user = userRepository.findById(receiverUserId);
-        if(user.isEmpty()) throw new NotFoundException("Not found user with id: " + receiverUserId);
+    public ApiResponse<Paginate<List<FriendRequestResponse>>> friendRequestState(String id,  Integer pageNumber, Integer pageSize) {
+        Optional<UserEntity> user = userRepository.findById(id);
+        if(user.isEmpty()) throw new NotFoundException("Not found user with id: " + id);
         try {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<UserEntity> userEntities = friendshipRepository.getReceivedFriendRequests(receiverUserId, pageable);
-            List<UserEntity> uL = userEntities.getContent();
+            Page<FriendshipEntity> friendshipEntities = friendshipRepository.getFriendRequestState(id, pageable);
+            List<FriendshipEntity> fl = friendshipEntities.getContent();
             List<FriendRequestResponse> friendRequestResponses = new ArrayList<>();
-            for (UserEntity userEntity : uL) {
-                FriendshipEntity friendshipEntity = friendshipRepository.findFriendshipBySenderUserAndReceiverUser(userEntity, user.get());
-                if (friendshipEntity != null) {
+            for(FriendshipEntity f : fl) {
+                if(f.getSenderUserEntity().getUserId().equals(id)) {
                     FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
-                    friendRequestResponse.setUser(OverallUserMapper.entityToDto(userEntity));
-                    friendRequestResponse.setCreatedAt(friendshipEntity.getCreatedAt());
+                    friendRequestResponse.setUser(OverallUserMapper.entityToDto(f.getReceiverUserEntity()));
+                    friendRequestResponse.setCreatedAt(f.getCreatedAt());
+                    friendRequestResponse.setStatus(NotiFriendRequestEnum.SUCCESS);
+                    friendRequestResponses.add(friendRequestResponse);
+                } else if(f.getReceiverUserEntity().getUserId().equals(id)) {
+                    FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
+                    friendRequestResponse.setUser(OverallUserMapper.entityToDto(f.getSenderUserEntity()));
+                    friendRequestResponse.setCreatedAt(f.getCreatedAt());
+                    friendRequestResponse.setStatus(NotiFriendRequestEnum.PENDING);
                     friendRequestResponses.add(friendRequestResponse);
                 }
             }
+//            for (UserEntity userEntity : fl) {
+//                FriendshipEntity friendshipEntity = friendshipRepository.findFriendshipBySenderUserAndReceiverUser(userEntity, user.get());
+//                if (friendshipEntity != null) {
+//                    FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
+//                    friendRequestResponse.setUser(OverallUserMapper.entityToDto(userEntity));
+//                    friendRequestResponse.setCreatedAt(friendshipEntity.getCreatedAt());
+//                    friendRequestResponses.add(friendRequestResponse);
+//                }
+//            }
             Paginate<List<FriendRequestResponse>> dataResponse = new Paginate<>(
-                    userEntities.getNumber(),
-                    userEntities.getSize(),
-                    userEntities.getTotalElements(),
-                    userEntities.getTotalPages(),
-                    userEntities.isLast(),
+                    friendshipEntities.getNumber(),
+                    friendshipEntities.getSize(),
+                    friendshipEntities.getTotalElements(),
+                    friendshipEntities.getTotalPages(),
+                    friendshipEntities.isLast(),
                     friendRequestResponses
             );
             return ApiResponse.success(HttpStatus.OK, "Get received friend requests!", dataResponse);

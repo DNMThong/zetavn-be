@@ -24,15 +24,17 @@ public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Lo
     @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
             "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED'")
     List<UserEntity> findFriendsSentToUser(@Param("userId") String userId);
-    @Query("select f.senderUserEntity from FriendshipEntity f where f.receiverUserEntity.userId = :receiverUserId and f.status = 'PENDING'" +
-            "ORDER BY f.createdAt DESC")
-    Page<UserEntity> getReceivedFriendRequests(String receiverUserId, Pageable pageable);
+
     @Query("SELECT f FROM FriendshipEntity f WHERE f.senderUserEntity = :senderUser AND f.receiverUserEntity = :receiverUser")
     FriendshipEntity findFriendshipBySenderUserAndReceiverUser(UserEntity senderUser, UserEntity receiverUser);
-
     @Query("select f from FriendshipEntity f where f.senderUserEntity.userId = :senderUserEntity_userId " +
             "                                  and f.receiverUserEntity.userId = :receiverUserEntity_userId or f.senderUserEntity.userId = :receiverUserEntity_userId and f.receiverUserEntity.userId = :senderUserEntity_userId")
     FriendshipEntity getFriendshipByUserID(String senderUserEntity_userId, String receiverUserEntity_userId);
+    @Query("SELECT f FROM FriendshipEntity f " +
+            "WHERE f.senderUserEntity.userId = :id and f.status = 'ACCEPTED'" +
+            "OR f.receiverUserEntity.userId = :id AND f.status = 'PENDING'" +
+            "ORDER BY f.createdAt DESC")
+    Page<FriendshipEntity> getFriendRequestState (String id, Pageable pageable);
 
     @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
             "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED'")
