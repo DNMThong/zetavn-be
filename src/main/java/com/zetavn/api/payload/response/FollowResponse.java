@@ -8,7 +8,8 @@ import lombok.Setter;
 @Setter
 public class FollowResponse {
     private long followId;
-    private String followerUserId;
-    private String followingUserId;
+    private String followerId;
+    private String followingId;
     private FollowPriorityEnum priority;
+
 }

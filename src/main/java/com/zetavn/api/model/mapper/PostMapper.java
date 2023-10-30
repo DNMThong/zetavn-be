@@ -32,6 +32,21 @@ public class PostMapper {
             List<UserEntity> users = entity.getPostMentionEntityList().stream().map(item -> item.getUserEntity()).collect(Collectors.toList());
             dto.setMentions(UserMentionMapper.entityListToDtoList(users));
         }
+
+        if (entity.getPostLikeEntityList() != null) {
+            dto.setCountLike(entity.getPostLikeEntityList().size());
+            List<UserMentionDto> userMentionDtoList = PostLikeMapper.entityListToUserDtoList(entity.getPostLikeEntityList());
+            dto.setUsersLike(userMentionDtoList.subList(0, Math.min(userMentionDtoList.size(), 4)));
+        } else {
+            dto.setCountLike(0);
+            dto.setUsersLike(null);
+        }
+
+        if (entity.getCommentEntityList() != null) {
+            dto.setCountComment(entity.getCommentEntityList().size());
+        } else {
+            dto.setCountComment(0);
+        }
         return dto;
     }
 

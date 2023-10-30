@@ -19,8 +19,9 @@ public class PostController {
 
     @Autowired
     PostLikeService postLikeService;
+
     @GetMapping("{Id}/post-like")
-    public ApiResponse<?> getListLikedUserOfPost(@PathVariable("Id") String postId){
+    public ApiResponse<?> getListLikedUserOfPost(@PathVariable("Id") String postId) {
         return postLikeService.getListLikedUserOfPost(postId);
     }
 

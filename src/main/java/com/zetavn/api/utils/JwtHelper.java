@@ -37,7 +37,6 @@ public class JwtHelper {
     }
 
     public String generateToken(UserEntity user) {
-        System.out.println((user == null) ? 1 : 2);
         ArrayList<String> authorities = new ArrayList<>();
         authorities.add(user.getRole().name());
         Algorithm algorithm = getAlgorithm();

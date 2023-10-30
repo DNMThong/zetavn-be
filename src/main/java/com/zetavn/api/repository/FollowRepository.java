@@ -23,6 +23,7 @@ public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
     @Query("SELECT fe.followerUserEntity FROM FollowEntity fe WHERE fe.followingUserEntity.userId = :userId")
     List<UserEntity> getFollowers(String userId);
 
+
     Optional<FollowEntity> findByFollowerUserEntityAndFollowingUserEntity(UserEntity followerUserEntity, UserEntity followingUserEntity);
 
     Optional<FollowEntity> findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(String followerUserEntity_userId, String followingUserEntity_userId);

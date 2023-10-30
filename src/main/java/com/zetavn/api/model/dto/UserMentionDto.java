@@ -1,7 +1,5 @@
 package com.zetavn.api.model.dto;
 
-import com.zetavn.api.enums.RoleEnum;
-import com.zetavn.api.model.entity.UserInfoEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

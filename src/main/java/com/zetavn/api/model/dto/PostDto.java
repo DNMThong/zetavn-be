@@ -26,4 +26,7 @@ public class PostDto {
     private PostActivityDto activity;
     List<PostMediaDto> medias;
     List<UserMentionDto> mentions;
+    private int countLike;
+    private int countComment;
+    private List<UserMentionDto> usersLike;
 }

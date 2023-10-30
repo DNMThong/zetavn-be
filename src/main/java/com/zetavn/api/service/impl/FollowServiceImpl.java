@@ -5,10 +5,12 @@ import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.FollowEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.FollowMapper;
+import com.zetavn.api.model.mapper.OverallUserMapper;
 import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.FollowRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FollowResponse;
+import com.zetavn.api.payload.response.OverallUserResponse;
 import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.FollowRepository;
 import com.zetavn.api.repository.UserRepository;
@@ -36,7 +38,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public ApiResponse<FollowResponse> createFollow(FollowRequest followRequest) {
-        Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerUserId(), followRequest.getFollowingUserId());
+        Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerId(), followRequest.getFollowingId());
         if (check.isEmpty()) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Friend request already exists", null);
         }
@@ -46,6 +48,7 @@ public class FollowServiceImpl implements FollowService {
         FollowEntity saveFollow = followRepository.save(followEntity);
         return ApiResponse.success(HttpStatus.OK, "", followMapper.entityToFollowResponse(saveFollow));
     }
+
 
     @Override
     public ApiResponse<FollowResponse> updatePriority(Long followId, String priority) {
@@ -76,24 +79,24 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public ApiResponse<List<UserResponse>> getFollowingUsers(String followerUserId) {
+    public ApiResponse<List<OverallUserResponse>> getFollowingUsers(String followerUserId) {
         Optional<UserEntity> u = userRepository.findById(followerUserId);
         if(u.isEmpty()) {
             throw new NotFoundException("Not found user with userId: " + u);
         }
         List<UserEntity> user = followRepository.getFollowingUsers(followerUserId);
-        List<UserResponse> userResponses = user.stream().map(UserMapper::userEntityToUserResponse).toList();
+        List<OverallUserResponse> userResponses = user.stream().map(OverallUserMapper::entityToDto).toList();
         return ApiResponse.success(HttpStatus.OK, "", userResponses);
     }
 
     @Override
-    public ApiResponse<List<UserResponse>> getFollower(String userId) {
+    public ApiResponse<List<OverallUserResponse>> getFollower(String userId) {
         Optional<UserEntity> u = userRepository.findById(userId);
         if(u.isEmpty()) {
             throw new NotFoundException("Not found user with userId: " + u);
         }
         List<UserEntity> user = followRepository.getFollowers(userId);
-        List<UserResponse> userResponses = user.stream().map(UserMapper::userEntityToUserResponse).toList();
+        List<OverallUserResponse> userResponses = user.stream().map(OverallUserMapper::entityToDto).toList();
         return ApiResponse.success(HttpStatus.OK, "", userResponses);
     }
 

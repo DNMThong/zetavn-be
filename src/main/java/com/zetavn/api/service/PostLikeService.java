@@ -14,6 +14,6 @@ public interface PostLikeService {
 
     ApiResponse<?> createPostLike (PostLikeRequest postLikeRequest);
        ApiResponse<?> removePostLike (PostLikeRequest postLikeRequest);
-
+       ApiResponse<?> checkPostLike(String userId, String postId);
 
 }

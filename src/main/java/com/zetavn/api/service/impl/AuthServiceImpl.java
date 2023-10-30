@@ -19,6 +19,7 @@ import com.zetavn.api.repository.UserInfoRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.AuthService;
 import com.zetavn.api.service.RefreshTokenService;
+import com.zetavn.api.utils.CookieHelper;
 import com.zetavn.api.utils.JwtHelper;
 import com.zetavn.api.utils.UUIDGenerator;
 import jakarta.servlet.http.Cookie;
@@ -124,16 +125,12 @@ public class AuthServiceImpl implements AuthService {
             Map<String, String> tokens = jwtHelper.generateTokens(user);
 
             // Store refresh token to db
-            log.info("_TOKEN: {}", tokens.get("refresh_token"));
+            log.info("Store refresh - Token: {}", tokens.get("refresh_token"));
             refreshTokenService.create(tokens.get("refresh_token"), user.getUserId(), "asdasd");
 
             // Add refresh token to Coookie
-            Cookie c = new Cookie("refresh_token2", tokens.get("refresh_token"));
-            c.setMaxAge(90000);
-            c.setHttpOnly(true);
-            c.setPath("/");
-            c.setSecure(false);
-            res.addCookie(c);
+            Cookie c = CookieHelper.addCookie(res, "refresh_token2", tokens.get("refresh_token"), -1, true);
+
 
             // Build the response containing JWT token and refresh token
             SignInResponse response = new SignInResponse();
@@ -198,19 +195,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ApiResponse<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String refresh_token = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie c: cookies) {
-
-            if (c.getName().equals("refresh_token2")) {
-                refresh_token = c.getValue();
-            }
-        }
-
+        refresh_token = CookieHelper.getCookie(request.getCookies(), "refresh_token2").getValue();
         if (refresh_token != null && !refresh_token.equals("")) {
             try {
                 DecodedJWT decodedJWT = jwtHelper.decodedJWTRef(refresh_token);
                 if (decodedJWT.getExpiresAt().before(new Date())) {
-                    log.info("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
+                    log.error("Expires At: {}", decodedJWT.getExpiresAt().toInstant());
                     throw new TokenExpiredException("The token has expired", decodedJWT.getExpiresAt().toInstant());
                 }
                 RefreshTokenEntity user = refreshTokenService.getRefreshTokenByToken(refresh_token);
@@ -222,16 +212,9 @@ public class AuthServiceImpl implements AuthService {
                 tokens.put("refresh_token", refresh_token);
                 JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
                 return ApiResponse.success(HttpStatus.OK, "Refresh token Success", jwtResponse);
-            } catch (TokenExpiredException e) {
-                response.setHeader("ERROR", e.getMessage());
-                response.setStatus(UNAUTHORIZED.value());
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "TokenExpired");
-                error.put("message", e.getMessage());
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(), error);
             } catch (Exception e) {
-                response.setHeader("ERROR", e.getMessage());
+                log.error("Error logging in: {}", e.getMessage());
+                response.setHeader("ERROR", "The Token is invalid");
                 response.setStatus(UNAUTHORIZED.value());
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "TokenInvalid");
@@ -245,6 +228,22 @@ public class AuthServiceImpl implements AuthService {
 //            refreshTokenService.removeRefreshTokenByIpAddressAndUserId();
 //        }
         return ApiResponse.error(FORBIDDEN, "Refresh token is invalid");
+    }
+
+    @Override
+    public ApiResponse<?> logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Cookie c = CookieHelper.getCookie(request.getCookies(), "refresh_token2");
+        String token = c.getValue();
+        if (token.equals("")) {
+            log.error("Refresh token does not exist");
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Bad Request");
+        } else {
+            log.info("Delete token in database: {}", token);
+            refreshTokenService.removeRefreshTokenByToken(token);
+            log.info("Delete token in cookie: {}", token);
+            CookieHelper.removeCookie(request, response, c.getName());
+            return ApiResponse.success(HttpStatus.OK, "Logout Success", null);
+        }
     }
 
 }

@@ -13,6 +13,7 @@ import com.zetavn.api.enums.GenderEnum;
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString
 @Entity
 @Table(name = "user_info")
 public class UserInfoEntity {
