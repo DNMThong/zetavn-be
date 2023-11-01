@@ -12,14 +12,14 @@ public class StatisticAdminController {
     @Autowired
     StatisticService statisticService;
 
-    @GetMapping("users")
+    @GetMapping("/users")
     public ApiResponse<?> statisticsUsers(@RequestBody StatisticRequest statisticRequest,
                                           @RequestParam (defaultValue = "0") Integer pageNumber,
                                           @RequestParam (defaultValue = "5") Integer pageSize){
         return statisticService.statisticCreateAtUsers(statisticRequest,pageNumber,pageSize);
     }
 
-    @GetMapping("posts")
+    @GetMapping("/posts")
     public ApiResponse<?> statisticsPosts(@RequestBody StatisticRequest statisticRequest,
                                           @RequestParam (defaultValue = "0") Integer pageNumber,
                                           @RequestParam (defaultValue = "5") Integer pageSize){

@@ -32,8 +32,8 @@ public class UserAdminController {
     public ApiResponse<?> update(@RequestBody UserAdminDto userAdminDto) {
         return userService.updateForAdmin(userAdminDto);
     }
-    @DeleteMapping()
-    public ApiResponse<?> remove(@RequestParam String id) {
+    @DeleteMapping("/{id}")
+    public ApiResponse<?> remove(@PathVariable String id) {
         return userService.removeForAdmin(id);
     }
 }
