@@ -19,7 +19,6 @@ import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.UserInfoService;
 import com.zetavn.api.service.UserService;
 import com.zetavn.api.utils.UUIDGenerator;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -477,5 +476,13 @@ public class UserServiceImpl implements UserService {
             return ApiResponse.success(HttpStatus.OK,"User is deleted",null);
         }
         return ApiResponse.error(HttpStatus.NOT_FOUND,"Not found userId",id);
+    }
+    @Override
+    public ApiResponse<?> getOneUserForAdmin(String id){
+        Optional<UserEntity> userEntity = userRepository.findById(id);
+        if(userEntity.isPresent()){
+            return ApiResponse.success(HttpStatus.OK,"User is deleted",UserMapper.userEntityToUserAdminDto(userEntity.get()));
+        }
+        return ApiResponse.error(HttpStatus.NOT_FOUND,"Not found User",null);
     }
 }

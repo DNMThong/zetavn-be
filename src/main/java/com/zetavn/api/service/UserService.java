@@ -47,4 +47,6 @@ public interface UserService {
     ApiResponse<?> createForAdmin(UserAdminDto userAdminDto);
 
     ApiResponse<?> removeForAdmin(String id);
+
+    ApiResponse<?> getOneUserForAdmin(String id);
 }

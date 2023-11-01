@@ -20,4 +20,8 @@ public class PostAdminController {
     public ApiResponse<?>update(@RequestParam String id, @RequestParam String status){
         return postService.updatePostForAdmin(id,status);
     }
+    @GetMapping("/{id}")
+    public ApiResponse<?> getOnePost(@PathVariable String id){
+        return postService.getOnePostForAdmin(id);
+    }
 }

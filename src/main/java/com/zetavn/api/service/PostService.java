@@ -30,4 +30,6 @@ public interface PostService {
     ApiResponse<?> getAllPostForAdmin(Integer pageNumber, Integer pageSize);
 
     ApiResponse<?> updatePostForAdmin(String id, String status);
+
+    ApiResponse<?> getOnePostForAdmin(String id);
 }

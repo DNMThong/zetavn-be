@@ -7,6 +7,7 @@ import com.zetavn.api.model.dto.PostDto;
 import com.zetavn.api.model.dto.UserMentionDto;
 import com.zetavn.api.model.entity.*;
 import com.zetavn.api.model.mapper.PostMapper;
+import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.model.mapper.UserMentionMapper;
 import com.zetavn.api.payload.request.PostMediaRequest;
 import com.zetavn.api.payload.request.PostMentionRequest;
@@ -337,5 +338,12 @@ public class PostServiceImpl implements PostService {
         }
         return ApiResponse.error(HttpStatus.BAD_REQUEST,"Update error",null);
     }
-
+    @Override
+    public ApiResponse<?> getOnePostForAdmin(String id){
+        Optional<PostEntity> postEntity = postRepository.findById(id);
+        if(postEntity.isPresent()){
+            return ApiResponse.success(HttpStatus.OK,"success", PostMapper.entityToPostAdminDto(postEntity.get()));
+        }
+        return ApiResponse.error(HttpStatus.NOT_FOUND,"Not found post",null);
+    }
 }

@@ -19,6 +19,11 @@ public class UserAdminController {
     {
         return  userService.getAllUserForAdminByStatus(status,pageNumber,pageSize);
     }
+
+    @GetMapping("/{id}")
+    public ApiResponse<?> getOneUser(@PathVariable String id){
+        return userService.getOneUserForAdmin(id);
+    }
     @PostMapping()
     public ApiResponse<?> create(@RequestBody UserAdminDto userAdminDto) {
         return userService.createForAdmin(userAdminDto);
