@@ -1,5 +1,6 @@
 package com.zetavn.api.service;
 
+import com.zetavn.api.enums.PostStatusEnum;
 import com.zetavn.api.model.dto.PostDto;
 import com.zetavn.api.model.entity.PostEntity;
 import com.zetavn.api.payload.request.PostRequest;
@@ -21,4 +22,12 @@ public interface PostService {
     ApiResponse<?> deletePost(String postId);
 
     ApiResponse<Paginate<List<PostDto>>> getAllPostByUserFollow(String userId, Integer pageNumber, Integer pageSize);
+
+    ApiResponse<?> getAllPostsForAdminByStatus(String status, Integer pageNumber, Integer pageSize);
+
+    ApiResponse<?> pageableUserForAdmin(PostStatusEnum postStatusEnum, Integer pageNumber, Integer pageSize);
+
+    ApiResponse<?> getAllPostForAdmin(Integer pageNumber, Integer pageSize);
+
+    ApiResponse<?> updatePostForAdmin(String id, String status);
 }
