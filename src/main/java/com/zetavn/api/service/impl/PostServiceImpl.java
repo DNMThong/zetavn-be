@@ -252,4 +252,25 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    public ApiResponse<Paginate<List<PostDto>>> getPostsWithMediaByUserId(String userId, Integer pageNumber, Integer pageSize) {
+        try {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Page<PostEntity> posts = postRepository.getPostsWithMediaByUserId(userId, pageable);
+            List<PostEntity> postList = posts.getContent();
+            List<PostDto> postDtoList = PostMapper.entityListToDtoList(postList);
+            Paginate<List<PostDto>> dataResponse = new Paginate<>(
+                    posts.getNumber(),
+                    posts.getSize(),
+                    posts.getTotalElements(),
+                    posts.getTotalPages(),
+                    posts.isLast(),
+                    postDtoList
+            );
+            return ApiResponse.success(HttpStatus.OK, "Success", dataResponse);
+        } catch (Exception e) {
+            System.out.println(e);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid Param");
+        }
+    }
+
 }

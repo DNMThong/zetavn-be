@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLOutput;
 import java.util.List;
 
 @RestController
@@ -52,5 +53,11 @@ public class FollowController {
         return followService.updatePriority(id, priority);
 
     }
+
+    @GetMapping("/follows/check-follow")
+    public ApiResponse<FollowResponse> checkFollow(@RequestParam("sourceId") String sourceId, @RequestParam("targetId") String targetId) {
+        return followService.getFollowStatus(sourceId, targetId);
+    }
+
 
 }

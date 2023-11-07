@@ -72,9 +72,9 @@ public class UserController {
         return postService.getAllPostByUserFollow(userId, pageNumber, pageSize);
     }
 
-    @GetMapping("/{userId}")
-    public ApiResponse<?> getUserProfile(@PathVariable(name = "userId", required = true) Optional<String> userId) {
-        return userInfoService.getUserInfoByUserId(userId.get());
+    @GetMapping("/{username}")
+    public ApiResponse<?> getUserProfile(@PathVariable(name = "username", required = true) Optional<String> userId) {
+        return userInfoService.getUserInfoByUsername(userId.get());
     }
 
     @PutMapping("/{userId}/info")

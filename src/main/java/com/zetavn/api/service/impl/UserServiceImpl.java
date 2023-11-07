@@ -1,13 +1,16 @@
 package com.zetavn.api.service.impl;
 
+import com.cloudinary.Api;
 import com.zetavn.api.enums.FriendStatusEnum;
 import com.zetavn.api.enums.StatusFriendsEnum;
 import com.zetavn.api.enums.UserStatusEnum;
+import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.FriendshipEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.OverallUserMapper;
 import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.SignUpRequest;
+import com.zetavn.api.payload.request.UserUpdateRequest;
 import com.zetavn.api.payload.response.*;
 import com.zetavn.api.repository.FriendshipRepository;
 import com.zetavn.api.repository.PostRepository;
@@ -80,8 +83,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<UserResponse> update() {
-        return null;
+    public UserResponse update(String userId, UserUpdateRequest userUpdateRequest) {
+        UserEntity user = userRepository.findById(userId).get();
+        user.setEmail(userUpdateRequest.getEmail());
+        user.setUsername(userUpdateRequest.getUsername());
+        user.setPhone(userUpdateRequest.getPhone());
+        user.setFirstName(userUpdateRequest.getFirstName());
+        user.setLastName(userUpdateRequest.getLastName());
+        user = userRepository.save(user);
+        return UserMapper.userInfoToUserResponse(user.getUserInfo());
     }
 
     @Override
@@ -103,7 +113,7 @@ public class UserServiceImpl implements UserService {
         } else {
             UserEntity user = userRepository.findUserEntityByEmail(email);
             log.info("Found email in database: {}", email);
-            return user == null;
+            return user != null;
         }
     }
 
@@ -115,7 +125,7 @@ public class UserServiceImpl implements UserService {
         } else {
             UserEntity user = userRepository.findUserEntityByUsername(username);
             log.info("Found username in database: {}", username);
-            return user == null;
+            return user != null;
         }
     }
     @Override
@@ -289,5 +299,30 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
+
+    @Override
+    public ApiResponse<UserResponse> updateAvatar(String sourceId, String avatarPath) {
+        Optional<UserEntity> user = userRepository.findById(sourceId);
+        if (user.isEmpty())
+            throw new NotFoundException("Not found user with userId: " + sourceId);
+        else {
+            user.get().setAvatar(avatarPath);
+            UserResponse response = UserMapper.userInfoToUserResponse(userRepository.save(user.get()).getUserInfo());
+            return ApiResponse.success(HttpStatus.OK, "Update avatar success", response);
+        }
+    }
+
+    @Override
+    public ApiResponse<UserResponse> updatePoster(String sourceId, String posterPath) {
+        Optional<UserEntity> user = userRepository.findById(sourceId);
+        if (user.isEmpty())
+            throw new NotFoundException("Not found user with userId: " + sourceId);
+        else {
+            user.get().setPoster(posterPath);
+            UserResponse response = UserMapper.userInfoToUserResponse(userRepository.save(user.get()).getUserInfo());
+            return ApiResponse.success(HttpStatus.OK, "Update poster success", response);
+        }
+    }
+
 
 }

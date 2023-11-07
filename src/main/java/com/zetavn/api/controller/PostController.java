@@ -30,8 +30,6 @@ public class PostController {
         return ApiResponse.success(HttpStatus.OK, "Get post success", postService.getPostById(postId));
     }
 
-
-
     @PostMapping("")
     public ApiResponse<?> createPost(@RequestBody PostRequest postRequest) {
         return postService.createPost(postRequest);
@@ -45,5 +43,12 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ApiResponse<?> deletePost(@PathVariable String postId) {
         return postService.deletePost(postId);
+    }
+
+    @GetMapping("/postMedia")
+    public ApiResponse<?> getPostById(@RequestParam(name = "userId") String userId,
+                                      @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+                                      @RequestParam(value = "pageSize", defaultValue = "9", required = false) Integer pageSize) {
+        return postService.getPostsWithMediaByUserId(userId, pageNumber, pageSize);
     }
 }

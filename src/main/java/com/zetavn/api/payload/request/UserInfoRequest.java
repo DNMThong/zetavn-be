@@ -11,6 +11,12 @@ import java.time.LocalDate;
 @ToString
 public class UserInfoRequest {
 
+    private String email;
+    private String username;
+    private String phone;;
+    private String firstName;
+    private String lastName;
+
     private String aboutMe;
     private GenderEnum genderEnum;
     @JsonFormat(pattern = "dd/MM/yyyy")

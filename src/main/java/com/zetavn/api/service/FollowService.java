@@ -17,5 +17,5 @@ public interface FollowService {
     ApiResponse<List<OverallUserResponse>> getFollower(String userId);
     void friendshipFollow(FollowRequest followRequest);
 
-
+    ApiResponse<FollowResponse> getFollowStatus(String sourceId, String targetId);
 }

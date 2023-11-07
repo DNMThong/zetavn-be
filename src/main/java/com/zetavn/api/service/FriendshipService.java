@@ -17,4 +17,6 @@ public interface FriendshipService {
     ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPaginate(String userId,  Integer pageNumber, Integer pageSize);
     ApiResponse<List<OverallUserResponse>> getFriendsByUserId(String userId);
     ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendSuggestions(String userId,  Integer pageNumber, Integer pageSize);
+
+    ApiResponse<ShortFriendshipResponse> getFriendshipStatus(String sourceId, String targetId);
 }
