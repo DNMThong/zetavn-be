@@ -12,6 +12,7 @@ import com.zetavn.api.service.UserService;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +35,8 @@ public class UserController {
     private FriendshipService friendshipService;
 
     @GetMapping("")
-    public ApiResponse<?> getAllUsers() {
+    public ApiResponse<?> getAllUsers(Authentication principal) {
+        System.out.println(principal.getName());
         return ApiResponse.success(HttpStatus.OK, "sucess", userService.getAllUsers());
     }
     @GetMapping("/search")

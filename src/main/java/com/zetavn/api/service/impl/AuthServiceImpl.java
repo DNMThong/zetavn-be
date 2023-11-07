@@ -4,7 +4,9 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zetavn.api.enums.RoleEnum;
+import com.zetavn.api.enums.TokenStatusEnum;
 import com.zetavn.api.enums.UserStatusEnum;
+import com.zetavn.api.model.entity.ComfirmationTokenEntity;
 import com.zetavn.api.model.entity.RefreshTokenEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.entity.UserInfoEntity;
@@ -15,25 +17,35 @@ import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.JwtResponse;
 import com.zetavn.api.payload.response.SignInResponse;
 import com.zetavn.api.payload.response.UserResponse;
+import com.zetavn.api.repository.ComfirmationTokenRepository;
 import com.zetavn.api.repository.UserInfoRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.AuthService;
+import com.zetavn.api.service.MailerService;
 import com.zetavn.api.service.RefreshTokenService;
 import com.zetavn.api.utils.CookieHelper;
 import com.zetavn.api.utils.JwtHelper;
 import com.zetavn.api.utils.UUIDGenerator;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -52,7 +64,6 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private UserInfoRepository userInfoRepository;
 
-
     @Autowired
     private RefreshTokenService refreshTokenService;
 
@@ -60,10 +71,26 @@ public class AuthServiceImpl implements AuthService {
     private AuthenticationManager authenticationManager;
 
     @Autowired
+    private ComfirmationTokenRepository comfirmationTokenRepository;
+
+    @Autowired
     private JwtHelper jwtHelper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JavaMailSender sender;
+
+    @Autowired
+    private Configuration configFreemarker;
+
+    @Autowired
+    MailerService mailerService;
+
+    @Value("${zetavn.domain}")
+    String domain;
+
 
     @Override
     public ApiResponse<?> register(SignUpRequest signUpRequest) {
@@ -81,6 +108,7 @@ public class AuthServiceImpl implements AuthService {
             userEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
             userEntity.setCreatedAt(LocalDateTime.now());
             userEntity.setUpdatedAt(LocalDateTime.now());
+            userEntity.setIsAuthorized(false);
             userEntity.setStatus(UserStatusEnum.ACTIVE);
             userEntity.setRole(RoleEnum.USER);
             userEntity.setLastName(signUpRequest.getLastName());
@@ -246,4 +274,111 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    @Override
+    public ApiResponse<?> forgotPassword(String email) {
+        UserEntity userEntity = userRepository.findUserEntityByEmail(email);
+        if(userEntity!=null) {
+            String token = UUIDGenerator.generateRandomUUID();
+            ComfirmationTokenEntity comfirmationToken = new ComfirmationTokenEntity();
+            comfirmationToken.setToken(token);
+            comfirmationToken.setCreatedAt(LocalDateTime.now());
+            comfirmationToken.setExpiredAt(LocalDateTime.now().plusMinutes(15));
+            comfirmationToken.setStatus(TokenStatusEnum.RESET_PASSWORD);
+            comfirmationToken.setUserEntity(userEntity);
+            comfirmationToken.setConfirmedAt(null);
+
+            comfirmationTokenRepository.save(comfirmationToken);
+
+            try {
+                Map<String, Object> model = new HashMap<>();
+                model.put("display",userEntity.getFirstName()+" "+userEntity.getLastName());
+                model.put("link_reset_password",domain+"/reset-password?t="+token);
+
+                Template t = configFreemarker.getTemplate("email-template.ftl");
+                String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
+                mailerService.send(email,"Lấy lại mật khẩu",html);
+
+                return ApiResponse.success(HttpStatus.OK, "Success", null);
+            }catch (Exception e) {
+                log.error(e.getMessage());
+                return ApiResponse.success(HttpStatus.BAD_REQUEST, "Bad Request", null);
+            }
+        }
+        return ApiResponse.success(HttpStatus.FAILED_DEPENDENCY, "Email not found", null);
+    }
+
+    @Override
+    public ApiResponse<?> resetPassword(String token,String password) {
+        ComfirmationTokenEntity comfirmationToken = comfirmationTokenRepository.getComfirmationToken(token,TokenStatusEnum.RESET_PASSWORD);
+
+        if(comfirmationToken!=null) {
+            if(comfirmationToken.getExpiredAt().isAfter(LocalDateTime.now())&&comfirmationToken.getConfirmedAt()==null) {
+                comfirmationToken.setConfirmedAt(LocalDateTime.now());
+                comfirmationTokenRepository.save(comfirmationToken);
+
+                UserEntity userEntity = comfirmationToken.getUserEntity();
+                userEntity.setPassword(passwordEncoder.encode(password));
+                userRepository.save(userEntity);
+
+                return ApiResponse.success(HttpStatus.OK, "Reset password success", null);
+            }
+        }
+        return ApiResponse.success(HttpStatus.FAILED_DEPENDENCY, "Invalid token", null);
+    }
+
+
+
+    @Override
+    public ApiResponse<?> sendEmailConfirmation(String userId) {
+        UserEntity userEntity = userRepository.findById(userId).orElse(null);
+
+        if(userEntity!=null) {
+            String token = UUIDGenerator.generateRandomUUID();
+            ComfirmationTokenEntity comfirmationToken = new ComfirmationTokenEntity();
+            comfirmationToken.setToken(token);
+            comfirmationToken.setCreatedAt(LocalDateTime.now());
+            comfirmationToken.setExpiredAt(LocalDateTime.now().plusMinutes(15));
+            comfirmationToken.setStatus(TokenStatusEnum.VERIFICATION_EMAIL);
+            comfirmationToken.setUserEntity(userEntity);
+            comfirmationToken.setConfirmedAt(null);
+
+            comfirmationTokenRepository.save(comfirmationToken);
+
+            try {
+                Map<String, Object> model = new HashMap<>();
+                model.put("display",userEntity.getFirstName()+" "+userEntity.getLastName());
+                model.put("email",userEntity.getEmail());
+                model.put("link_confirm_email",domain+"/confirmation-email?t="+token);
+
+                Template t = configFreemarker.getTemplate("confirmation-email-template.ftl");
+                String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
+
+                mailerService.send(userEntity.getEmail(),"Xác thực tài khoản",html);
+
+                return ApiResponse.success(HttpStatus.OK, "Success", null);
+            }catch (Exception e) {
+                log.error(e.getMessage());
+                return ApiResponse.success(HttpStatus.BAD_REQUEST, "Bad Request", null);
+            }
+        }
+
+        return ApiResponse.success(HttpStatus.FAILED_DEPENDENCY, "User not found", null);
+    }
+
+    @Override
+    public ApiResponse<?> confirmationEmail(String token) {
+        ComfirmationTokenEntity comfirmationToken = comfirmationTokenRepository.getComfirmationToken(token,TokenStatusEnum.VERIFICATION_EMAIL);
+
+        if(comfirmationToken!=null) {
+            if(comfirmationToken.getExpiredAt().isAfter(LocalDateTime.now())&&comfirmationToken.getConfirmedAt()==null) {
+                comfirmationToken.setConfirmedAt(LocalDateTime.now());
+                comfirmationTokenRepository.save(comfirmationToken);
+                UserEntity userEntity = comfirmationToken.getUserEntity();
+                userEntity.setIsAuthorized(true);
+                userRepository.save(userEntity);
+                return ApiResponse.success(HttpStatus.OK, "Confirm email success", null);
+            }
+        }
+        return ApiResponse.success(HttpStatus.FAILED_DEPENDENCY, "Invalid token", null);
+    }
 }

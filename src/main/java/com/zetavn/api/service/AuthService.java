@@ -21,4 +21,14 @@ public interface AuthService {
 
     ApiResponse<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
     ApiResponse<?> logout(HttpServletRequest request, HttpServletResponse response) throws IOException;
+    ApiResponse<?> forgotPassword(String email);
+
+    ApiResponse<?> resetPassword(String token,String password);
+
+    ApiResponse<?> sendEmailConfirmation(String userId);
+    ApiResponse<?> confirmationEmail(String token);
+
+
+
+
 }

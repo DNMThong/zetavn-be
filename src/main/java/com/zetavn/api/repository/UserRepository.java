@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     UserEntity findUserEntityByEmail(String email);
     UserEntity findUserEntityByUsername(String username);
 
+    UserEntity findUserEntitiesByToken(String token);
+
     @Query("SELECT o FROM UserEntity o WHERE o.username LIKE ?1 OR o.email LIKE ?2")
     UserEntity findUserEntityByUsernameAndEmail(String username, String email);
     @Query("SELECT DISTINCT (o) FROM UserEntity o WHERE (LOWER(CONCAT(o.firstName, ' ', o.lastName)) LIKE CONCAT('%', LOWER(:keyword), '%')) AND o.userId <> :sourceId")
@@ -25,4 +27,12 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     @Query("SELECT DISTINCT (o) FROM UserEntity o WHERE o.userId NOT IN :listId AND (LOWER(CONCAT(o.firstName, ' ', o.lastName)) LIKE CONCAT('%', LOWER(:keyword), '%')) AND o.userId <> :sourceId")
     Page<UserEntity> findStrangersByKeyword(@Param("sourceId") String sourceId, @Param("listId") List<String> listId, @Param("keyword") String keyword, Pageable pageable);
+
+
+    @Query("select u from UserEntity u " +
+            "where u.userId in (select f.receiverUserEntity.userId from FriendshipEntity f where f.senderUserEntity.userId = :userId and f.status = 'ACCEPTED') " +
+            "or u.userId in (select f.senderUserEntity.userId from FriendshipEntity f where f.receiverUserEntity.userId = :userId and f.status = 'ACCEPTED')")
+    List<UserEntity> findFriendsByUser(@Param("userId") String userId);
+
+
 }

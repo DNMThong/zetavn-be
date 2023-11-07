@@ -9,6 +9,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zetavn.api.exception.CustomExceptionHandler;
 import com.zetavn.api.model.entity.UserEntity;
+import com.zetavn.api.payload.request.ResetPasswordRequest;
 import com.zetavn.api.payload.request.SignInRequest;
 import com.zetavn.api.payload.request.SignUpRequest;
 import com.zetavn.api.payload.response.ApiResponse;
@@ -47,22 +48,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class AuthController {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private AuthService authService;
-//
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Value("${zetavn.secret_key}")
-    private String ZETAVN_SECRET_KEY;
-
-    @Value("${zetavn.access_token_expiration_time}")
-    private Long ACCESS_TOKEN_EXPIRATION_TIME;
-
-    @Autowired
-    private JwtHelper jwtHelper;
 
 
 
@@ -99,5 +85,23 @@ public class AuthController {
         return authService.logout(request, response);
     }
 
+    @PostMapping("/forgot-password")
+    public ApiResponse<?> forgotPassword(@RequestParam String email) {
+        return authService.forgotPassword(email);
+    }
 
+    @PostMapping("/reset-password")
+    public ApiResponse<?> forgotPassword(@RequestBody ResetPasswordRequest request) {
+        return authService.resetPassword(request.getToken(),request.getPassword());
+    }
+
+    @PostMapping("/send-confirmation-email")
+    public ApiResponse<?> sendEmailConfirmation(@RequestParam("userId") String userId) {
+        return authService.sendEmailConfirmation(userId);
+    }
+
+    @PostMapping("/confirmation-email")
+    public ApiResponse<?> confirmationEmail(@RequestParam("token") String token) {
+        return authService.confirmationEmail(token);
+    }
 }

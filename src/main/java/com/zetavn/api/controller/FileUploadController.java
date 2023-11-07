@@ -5,6 +5,7 @@ import com.zetavn.api.payload.request.DeleteFileRequest;
 import com.zetavn.api.payload.request.UploadImageBase64Response;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FileUploadResponse;
+import com.zetavn.api.payload.response.UploadVideoBase64Response;
 import com.zetavn.api.service.CloudinaryService;
 import com.zetavn.api.utils.FileUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +54,28 @@ public class FileUploadController {
     }
 
     @PostMapping("/images")
-    public ApiResponse<?> uploadImagesBase64(@RequestBody UploadImageBase64Response imagesBase64) {
+    public ApiResponse<?> uploadImageBase64(@RequestBody UploadImageBase64Response imagesBase64) {
         try {
             List<FileUploadResponse> fileUploadResponseList = new ArrayList<>();
             for(String base64: imagesBase64.getImages()) {
                 FileUploadResponse fileUploadResponse = cloudinaryService.uploadBase64(base64,"images/","image");
+                if(fileUploadResponse==null) {
+                    return ApiResponse.error(HttpStatus.BAD_REQUEST,"Upload fail");
+                }
+                fileUploadResponseList.add(fileUploadResponse);
+            }
+            return ApiResponse.success(HttpStatus.CREATED,"Upload success",fileUploadResponseList);
+        }catch (Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST,"Upload fail");
+        }
+    }
+
+    @PostMapping("/videos")
+    public ApiResponse<?> uploadVideoBase64(@RequestBody UploadVideoBase64Response videoBase64Response) {
+        try {
+            List<FileUploadResponse> fileUploadResponseList = new ArrayList<>();
+            for(String base64: videoBase64Response.getVideos()) {
+                FileUploadResponse fileUploadResponse = cloudinaryService.uploadBase64(base64,"videos/","video");
                 if(fileUploadResponse==null) {
                     return ApiResponse.error(HttpStatus.BAD_REQUEST,"Upload fail");
                 }

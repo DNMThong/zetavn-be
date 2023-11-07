@@ -227,7 +227,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ApiResponse<Paginate<List<PostDto>>> getAllPostByUserFollow(String userId, Integer pageNumber, Integer pageSize) {
-        List<UserMentionDto> users = UserMentionMapper.entityListToDtoList(friendshipRepository.findFriendsReceivedByUser(userId));
+        List<UserMentionDto> users = UserMentionMapper.entityListToDtoList(userRepository.findFriendsByUser(userId));
         List<String> listUserId = users.stream().map(UserMentionDto::getId).collect(Collectors.toList());
         listUserId.add(userId);
         try {
