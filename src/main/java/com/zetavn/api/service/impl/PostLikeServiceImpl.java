@@ -18,6 +18,7 @@ import com.zetavn.api.service.PostLikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.NotActiveException;
 import java.util.ArrayList;
@@ -65,14 +66,16 @@ public class PostLikeServiceImpl implements PostLikeService {
             PostLikeEntity postLike = new PostLikeEntity();
             postLike.setPostEntity(post);
             postLike.setUserEntity(user);
+            PostLikeEntity postLikeEntity = postLikeRepository.save(postLike);
+
             notificationService.createNotification(user.getUserId(), post.getUserEntity().getUserId(), post.getPostId(), PostNotificationEnum.LIKE, postLike.getPostLikeId());
-            return ApiResponse.success(HttpStatus.OK,"Create post-like success", postLikeRepository.save(postLike));
+            return ApiResponse.success(HttpStatus.OK,"Create post-like success", postLikeEntity);
 
         }catch (Exception e){
             return  ApiResponse.error(HttpStatus.BAD_REQUEST,e.getMessage());
         }
      }
-
+     @Transactional
     @Override
     public ApiResponse<?> removePostLike(PostLikeRequest postLikeRequest) {
         try{

@@ -19,7 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +37,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
 
     @Override
@@ -57,7 +62,11 @@ public class NotificationServiceImpl implements NotificationService {
         postNotificationEntity.setRelatedId(relatedId);
         notificationRepository.save(postNotificationEntity);
 
-        return PostNotificationMapper.entityToResponse(postNotificationEntity);
+        PostNotificationResponse postNotificationResponse = PostNotificationMapper.entityToResponse(postNotificationEntity);
+
+        simpMessagingTemplate.convertAndSendToUser(postNotificationEntity.getReceivingUser().getUserId(),"/topic/post-notification",postNotificationResponse);
+
+        return postNotificationResponse;
     }
 
     @Override
@@ -83,6 +92,24 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void deleteNotification(Long relatedId, PostNotificationEnum type) {
-        notificationRepository.deletePostNotification(relatedId, type);
+        PostNotificationEntity postNotification = notificationRepository.getPostNotification(relatedId, type);
+
+        PostNotificationResponse postNotificationResponse = PostNotificationMapper.entityToResponse(postNotification);
+        postNotificationResponse.setIsCancel(true);
+
+        simpMessagingTemplate.convertAndSendToUser(postNotification.getReceivingUser().getUserId(),"/topic/post-notification",postNotificationResponse);
+        notificationRepository.delete(postNotification);
+    }
+
+    @Override
+    public boolean updateIsReadNotification(Long[] ids) {
+        try{
+            for(Long id: ids) {
+                notificationRepository.updateIsReadTrue(id);
+            }
+            return true;
+        }catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -20,7 +20,8 @@ public class PostNotificationResponse {
     private OverallUserResponse interacting;
     private OverallUserResponse receiving;
     private PostNotificationEnum type;
-    private boolean isRead;
+    private Boolean isRead;
     @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
     private LocalDateTime createdAt;
+    private Boolean isCancel;
 }

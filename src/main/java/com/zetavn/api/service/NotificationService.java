@@ -13,4 +13,6 @@ public interface NotificationService {
     Paginate<List<PostNotificationResponse>> listNotification(String userId, Integer pageNumber, Integer pageSize);
 
     void deleteNotification(Long relatedId, PostNotificationEnum type);
+
+    boolean updateIsReadNotification(Long[] ids);
 }

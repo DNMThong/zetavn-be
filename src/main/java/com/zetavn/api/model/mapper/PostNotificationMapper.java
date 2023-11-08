@@ -13,8 +13,9 @@ public class PostNotificationMapper {
         notification.setReceiving(OverallUserMapper.entityToDto(postNotificationEntity.getReceivingUser()));
         notification.setCreatedAt(postNotificationEntity.getCreatedAt());
         notification.setType(postNotificationEntity.getType());
-        notification.setRead(postNotificationEntity.isRead());
+        notification.setIsRead(postNotificationEntity.isRead());
         notification.setRelatedId(postNotificationEntity.getRelatedId());
+        notification.setIsCancel(false);
         return notification;
     }
 }

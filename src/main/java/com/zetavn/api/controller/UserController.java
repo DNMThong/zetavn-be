@@ -31,8 +31,7 @@ public class UserController {
     @Autowired
     private FriendshipService friendshipService;
 
-    @Autowired
-    private NotificationService notificationService;
+
 
 
     @GetMapping("")
@@ -92,11 +91,6 @@ public class UserController {
         return friendshipService.getFriendsByUserId(id);
     }
 
-    @GetMapping("/notification/{id}")
-    public ApiResponse<?> list(@PathVariable String id,
-                               @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
-                               @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
-        return ApiResponse.success(HttpStatus.OK, "", notificationService.listNotification(id, pageNumber, pageSize));
-    }
+
 }
 
