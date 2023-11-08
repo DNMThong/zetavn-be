@@ -38,7 +38,7 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
     Page<PostEntity> statisticCreatAtPosts(LocalDate startDay, LocalDate endDay, Pageable pageable);
 
     @Query("SELECT o FROM PostEntity o WHERE o.status=?1 AND o.isDeleted=false ORDER BY o.createdAt DESC")
-    Page<PostEntity> getAllPostsForAdminByStatus (PostStatusEnum postStatusEnum,Pageable pageable);
+    Page<PostEntity> getAllPostsForAdminByStatus(PostStatusEnum postStatusEnum, Pageable pageable);
 
     @Query("SELECT o FROM PostEntity o WHERE o.isDeleted=false ORDER BY o.createdAt DESC")
     Page<PostEntity> findAllPosts(Pageable pageable);

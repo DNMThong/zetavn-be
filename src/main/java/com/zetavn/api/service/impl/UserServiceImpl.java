@@ -25,7 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.InvalidParameterException;
@@ -39,8 +39,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private FriendshipRepository friendshipRepository;
@@ -56,26 +56,27 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ApiResponse<?> create(SignUpRequest signUpRequest) {
-        log.info("Try to create User in database");
-        if (existUserByUsername(signUpRequest.getEmail())) {
-            log.error("User exist in DB: {}", signUpRequest.getEmail());
-            return ApiResponse.error(HttpStatus.CONFLICT, "Email have been taken");
-        } else {
-
-            UserEntity userEntity = new UserEntity();
-            userEntity.setUserId(UUIDGenerator.generateRandomUUID());
-            userEntity.setUsername(userEntity.getUserId());
-            userEntity.setEmail(signUpRequest.getEmail());
-            userEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-            userEntity.setCreatedAt(LocalDateTime.now());
-            userEntity.setUpdatedAt(LocalDateTime.now());
-            userEntity.setStatus(UserStatusEnum.ACTIVE);
-            userEntity.setLastName(signUpRequest.getLastName());
-            userEntity.setFirstName(signUpRequest.getFirstName());
-            UserEntity _user = userRepository.save(userEntity);
-            log.info("Create user in database success: {}", _user.getEmail());
-            return ApiResponse.success(HttpStatus.OK, "Register success", UserMapper.userEntityToUserResponse(_user));
-        }
+        return null;
+//        log.info("Try to create User in database");
+//        if (existUserByUsername(signUpRequest.getEmail())) {
+//            log.error("User exist in DB: {}", signUpRequest.getEmail());
+//            return ApiResponse.error(HttpStatus.CONFLICT, "Email have been taken");
+//        } else {
+//
+//            UserEntity userEntity = new UserEntity();
+//            userEntity.setUserId(UUIDGenerator.generateRandomUUID());
+//            userEntity.setUsername(userEntity.getUserId());
+//            userEntity.setEmail(signUpRequest.getEmail());
+//            userEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+//            userEntity.setCreatedAt(LocalDateTime.now());
+//            userEntity.setUpdatedAt(LocalDateTime.now());
+//            userEntity.setStatus(UserStatusEnum.ACTIVE);
+//            userEntity.setLastName(signUpRequest.getLastName());
+//            userEntity.setFirstName(signUpRequest.getFirstName());
+//            UserEntity _user = userRepository.save(userEntity);
+//            log.info("Create user in database success: {}", _user.getEmail());
+//            return ApiResponse.success(HttpStatus.OK, "Register success", UserMapper.userEntityToUserResponse(_user));
+//        }
     }
 
     @Override
@@ -98,8 +99,6 @@ public class UserServiceImpl implements UserService {
     public ApiResponse<UserResponse> remove(String userId) {
         return null;
     }
-
-
 
 
     @Override
@@ -131,6 +130,7 @@ public class UserServiceImpl implements UserService {
             return user == null;
         }
     }
+
     @Override
     public ApiResponse<?> getAllUsersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize) {
         log.info("Try to find Users by keyword {} at page number {} and page size {}", keyword, pageNumber, pageSize);
@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
             try {
                 List<UserEntity> userEntities = users.getContent();
                 List<UserSearchResponse> userSearchResponses = new ArrayList<>();
-                for(UserEntity u : userEntities) {
+                for (UserEntity u : userEntities) {
                     UserSearchResponse user = new UserSearchResponse();
                     OverallUserResponse userResponses = OverallUserMapper.entityToDto(u);
                     user.setUser(userResponses);
@@ -155,7 +155,7 @@ public class UserServiceImpl implements UserService {
                     user.setTotalPosts(postRepository.countPostEntityByUserEntityUserId(u.getUserId()));
                     user.setCountLikesOfPosts(postRepository.getTotalLikesByUserId(u.getUserId()));
                     FriendshipEntity statusFriendsEnum = friendshipRepository.checkFriendshipStatus(sourceId, u.getUserId());
-                    if(statusFriendsEnum != null) {
+                    if (statusFriendsEnum != null) {
                         if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.ACCEPTED)) {
                             user.setStatus(StatusFriendsEnum.FRIEND);
                         } else if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.PENDING)) {
@@ -201,13 +201,13 @@ public class UserServiceImpl implements UserService {
 //            friendIdList.addAll(source.get().getUserSenderList().stream().map(u -> u.getReceiverUserEntity().getUserId()).toList());
 
             source.get().getUserReceiverList().forEach((item) -> {
-                if(item.getStatus()==FriendStatusEnum.ACCEPTED) {
+                if (item.getStatus() == FriendStatusEnum.ACCEPTED) {
                     friendIdList.add(item.getSenderUserEntity().getUserId());
                 }
             });
 
             source.get().getUserSenderList().forEach((item) -> {
-                if(item.getStatus()==FriendStatusEnum.ACCEPTED) {
+                if (item.getStatus() == FriendStatusEnum.ACCEPTED) {
                     friendIdList.add(item.getReceiverUserEntity().getUserId());
                 }
             });
@@ -220,7 +220,7 @@ public class UserServiceImpl implements UserService {
             try {
                 List<UserEntity> userEntities = users.getContent();
                 List<UserSearchResponse> userSearchResponses = new ArrayList<>();
-                for(UserEntity u : userEntities) {
+                for (UserEntity u : userEntities) {
                     UserSearchResponse user = new UserSearchResponse();
                     OverallUserResponse userResponses = OverallUserMapper.entityToDto(u);
                     user.setUser(userResponses);
@@ -265,7 +265,7 @@ public class UserServiceImpl implements UserService {
             try {
                 List<UserEntity> userEntities = users.getContent();
                 List<UserSearchResponse> userSearchResponses = new ArrayList<>();
-                for(UserEntity u : userEntities) {
+                for (UserEntity u : userEntities) {
                     UserSearchResponse user = new UserSearchResponse();
                     OverallUserResponse userResponses = OverallUserMapper.entityToDto(u);
                     user.setUser(userResponses);
@@ -273,7 +273,7 @@ public class UserServiceImpl implements UserService {
                     user.setTotalPosts(postRepository.countPostEntityByUserEntityUserId(u.getUserId()));
                     user.setCountLikesOfPosts(postRepository.getTotalLikesByUserId(u.getUserId()));
                     FriendshipEntity statusFriendsEnum = friendshipRepository.checkFriendshipStatus(sourceId, u.getUserId());
-                    if(statusFriendsEnum != null) {
+                    if (statusFriendsEnum != null) {
                         if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.PENDING)) {
                             if (statusFriendsEnum.getSenderUserEntity().getUserId().equals(sourceId)) {
                                 user.setStatus(StatusFriendsEnum.SENDER);
@@ -309,17 +309,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<?> getAllUserForAdminByStatus(String status, Integer pageNumber, Integer pageSize){
+    public ApiResponse<?> getAllUserForAdminByStatus(String status, Integer pageNumber, Integer pageSize) {
         return switch (status) {
-            case "active" ->
-                    ApiResponse.success(HttpStatus.OK, "Get all user active", pageableUserForAdmin(UserStatusEnum.ACTIVE,pageNumber,pageSize));
-            case "locked" ->
-                    ApiResponse.success(HttpStatus.OK, "Get all user locked",  pageableUserForAdmin(UserStatusEnum.LOCKED,pageNumber,pageSize));
-            case "suspended" ->
-                    ApiResponse.success(HttpStatus.OK, "Get all user suspended",  pageableUserForAdmin(UserStatusEnum.SUSPENDED,pageNumber,pageSize));
-            default -> getAllUserForAdmin(pageNumber,pageSize);
+            case "active" -> pageableUserForAdmin(UserStatusEnum.ACTIVE, pageNumber, pageSize);
+            case "locked" -> pageableUserForAdmin(UserStatusEnum.LOCKED, pageNumber, pageSize);
+            case "suspended" -> pageableUserForAdmin(UserStatusEnum.SUSPENDED, pageNumber, pageSize);
+            default -> getAllUserForAdmin(pageNumber, pageSize);
         };
     }
+
     @Override
     public ApiResponse<?> pageableUserForAdmin(UserStatusEnum userStatusEnum, Integer pageNumber, Integer pageSize) {
         log.info("Try to find Users by status {} at page number {} and page size {}", userStatusEnum, pageNumber, pageSize);
@@ -335,6 +333,7 @@ public class UserServiceImpl implements UserService {
             }
             try {
                 List<UserEntity> userEntities = users.getContent();
+                System.out.println(userEntities);
                 List<UserAdminDto> userAdminDtos = userEntities.stream().map(UserMapper::userEntityToUserAdminDto).toList();
                 Paginate<List<UserAdminDto>> dataResponse = new Paginate<>();
                 dataResponse.setData(userAdminDtos);
@@ -350,8 +349,9 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
+
     @Override
-    public ApiResponse<?> getAllUserForAdmin(Integer pageNumber, Integer pageSize){
+    public ApiResponse<?> getAllUserForAdmin(Integer pageNumber, Integer pageSize) {
 
         log.info("Try to find Users at page number {} and page size {}", pageNumber, pageSize);
         if (pageNumber < 0 || pageSize < 0) {
@@ -363,7 +363,8 @@ public class UserServiceImpl implements UserService {
             if (pageNumber > users.getTotalPages()) {
                 log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, users.getNumber());
                 throw new InvalidParameterException("pageNumber is out of total Page");
-            }try {
+            }
+            try {
                 List<UserEntity> userEntities = users.getContent();
                 List<UserAdminDto> userResponses = userEntities.stream().map(UserMapper::userEntityToUserAdminDto).toList();
                 Paginate<List<UserAdminDto>> dataResponse = new Paginate<>();
@@ -380,30 +381,31 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
+
     @Override
     public ApiResponse<?> createForAdmin(UserAdminDto userAdminDto) {
         UserEntity userEntity = new UserEntity();
-        if(!existUserByEmail(userAdminDto.getEmail())){
+        if (!existUserByEmail(userAdminDto.getEmail())) {
             log.warn("Found Email in database: {}", userAdminDto.getEmail());
-            return ApiResponse.error(HttpStatus.BAD_REQUEST,"Email is used",  null);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Email is used", null);
         }
-        if(!existUserByUsername(userAdminDto.getUsername())){
+        if (!existUserByUsername(userAdminDto.getUsername())) {
             log.warn("Found Username in database: {}", userAdminDto.getUsername());
-            return ApiResponse.error(HttpStatus.BAD_REQUEST,"Username is used",  null);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Username is used", null);
         }
         if (userAdminDto.getInformation() == null) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! User-info is null");
         }
-        if(userAdminDto.getInformation().getBirthday()==null){
+        if (userAdminDto.getInformation().getBirthday() == null) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Birthday is null");
         }
-        if(userAdminDto.getInformation().getGenderEnum()==null){
+        if (userAdminDto.getInformation().getGenderEnum() == null) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Gender is null");
         }
         userAdminDto.setId(UUIDGenerator.generateRandomUUID());
         userAdminDto.setCreatedAt(LocalDateTime.now());
         userAdminDto.setUpdatedAt(LocalDateTime.now());
-        UserEntity _user = userRepository.save(UserMapper.userAdminDtoToUserEntity(userAdminDto,userEntity));
+        UserEntity _user = userRepository.save(UserMapper.userAdminDtoToUserEntity(userAdminDto, userEntity));
         if (_user != null) {
             UserInfoEntity userInfo = new UserInfoEntity();
             userInfo.setAboutMe(userAdminDto.getInformation().getAboutMe());
@@ -417,36 +419,37 @@ public class UserServiceImpl implements UserService {
             userInfo.setCreatedAt(LocalDateTime.now());
             userInfo.setUpdatedAt(LocalDateTime.now());
             log.info("try to save userinfo: birthday: {} - gender: {}", userInfo.getBirthday(), userInfo.getGenderEnum());
-            UserInfoEntity userInfoEntity=userInfoRepository.save(userInfo);
+            UserInfoEntity userInfoEntity = userInfoRepository.save(userInfo);
             _user.setUserInfo(userInfoEntity);
-        }else {
+        } else {
             throw new IllegalArgumentException("Creat user not success");
         }
 
-        return ApiResponse.success(HttpStatus.OK,"Create user success",UserMapper.userEntityToUserAdminDto(_user));
+        return ApiResponse.success(HttpStatus.OK, "Create user success", UserMapper.userEntityToUserAdminDto(_user));
     }
+
     @Override
     public ApiResponse<UserAdminDto> updateForAdmin(UserAdminDto userAdminDto) {
         Optional<UserEntity> userEntity = userRepository.findById(userAdminDto.getId());
-        if(userAdminDto.getUsername()==null|| userAdminDto.getUsername().isEmpty()){
+        if (userAdminDto.getUsername() == null || userAdminDto.getUsername().isEmpty()) {
             log.error("Error Logging: UserService - existUserByUsername - Missing username arg");
             throw new IllegalArgumentException("UserService - existUserByUsername - Missing username arg");
         }
-        if(userEntity.isPresent()){
-            try{
+        if (userEntity.isPresent()) {
+            try {
                 userAdminDto.setUpdatedAt(LocalDateTime.now());
                 userAdminDto.setCreatedAt(userEntity.get().getCreatedAt());
-                UserEntity _user = userRepository.save(UserMapper.userAdminDtoToUserEntity(userAdminDto,userEntity.get()));
+                UserEntity _user = userRepository.save(UserMapper.userAdminDtoToUserEntity(userAdminDto, userEntity.get()));
                 if (userAdminDto.getInformation() == null) {
                     return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! User-info is null");
                 }
-                if(userAdminDto.getInformation().getBirthday()==null){
+                if (userAdminDto.getInformation().getBirthday() == null) {
                     return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Birthday is null");
                 }
-                if(userAdminDto.getInformation().getGenderEnum()==null){
+                if (userAdminDto.getInformation().getGenderEnum() == null) {
                     return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Gender is null");
                 }
-                UserInfoRequest userInfoRequest =new UserInfoRequest();
+                UserInfoRequest userInfoRequest = new UserInfoRequest();
                 userInfoRequest.setBirthday(userAdminDto.getInformation().getBirthday());
                 userInfoRequest.setAboutMe(userAdminDto.getInformation().getAboutMe());
                 userInfoRequest.setGenderEnum(userAdminDto.getInformation().getGenderEnum());
@@ -454,35 +457,36 @@ public class UserServiceImpl implements UserService {
                 userInfoRequest.setLivesAt(userAdminDto.getInformation().getLivesAt());
                 userInfoRequest.setWorksAt(userAdminDto.getInformation().getWorksAt());
                 userInfoRequest.setStudiedAt(userAdminDto.getInformation().getStudiedAt());
-                userInfoService.update(userEntity.get().getUserId(),userInfoRequest);
+                userInfoService.update(userEntity.get().getUserId(), userInfoRequest);
                 log.info("Update success user");
-                return ApiResponse.success(HttpStatus.OK,"Update user success",UserMapper.userEntityToUserAdminDto(_user));
-            }catch (Exception e){
+                return ApiResponse.success(HttpStatus.OK, "Update user success", UserMapper.userEntityToUserAdminDto(_user));
+            } catch (Exception e) {
                 log.warn("Email or username are used");
-                return ApiResponse.error(HttpStatus.BAD_REQUEST,"Email or username are used",userAdminDto);
+                return ApiResponse.error(HttpStatus.BAD_REQUEST, "Email or username are used", userAdminDto);
             }
         }
         log.warn("Not found userId in database: {}", userAdminDto.getId());
-        return ApiResponse.error(HttpStatus.NOT_FOUND,"Not found user", null);
+        return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found user", null);
     }
 
     @Override
-    public ApiResponse<?> removeForAdmin(String id){
+    public ApiResponse<?> removeForAdmin(String id, boolean isDeleted) {
         Optional<UserEntity> userEntity = userRepository.findById(id);
-        if(userEntity.isPresent()){
-            log.info("User removed:",userEntity.get().getUserId());
-            userEntity.get().setIsDeleted(true);
+        if (userEntity.isPresent()) {
+            log.info("User removed:", userEntity.get().getUserId());
+            userEntity.get().setIsDeleted(isDeleted);
             userRepository.save(userEntity.get());
-            return ApiResponse.success(HttpStatus.OK,"User is deleted",null);
+            return ApiResponse.success(HttpStatus.OK, "User is deleted", null);
         }
-        return ApiResponse.error(HttpStatus.NOT_FOUND,"Not found userId",id);
+        return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found userId", id);
     }
+
     @Override
-    public ApiResponse<?> getOneUserForAdmin(String id){
+    public ApiResponse<?> getOneUserForAdmin(String id) {
         Optional<UserEntity> userEntity = userRepository.findById(id);
-        if(userEntity.isPresent()){
-            return ApiResponse.success(HttpStatus.OK,"User is deleted",UserMapper.userEntityToUserAdminDto(userEntity.get()));
+        if (userEntity.isPresent()) {
+            return ApiResponse.success(HttpStatus.OK, "User is deleted", UserMapper.userEntityToUserAdminDto(userEntity.get()));
         }
-        return ApiResponse.error(HttpStatus.NOT_FOUND,"Not found User",null);
+        return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found User", null);
     }
 }

@@ -5,7 +5,7 @@ import com.zetavn.api.model.entity.FriendshipEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.payload.response.FriendshipResponse;
 import com.zetavn.api.payload.response.UserResponse;
-import com.zetavn.api.service.impl.UserServiceImpl;
+//import com.zetavn.api.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

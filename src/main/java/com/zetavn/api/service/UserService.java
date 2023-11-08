@@ -26,7 +26,6 @@ public interface UserService {
     ApiResponse<UserResponse> remove(String userId);
 
 
-
     ApiResponse<UserResponse> getUserByEmailOrUsername(String username, String email);
 
     ApiResponse<?> getAllUsersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize);
@@ -34,6 +33,7 @@ public interface UserService {
     ApiResponse<?> getAllFriendsByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize);
 
     ApiResponse<?> getStrangersByKeyword(String sourceId, String keyword, Integer pageNumebr, Integer pageSize);
+
     ApiResponse<?> getAllUsersByKeyword(String keyword, Integer pageNumber, Integer pageSize);
 
     ApiResponse<?> getAllUserForAdminByStatus(String status, Integer pageNumber, Integer pageSize);
@@ -46,7 +46,7 @@ public interface UserService {
 
     ApiResponse<?> createForAdmin(UserAdminDto userAdminDto);
 
-    ApiResponse<?> removeForAdmin(String id);
+    ApiResponse<?> removeForAdmin(String id, boolean isDeleted);
 
     ApiResponse<?> getOneUserForAdmin(String id);
 }

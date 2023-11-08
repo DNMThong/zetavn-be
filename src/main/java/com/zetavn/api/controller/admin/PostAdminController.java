@@ -10,18 +10,21 @@ import org.springframework.web.bind.annotation.*;
 public class PostAdminController {
     @Autowired
     PostService postService;
+
     @GetMapping()
-    public ApiResponse<?> getAllPosts( @RequestParam(name = "status",defaultValue = " ",required = false) String status,
-                                       @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
-                                       @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize){
-        return postService.getAllPostsForAdminByStatus(status,pageNumber,pageSize);
+    public ApiResponse<?> getAllPosts(@RequestParam(name = "status", defaultValue = " ", required = false) String status,
+                                      @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+                                      @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {
+        return postService.getAllPostsForAdminByStatus(status, pageNumber, pageSize);
     }
+
     @PutMapping()
-    public ApiResponse<?>update(@RequestParam String id, @RequestParam String status){
-        return postService.updatePostForAdmin(id,status);
+    public ApiResponse<?> update(@RequestParam String id, @RequestParam String status) {
+        return postService.updatePostForAdmin(id, status);
     }
+
     @GetMapping("/{id}")
-    public ApiResponse<?> getOnePost(@PathVariable String id){
+    public ApiResponse<?> getOnePost(@PathVariable String id) {
         return postService.getOnePostForAdmin(id);
     }
 }

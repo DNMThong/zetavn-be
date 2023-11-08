@@ -16,10 +16,12 @@ import java.util.List;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, String> {
     UserEntity findUserEntityByEmail(String email);
+
     UserEntity findUserEntityByUsername(String username);
 
     @Query("SELECT o FROM UserEntity o WHERE o.username LIKE ?1 OR o.email LIKE ?2")
     UserEntity findUserEntityByUsernameAndEmail(String username, String email);
+
     @Query("SELECT DISTINCT (o) FROM UserEntity o WHERE (LOWER(CONCAT(o.firstName, ' ', o.lastName)) LIKE CONCAT('%', LOWER(:keyword), '%')) AND o.userId <> :sourceId")
     Page<UserEntity> findUserEntityByKeyword(@Param("sourceId") String sourceId, @Param("keyword") String keyword, Pageable pageable);
 
@@ -32,7 +34,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     @Query("SELECT o FROM UserEntity o WHERE o.isDeleted=false ORDER BY o.createdAt DESC")
     Page<UserEntity> findAllUser(Pageable pageable);
 
-    @Query("SELECT o FROM UserEntity o WHERE  o.status=?1 AND o.isDeleted=false ORDER BY o.createdAt DESC")
+    @Query("SELECT o FROM UserEntity o WHERE o.status=?1 AND o.isDeleted=false ORDER BY o.createdAt DESC")
     Page<UserEntity> findByUserEntityByStatus(UserStatusEnum userStatusEnum, Pageable pageable);
 
     @Query("SELECT o FROM UserEntity o WHERE DATE(o.createdAt) >=?1 AND DATE(o.createdAt) <=?2  ORDER BY o.createdAt DESC")
