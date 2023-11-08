@@ -5,10 +5,7 @@ import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FriendRequestResponse;
 import com.zetavn.api.payload.response.OverallUserResponse;
 import com.zetavn.api.payload.response.Paginate;
-import com.zetavn.api.service.FriendshipService;
-import com.zetavn.api.service.PostService;
-import com.zetavn.api.service.UserInfoService;
-import com.zetavn.api.service.UserService;
+import com.zetavn.api.service.*;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +30,10 @@ public class UserController {
 
     @Autowired
     private FriendshipService friendshipService;
+
+    @Autowired
+    private NotificationService notificationService;
+
 
     @GetMapping("")
     public ApiResponse<?> getAllUsers(Authentication principal) {
@@ -90,4 +91,12 @@ public class UserController {
     public ApiResponse<List<OverallUserResponse>> getFriends(@PathVariable("id") String id) {
         return friendshipService.getFriendsByUserId(id);
     }
+
+    @GetMapping("/notification/{id}")
+    public ApiResponse<?> list(@PathVariable String id,
+                               @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+                               @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
+        return ApiResponse.success(HttpStatus.OK, "", notificationService.listNotification(id, pageNumber, pageSize));
+    }
 }
+
