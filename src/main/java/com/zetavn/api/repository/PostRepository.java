@@ -31,4 +31,8 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
     @Query("SELECT COUNT(pl) FROM PostLikeEntity pl " +
             "WHERE pl.userEntity.userId = :id")
     Long getTotalLikesByUserId(@Param("id") String id);
+
+
+    @Query("SELECT p.postEntity FROM PostMediaEntity p WHERE p.userEntity.userId = ?1 ORDER BY p.postEntity.createdAt DESC")
+    Page<PostEntity> getPostsWithMediaByUserId(String userId, Pageable pageable);
 }

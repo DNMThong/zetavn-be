@@ -15,6 +15,7 @@ import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.FollowRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.FollowService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class FollowServiceImpl implements FollowService {
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
@@ -39,7 +41,7 @@ public class FollowServiceImpl implements FollowService {
     @Override
     public ApiResponse<FollowResponse> createFollow(FollowRequest followRequest) {
         Optional<FollowEntity> check = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(followRequest.getFollowerId(), followRequest.getFollowingId());
-        if (check.isEmpty()) {
+        if (check.isPresent()) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Friend request already exists", null);
         }
         FollowEntity followEntity = followMapper.commentRequestToEntity(followRequest);
@@ -72,9 +74,9 @@ public class FollowServiceImpl implements FollowService {
         String message = followerUserId + " unfollow " + followingUserId;
 
         if (isFollowing) {
-            return ApiResponse.success(HttpStatus.OK, message, null);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Something went wrong with unfollow request", null);
         } else {
-            return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found follows", null);
+            return ApiResponse.success(HttpStatus.NO_CONTENT, "Unfollow success", null);
         }
     }
 
@@ -106,5 +108,28 @@ public class FollowServiceImpl implements FollowService {
         followEntity.setCreatedAt(LocalDateTime.now());
         followEntity.setPriority(FollowPriorityEnum.MEDIUM);
         followRepository.save(followEntity);
+    }
+
+    @Override
+    public ApiResponse<FollowResponse> getFollowStatus(String sourceId, String targetId) {
+        if (userRepository.findById(targetId).isEmpty()) {
+            log.error("Not found user with userId: {}" + targetId);
+            throw new NotFoundException("Not found user with userId: " + targetId);
+        }
+        try {
+            FollowEntity followEntity = followRepository.findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(sourceId, targetId).get();
+            FollowResponse response = new FollowResponse();
+            response.setFollowId(followEntity.getFollowsId());
+            response.setFollowerId(followEntity.getFollowerUserEntity().getUserId());
+            response.setFollowingId(followEntity.getFollowingUserEntity().getUserId());
+            response.setPriority(followEntity.getPriority());
+            return ApiResponse.success(HttpStatus.OK, "Get follow status success", response);
+        } catch (Exception e) {
+            FollowResponse response = new FollowResponse();
+            response.setFollowerId(sourceId);
+            response.setFollowingId(targetId);
+            response.setPriority(FollowPriorityEnum.NONE);
+            return ApiResponse.success(HttpStatus.OK, "No follow status", response);
+        }
     }
 }

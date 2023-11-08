@@ -1,7 +1,9 @@
 package com.zetavn.api.service.impl;
 
+import com.cloudinary.Api;
 import com.zetavn.api.enums.FriendStatusEnum;
 import com.zetavn.api.enums.NotiFriendRequestEnum;
+import com.zetavn.api.enums.StatusFriendsEnum;
 import com.zetavn.api.exception.DuplicateRecordException;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.FriendshipEntity;
@@ -9,6 +11,7 @@ import com.zetavn.api.model.entity.PostEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.FriendshipMapper;
 import com.zetavn.api.model.mapper.OverallUserMapper;
+import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.model.mapper.UserSearchMapper;
 import com.zetavn.api.payload.request.FollowRequest;
 import com.zetavn.api.payload.request.FriendshipRequest;
@@ -228,8 +231,9 @@ public class FriendshipServiceImpl implements FriendshipService {
     public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPaginate(String userId, Integer pageNumber, Integer pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUserPageable(userId, pageable);
-            Page<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(userId, pageable);
+            UserEntity user = userRepository.findUserEntityByUsername(userId);
+            Page<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUserPageable(user.getUserId(), pageable);
+            Page<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(user.getUserId(), pageable);
             List<UserEntity> allFriends = new ArrayList<>(friendsSentToUser.getContent());
             allFriends.addAll(friendsReceivedByUser.getContent());
 
@@ -295,8 +299,10 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public ApiResponse<List<OverallUserResponse>> getFriendsByUserId(String userId) {
-        List<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUser(userId);
-        List<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(userId);
+        UserEntity userEnitty = userRepository.findUserEntityByUsername(userId);
+        System.out.println("User ID: " + userEnitty.getUserId());
+        List<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUser(userEnitty.getUserId());
+        List<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(userEnitty.getUserId());
 
         List<UserEntity> allFriends = new ArrayList<>(friendsSentToUser);
         allFriends.addAll(friendsReceivedByUser);
@@ -323,4 +329,34 @@ public class FriendshipServiceImpl implements FriendshipService {
 //
 //        return ApiResponse.success(HttpStatus.OK , "List of friend suggestions", suggestionResponses);
 //    }
+
+    @Override
+    public ApiResponse<ShortFriendshipResponse> getFriendshipStatus(String sourceId, String targetId) {
+        try {
+            FriendshipEntity statusFriendsEnum = friendshipRepository.checkFriendshipStatus(sourceId, targetId);
+            UserEntity targetUser = userRepository.findById(targetId).get();
+            OverallUserResponse overallUserResponse = OverallUserMapper.entityToDto(targetUser);
+
+            ShortFriendshipResponse shortFriendshipResponse = new ShortFriendshipResponse();
+            shortFriendshipResponse.setTargetUser(overallUserResponse);
+            if(statusFriendsEnum != null) {
+                if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.ACCEPTED)) {
+                    shortFriendshipResponse.setStatus(StatusFriendsEnum.FRIEND);
+                } else if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.PENDING)) {
+                    if (statusFriendsEnum.getSenderUserEntity().getUserId().equals(sourceId)) {
+                        shortFriendshipResponse.setStatus(StatusFriendsEnum.SENDER);
+                    } else {
+                        shortFriendshipResponse.setStatus(StatusFriendsEnum.RECEIVER);
+                    }
+                } else {
+                    shortFriendshipResponse.setStatus(StatusFriendsEnum.NONE);
+                }
+            } else {
+                shortFriendshipResponse.setStatus(StatusFriendsEnum.NONE);
+            }
+            return ApiResponse.success(HttpStatus.OK, "Check friendship status success", shortFriendshipResponse);
+        } catch(Exception e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Some thing went wrong");
+        }
+    }
 }

@@ -2,10 +2,7 @@ package com.zetavn.api.controller.user;
 
 import com.zetavn.api.model.dto.UserMentionDto;
 import com.zetavn.api.payload.request.FriendshipRequest;
-import com.zetavn.api.payload.response.ApiResponse;
-import com.zetavn.api.payload.response.FriendRequestResponse;
-import com.zetavn.api.payload.response.FriendshipResponse;
-import com.zetavn.api.payload.response.Paginate;
+import com.zetavn.api.payload.response.*;
 import com.zetavn.api.service.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -38,12 +35,14 @@ public class FriendshipController {
 
     @PutMapping("/accept")
     public ApiResponse<FriendshipResponse> accept(@RequestBody FriendshipRequest friendshipRequest) {
+        System.out.println("Accept Reqeust: " + friendshipRequest.toString());
         return friendshipService.accept(friendshipRequest.getSenderId(), friendshipRequest.getReceiverId());
     }
 
     @Transactional
     @PutMapping("/reject")
     public ApiResponse<FriendshipResponse> reject(@RequestBody FriendshipRequest friendshipRequest) {
+        System.out.println("Reject Reqeust: " + friendshipRequest.toString());
         return friendshipService.rejected(friendshipRequest.getSenderId(), friendshipRequest.getReceiverId());
     }
 
@@ -59,5 +58,10 @@ public class FriendshipController {
                                                                       @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                                                       @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
         return friendshipService.getFriendSuggestions(id, pageNumber, pageSize);
+    }
+
+    @GetMapping("/status")
+    public ApiResponse<ShortFriendshipResponse> getFriendStatus(@RequestParam(name = "sourceId") String sourceId, @RequestParam(name = "targetId") String targetId) {
+        return friendshipService.getFriendshipStatus(sourceId, targetId);
     }
 }

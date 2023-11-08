@@ -6,6 +6,7 @@ import com.zetavn.api.payload.request.PostRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.payload.response.PostResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface PostService {
     ApiResponse<?> deletePost(String postId);
 
     ApiResponse<Paginate<List<PostDto>>> getAllPostByUserFollow(String userId, Integer pageNumber, Integer pageSize);
+
+    ApiResponse<?> getPostsWithMediaByUserId(String userId, Integer pageNumber, Integer pageSize);
 }

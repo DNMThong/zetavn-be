@@ -163,7 +163,7 @@ public class AuthServiceImpl implements AuthService {
             // Build the response containing JWT token and refresh token
             SignInResponse response = new SignInResponse();
 //            JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
-            UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
+            UserResponse userResponse = UserMapper.userInfoToUserResponse(user.getUserInfo());
             response.setUserInfo(userResponse);
             response.setAccess_token(tokens.get("access_token"));
 
