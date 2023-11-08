@@ -20,14 +20,12 @@ public class NotificationController {
 
     @MessageMapping("/hello")
     public void send(@Payload String name, Principal principal) {
-
 //        simpMessagingTemplate.convertAndSendToUser(principal.getName(),"/topic/hello","hello");
 //        String destination = "/topic/hello";
 //        simpMessagingTemplate.convertAndSendToUser(name, destination, "Hello, User!");
         if(principal!=null) {
             System.out.println(principal.getName());
         }
-
     }
 
 }

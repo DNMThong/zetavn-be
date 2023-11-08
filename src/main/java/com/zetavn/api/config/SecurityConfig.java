@@ -37,6 +37,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions
+                                .sameOrigin()
+                        )
+                )
                 .authorizeHttpRequests(r -> r.requestMatchers("/api/v0/auth/**","/ws/**").permitAll()
                         .requestMatchers("/api/v0/auth/logout").authenticated()
                         .anyRequest().hasAnyAuthority("USER"))
