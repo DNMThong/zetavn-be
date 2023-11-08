@@ -1,5 +1,6 @@
 package com.zetavn.api.service.impl;
 
+import com.zetavn.api.enums.PostNotificationEnum;
 import com.zetavn.api.model.entity.PostEntity;
 import com.zetavn.api.model.entity.PostLikeEntity;
 import com.zetavn.api.model.entity.UserEntity;
@@ -12,6 +13,7 @@ import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.PostLikeRepository;
 import com.zetavn.api.repository.PostRepository;
 import com.zetavn.api.repository.UserRepository;
+import com.zetavn.api.service.NotificationService;
 import com.zetavn.api.service.PostLikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,9 @@ public class PostLikeServiceImpl implements PostLikeService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    NotificationService notificationService;
 
     @Override
     public ApiResponse<?> getListLikedUserOfPost(String postId) {
@@ -60,7 +65,8 @@ public class PostLikeServiceImpl implements PostLikeService {
             PostLikeEntity postLike = new PostLikeEntity();
             postLike.setPostEntity(post);
             postLike.setUserEntity(user);
-            return ApiResponse.success(HttpStatus.OK,"Create post-like success",postLikeRepository.save(postLike));
+            notificationService.createNotification(user.getUserId(), post.getUserEntity().getUserId(), post.getPostId(), PostNotificationEnum.LIKE, postLike.getPostLikeId());
+            return ApiResponse.success(HttpStatus.OK,"Create post-like success", postLikeRepository.save(postLike));
 
         }catch (Exception e){
             return  ApiResponse.error(HttpStatus.BAD_REQUEST,e.getMessage());
@@ -74,8 +80,8 @@ public class PostLikeServiceImpl implements PostLikeService {
             UserEntity user = userRepository.findById(postLikeRequest.getUserId()).orElseThrow(NullPointerException::new);
             PostLikeEntity postLike = postLikeRepository.findPostLikeEntityByPostEntityAndUserEntity(post,user);
             postLikeRepository.delete(postLike);
+            notificationService.deleteNotification(postLike.getPostLikeId(), PostNotificationEnum.LIKE);
             return ApiResponse.success(HttpStatus.OK,"Delete post-like success",null);
-
         }catch (Exception e){
             return ApiResponse.error(HttpStatus.BAD_REQUEST,e.getMessage());
         }
