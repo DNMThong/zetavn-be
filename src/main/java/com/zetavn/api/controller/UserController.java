@@ -1,10 +1,8 @@
 package com.zetavn.api.controller;
 
+import com.zetavn.api.payload.request.UploadImageBase64Response;
 import com.zetavn.api.payload.request.UserInfoRequest;
-import com.zetavn.api.payload.response.ApiResponse;
-import com.zetavn.api.payload.response.FriendRequestResponse;
-import com.zetavn.api.payload.response.OverallUserResponse;
-import com.zetavn.api.payload.response.Paginate;
+import com.zetavn.api.payload.response.*;
 import com.zetavn.api.service.FriendshipService;
 import com.zetavn.api.service.PostService;
 import com.zetavn.api.service.UserInfoService;
