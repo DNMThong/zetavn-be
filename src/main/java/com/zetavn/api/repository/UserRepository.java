@@ -39,5 +39,11 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     @Query("SELECT o FROM UserEntity o WHERE DATE(o.createdAt) >=?1 AND DATE(o.createdAt) <=?2  ORDER BY o.createdAt DESC")
     Page<UserEntity> statisticCreatAtUser(LocalDate startDay, LocalDate endDay, Pageable pageable);
+    @Query("SELECT COUNT(o) FROM UserEntity o WHERE  DATE(o.createdAt) >=?1 AND DATE(o.createdAt) <=?2")
+    Long countUsersInDateRange(LocalDate startDate, LocalDate endDate);
+    @Query("SELECT u FROM UserEntity u ORDER BY SIZE(u.userFollowingList) DESC")
+    Page<UserEntity> findTopFollowedUsers(Pageable pageable);
 
+    @Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.userFollowingList")
+    List<UserEntity> findAllWithFollowers();
 }

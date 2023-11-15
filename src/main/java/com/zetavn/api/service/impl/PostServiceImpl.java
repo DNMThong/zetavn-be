@@ -12,6 +12,7 @@ import com.zetavn.api.model.mapper.UserMentionMapper;
 import com.zetavn.api.payload.request.PostMediaRequest;
 import com.zetavn.api.payload.request.PostMentionRequest;
 import com.zetavn.api.payload.request.PostRequest;
+import com.zetavn.api.payload.request.UpdatePostForAdminRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.repository.*;
@@ -255,9 +256,9 @@ public class PostServiceImpl implements PostService {
     public ApiResponse<?> getAllPostsForAdminByStatus(String status, Integer pageNumber, Integer pageSize){
         return switch (status) {
             case "active" ->
-                    ApiResponse.success(HttpStatus.OK, "Get all user active", pageableUserForAdmin(PostStatusEnum.ACTIVE,pageNumber,pageSize));
+                    ApiResponse.success(HttpStatus.OK, "Get all post active", pageableUserForAdmin(PostStatusEnum.ACTIVE,pageNumber,pageSize));
             case "locked" ->
-                    ApiResponse.success(HttpStatus.OK, "Get all user locked",  pageableUserForAdmin(PostStatusEnum.LOCKED,pageNumber,pageSize));
+                    ApiResponse.success(HttpStatus.OK, "Get all post locked",  pageableUserForAdmin(PostStatusEnum.LOCKED,pageNumber,pageSize));
            default -> getAllPostForAdmin(pageNumber,pageSize);
         };
     }
@@ -271,7 +272,7 @@ public class PostServiceImpl implements PostService {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
             Page<PostEntity> posts = postRepository.getAllPostsForAdminByStatus(postStatusEnum, pageable);
             if (pageNumber > posts.getTotalPages()) {
-                log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, posts.getNumber());
+                log.error("Error Loggingssss: pageNumber: {} is out of total_page: {}", pageNumber, posts.getNumber(),posts.getTotalPages());
                 throw new InvalidParameterException("pageNumber is out of total Page");
             }
             try {
@@ -300,10 +301,7 @@ public class PostServiceImpl implements PostService {
         } else {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
             Page<PostEntity> posts = postRepository.findAllPosts(pageable);
-            if (pageNumber > posts.getTotalPages()) {
-                log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, posts.getNumber());
-                throw new InvalidParameterException("pageNumber is out of total Page");
-            }try {
+            try {
                 List<PostEntity> postEntities = posts.getContent();
                 List<PostAdminDto> userResponses = postEntities.stream().map(PostMapper::entityToPostAdminDto).toList();
                 Paginate<List<PostAdminDto>> dataResponse = new Paginate<>();
@@ -321,16 +319,16 @@ public class PostServiceImpl implements PostService {
         }
     }
     @Override
-    public ApiResponse<?> updatePostForAdmin(String id,String status){
-        if(status.equals("active")){
-            PostEntity post=postRepository.findById(id).orElseThrow(() -> new NotFoundException("No posts found with ID: " + id));
+    public ApiResponse<?> updatePostForAdmin(UpdatePostForAdminRequest request){
+        if(request.getStatus().equals("active")){
+            PostEntity post=postRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("No posts found with ID: " + request.getId()));
             post.setStatus(PostStatusEnum.ACTIVE);
             post.setUpdatedAt(LocalDateTime.now());
             PostEntity postUpdated= postRepository.save(post);
             return ApiResponse.success(HttpStatus.OK,"Update success post",postUpdated);
         }
-        if(status.equals("locked")){
-            PostEntity post=postRepository.findById(id).orElseThrow(() -> new NotFoundException("No posts found with ID: " + id));
+        if(request.getStatus().equals("locked")){
+            PostEntity post=postRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("No posts found with ID: " + request.getId()));
             post.setStatus(PostStatusEnum.LOCKED);
             post.setUpdatedAt(LocalDateTime.now());
             PostEntity postUpdated= postRepository.save(post);

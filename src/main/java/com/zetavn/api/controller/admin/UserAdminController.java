@@ -36,7 +36,7 @@ public class UserAdminController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<?> remove(@RequestBody String id, @RequestBody boolean isDeleted) {
+    public ApiResponse<?> remove(@PathVariable String id, @RequestBody boolean isDeleted) {
         return userService.removeForAdmin(id, isDeleted);
     }
 }

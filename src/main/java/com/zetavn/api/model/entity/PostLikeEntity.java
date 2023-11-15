@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -25,4 +27,7 @@ public class PostLikeEntity {
     @JoinColumn(name = "post_id", nullable = false)
     @JsonBackReference
     private PostEntity postEntity;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 }

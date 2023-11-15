@@ -4,6 +4,7 @@ import com.zetavn.api.enums.PostStatusEnum;
 import com.zetavn.api.model.dto.PostDto;
 import com.zetavn.api.model.entity.PostEntity;
 import com.zetavn.api.payload.request.PostRequest;
+import com.zetavn.api.payload.request.UpdatePostForAdminRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.payload.response.PostResponse;
@@ -29,7 +30,7 @@ public interface PostService {
 
     ApiResponse<?> getAllPostForAdmin(Integer pageNumber, Integer pageSize);
 
-    ApiResponse<?> updatePostForAdmin(String id, String status);
+    ApiResponse<?> updatePostForAdmin(UpdatePostForAdminRequest request);
 
     ApiResponse<?> getOnePostForAdmin(String id);
 }

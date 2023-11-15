@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,6 +65,7 @@ public class PostLikeServiceImpl implements PostLikeService {
             PostLikeEntity postLike = new PostLikeEntity();
             postLike.setPostEntity(post);
             postLike.setUserEntity(user);
+            postLike.setCreatedAt(LocalDateTime.now());
             return ApiResponse.success(HttpStatus.OK,"Create post-like success",postLikeRepository.save(postLike));
 
         }catch (Exception e){
