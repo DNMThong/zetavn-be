@@ -1,5 +1,6 @@
 package com.zetavn.api.service.impl;
 
+import com.zetavn.api.enums.PostNotificationEnum;
 import com.zetavn.api.model.entity.PostEntity;
 import com.zetavn.api.model.entity.PostLikeEntity;
 import com.zetavn.api.model.entity.UserEntity;
@@ -12,6 +13,7 @@ import com.zetavn.api.payload.response.UserResponse;
 import com.zetavn.api.repository.PostLikeRepository;
 import com.zetavn.api.repository.PostRepository;
 import com.zetavn.api.repository.UserRepository;
+import com.zetavn.api.service.NotificationService;
 import com.zetavn.api.service.PostLikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
