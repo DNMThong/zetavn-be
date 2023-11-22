@@ -1,5 +1,6 @@
 package com.zetavn.api.service.impl;
 
+import com.zetavn.api.enums.PostNotificationEnum;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.dto.PostDto;
 import com.zetavn.api.model.entity.UserEntity;
@@ -14,6 +15,8 @@ import com.zetavn.api.repository.CommentRepository;
 import com.zetavn.api.repository.PostRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.CommentService;
+import com.zetavn.api.service.NotificationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,16 +32,21 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
+@Slf4j
+
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+    private NotificationService notificationService;
+
     @Autowired
-    CommentServiceImpl(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository) {
+    CommentServiceImpl(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository, NotificationService notificationService) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -119,7 +127,6 @@ public class CommentServiceImpl implements CommentService {
         comment.setUserEntity(user.get());
 
         CommentEntity saveComment = commentRepository.save(comment);
-
         return ApiResponse.success(HttpStatus.OK, "", CommentMapper.entityToCommentResponse(saveComment));
     }
 
@@ -143,7 +150,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setUserEntity(user.get());
 
         CommentEntity saveComment = commentRepository.save(comment);
-
+        notificationService.createNotification(user.get().getUserId(), post.getUserEntity().getUserId(), post.getPostId(), PostNotificationEnum.COMMENT, saveComment.getCommentId());
         return ApiResponse.success(HttpStatus.OK, "", CommentMapper.entityToCommentResponse(saveComment));
     }
 
@@ -169,7 +176,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         commentRepository.deleteCommentAndReplies(commentId);
-
+        notificationService.deleteNotification(commentId, PostNotificationEnum.COMMENT);
         return ApiResponse.success(HttpStatus.OK, "Delete success", null);
     }
 }

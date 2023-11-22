@@ -1,8 +1,7 @@
 package com.zetavn.api.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.zetavn.api.enums.FriendStatusEnum;
-import com.zetavn.api.enums.NotiFriendRequestEnum;
+import com.zetavn.api.enums.PostNotificationEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,10 +13,15 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FriendRequestResponse {
-
-    private OverallUserResponse user;
+public class PostNotificationResponse {
+    private Long id;
+    private String postId;
+    private Long relatedId;
+    private OverallUserResponse interacting;
+    private OverallUserResponse receiving;
+    private PostNotificationEnum type;
+    private Boolean isRead;
     @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
     private LocalDateTime createdAt;
-    private NotiFriendRequestEnum status;
+    private Boolean isCancel;
 }

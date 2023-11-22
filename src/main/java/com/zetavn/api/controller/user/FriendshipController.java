@@ -7,6 +7,8 @@ import com.zetavn.api.payload.response.FriendRequestResponse;
 import com.zetavn.api.payload.response.FriendshipResponse;
 import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.service.FriendshipService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +22,10 @@ public class FriendshipController {
         this.friendshipService = friendshipService;
     }
 
+
     @PostMapping("")
     public ApiResponse<FriendshipResponse> sendRequest(@RequestBody FriendshipRequest friendshipRequest) {
+
         return friendshipService.sendRequest(friendshipRequest);
     }
 
@@ -29,7 +33,7 @@ public class FriendshipController {
     public ApiResponse<Paginate<List<FriendRequestResponse>>> getRequest(@RequestParam String id,
                                                                          @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                                                          @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
-        return friendshipService.getReceiverFriendRequests(id, pageNumber, pageSize);
+        return friendshipService.friendRequestState(id, pageNumber, pageSize);
     }
 
     @PutMapping("/accept")

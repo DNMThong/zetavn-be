@@ -14,7 +14,7 @@ public class UserMapper {
 
         UserResponse userResponse = new UserResponse();
         userResponse.setId(userEntity.getUserId());
-        userResponse.setIsAuthorized(userEntity.getIsAuthorized() != null);
+        userResponse.setIsAuthorized(userEntity.getIsAuthorized());
         userResponse.setLastName(userEntity.getLastName());
         userResponse.setFirstName(userEntity.getFirstName());
         userResponse.setDisplay(userEntity.getFirstName() + " " + userEntity.getLastName());

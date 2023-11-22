@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.io.NotActiveException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +31,9 @@ public class PostLikeServiceImpl implements PostLikeService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    NotificationService notificationService;
 
     @Override
     public ApiResponse<?> getListLikedUserOfPost(String postId) {
@@ -52,21 +55,18 @@ public class PostLikeServiceImpl implements PostLikeService {
         }
         }
 
-
     @Override
     public ApiResponse<?> createPostLike(PostLikeRequest postLikeRequest) {
         try{
             PostEntity post = postRepository.findById(postLikeRequest.getPostId()).orElseThrow(NullPointerException::new);
             UserEntity user = userRepository.findById(postLikeRequest.getUserId()).orElseThrow(NullPointerException::new);
-            PostLikeEntity postLikeCheck = postLikeRepository.findPostLikeEntityByPostEntityAndUserEntity(post,user);
-            if(postLikeCheck!=null){
-                return  ApiResponse.error(HttpStatus.BAD_REQUEST,"User liked",new PostLikeResponse(user.getUserId(),post.getPostId()));
-            }
             PostLikeEntity postLike = new PostLikeEntity();
             postLike.setPostEntity(post);
             postLike.setUserEntity(user);
-            postLike.setCreatedAt(LocalDateTime.now());
-            return ApiResponse.success(HttpStatus.OK,"Create post-like success",postLikeRepository.save(postLike));
+            PostLikeEntity postLikeEntity = postLikeRepository.save(postLike);
+
+            notificationService.createNotification(user.getUserId(), post.getUserEntity().getUserId(), post.getPostId(), PostNotificationEnum.LIKE, postLike.getPostLikeId());
+            return ApiResponse.success(HttpStatus.OK,"Create post-like success", postLikeEntity);
 
         }catch (Exception e){
             return  ApiResponse.error(HttpStatus.BAD_REQUEST,e.getMessage());
@@ -79,9 +79,6 @@ public class PostLikeServiceImpl implements PostLikeService {
             PostEntity post = postRepository.findById(postLikeRequest.getPostId()).orElseThrow(NullPointerException::new);
             UserEntity user = userRepository.findById(postLikeRequest.getUserId()).orElseThrow(NullPointerException::new);
             PostLikeEntity postLike = postLikeRepository.findPostLikeEntityByPostEntityAndUserEntity(post,user);
-            if(postLike==null){
-                return  ApiResponse.error(HttpStatus.BAD_REQUEST,"User not like",new PostLikeResponse(user.getUserId(),post.getPostId()));
-            }
             postLikeRepository.delete(postLike);
             return ApiResponse.success(HttpStatus.OK,"Delete post-like success",null);
 

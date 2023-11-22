@@ -1,6 +1,7 @@
 package com.zetavn.api.service.impl;
 
 import com.zetavn.api.enums.FriendStatusEnum;
+import com.zetavn.api.enums.NotiFriendRequestEnum;
 import com.zetavn.api.exception.DuplicateRecordException;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.FriendshipEntity;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,15 +37,19 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final FollowService followService;
     private final UserRepository userRepository;
 
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
     @Autowired
     FriendshipServiceImpl(FriendshipRepository friendshipRepository,
                           FriendshipMapper friendshipMapper,
                           FollowService followService,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          SimpMessagingTemplate simpMessagingTemplate) {
         this.friendshipRepository = friendshipRepository;
         this.friendshipMapper = friendshipMapper;
         this.followService = followService;
         this.userRepository = userRepository;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -69,33 +75,58 @@ public class FriendshipServiceImpl implements FriendshipService {
         followService.friendshipFollow(follow);
 
         FriendshipEntity saveFriendship = friendshipRepository.save(friendship);
+
+        // Send socket
+        FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
+        friendRequestResponse.setUser(OverallUserMapper.entityToDto(saveFriendship.getSenderUserEntity()));
+        friendRequestResponse.setCreatedAt(saveFriendship.getCreatedAt());
+        friendRequestResponse.setStatus(NotiFriendRequestEnum.PENDING);
+
+        simpMessagingTemplate.convertAndSendToUser(saveFriendship.getReceiverUserEntity().getUserId(),"/topic/friendship",friendRequestResponse);
+
+
         return ApiResponse.success(HttpStatus.OK, "send request success!", friendshipMapper.entityToFriendshipResponse(saveFriendship));
     }
 
     @Override
-    public ApiResponse<Paginate<List<FriendRequestResponse>>> getReceiverFriendRequests(String receiverUserId,  Integer pageNumber, Integer pageSize) {
-        Optional<UserEntity> user = userRepository.findById(receiverUserId);
-        if(user.isEmpty()) throw new NotFoundException("Not found user with id: " + receiverUserId);
+    public ApiResponse<Paginate<List<FriendRequestResponse>>> friendRequestState(String id,  Integer pageNumber, Integer pageSize) {
+        Optional<UserEntity> user = userRepository.findById(id);
+        if(user.isEmpty()) throw new NotFoundException("Not found user with id: " + id);
         try {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<UserEntity> userEntities = friendshipRepository.getReceivedFriendRequests(receiverUserId, pageable);
-            List<UserEntity> uL = userEntities.getContent();
+            Page<FriendshipEntity> friendshipEntities = friendshipRepository.getFriendRequestState(id, pageable);
+            List<FriendshipEntity> fl = friendshipEntities.getContent();
             List<FriendRequestResponse> friendRequestResponses = new ArrayList<>();
-            for (UserEntity userEntity : uL) {
-                FriendshipEntity friendshipEntity = friendshipRepository.findFriendshipBySenderUserAndReceiverUser(userEntity, user.get());
-                if (friendshipEntity != null) {
+            for(FriendshipEntity f : fl) {
+                if(f.getSenderUserEntity().getUserId().equals(id)) {
                     FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
-                    friendRequestResponse.setUser(OverallUserMapper.entityToDto(userEntity));
-                    friendRequestResponse.setCreatedAt(friendshipEntity.getCreatedAt());
+                    friendRequestResponse.setUser(OverallUserMapper.entityToDto(f.getReceiverUserEntity()));
+                    friendRequestResponse.setCreatedAt(f.getCreatedAt());
+                    friendRequestResponse.setStatus(NotiFriendRequestEnum.SUCCESS);
+                    friendRequestResponses.add(friendRequestResponse);
+                } else if(f.getReceiverUserEntity().getUserId().equals(id)) {
+                    FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
+                    friendRequestResponse.setUser(OverallUserMapper.entityToDto(f.getSenderUserEntity()));
+                    friendRequestResponse.setCreatedAt(f.getCreatedAt());
+                    friendRequestResponse.setStatus(NotiFriendRequestEnum.PENDING);
                     friendRequestResponses.add(friendRequestResponse);
                 }
             }
+//            for (UserEntity userEntity : fl) {
+//                FriendshipEntity friendshipEntity = friendshipRepository.findFriendshipBySenderUserAndReceiverUser(userEntity, user.get());
+//                if (friendshipEntity != null) {
+//                    FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
+//                    friendRequestResponse.setUser(OverallUserMapper.entityToDto(userEntity));
+//                    friendRequestResponse.setCreatedAt(friendshipEntity.getCreatedAt());
+//                    friendRequestResponses.add(friendRequestResponse);
+//                }
+//            }
             Paginate<List<FriendRequestResponse>> dataResponse = new Paginate<>(
-                    userEntities.getNumber(),
-                    userEntities.getSize(),
-                    userEntities.getTotalElements(),
-                    userEntities.getTotalPages(),
-                    userEntities.isLast(),
+                    friendshipEntities.getNumber(),
+                    friendshipEntities.getSize(),
+                    friendshipEntities.getTotalElements(),
+                    friendshipEntities.getTotalPages(),
+                    friendshipEntities.isLast(),
                     friendRequestResponses
             );
             return ApiResponse.success(HttpStatus.OK, "Get received friend requests!", dataResponse);
@@ -133,13 +164,23 @@ public class FriendshipServiceImpl implements FriendshipService {
         }
 
         friendship.setStatus(FriendStatusEnum.ACCEPTED);
+        friendship.setCreatedAt(LocalDateTime.now());
 
         FollowRequest follow = new FollowRequest();
         follow.setFollowerId(friendship.getReceiverUserEntity().getUserId());
         follow.setFollowingId(friendship.getSenderUserEntity().getUserId());
         followService.friendshipFollow(follow);
 
+
+
         FriendshipEntity updatedFriendship = friendshipRepository.save(friendship);
+
+        FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
+        friendRequestResponse.setUser(OverallUserMapper.entityToDto(updatedFriendship.getReceiverUserEntity()));
+        friendRequestResponse.setCreatedAt(updatedFriendship.getCreatedAt());
+        friendRequestResponse.setStatus(NotiFriendRequestEnum.SUCCESS);
+
+        simpMessagingTemplate.convertAndSendToUser(updatedFriendship.getSenderUserEntity().getUserId(),"/topic/friendship",friendRequestResponse);
 
         return ApiResponse.success(HttpStatus.OK, "Accept success!", friendshipMapper.entityToFriendshipResponse(updatedFriendship));
     }
@@ -156,6 +197,15 @@ public class FriendshipServiceImpl implements FriendshipService {
         followService.deleteFollow(friendship.getSenderUserEntity().getUserId(), friendship.getReceiverUserEntity().getUserId());
 
         FriendshipEntity updatedFriendship = friendshipRepository.save(friendship);
+
+
+        // send socket friend accept
+        FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
+        friendRequestResponse.setUser(OverallUserMapper.entityToDto(updatedFriendship.getSenderUserEntity()));
+        friendRequestResponse.setCreatedAt(updatedFriendship.getCreatedAt());
+        friendRequestResponse.setStatus(NotiFriendRequestEnum.CANCEL);
+
+        simpMessagingTemplate.convertAndSendToUser(updatedFriendship.getReceiverUserEntity().getUserId(),"/topic/friendship",friendRequestResponse);
 
         return ApiResponse.success(HttpStatus.OK, "Reject success!", friendshipMapper.entityToFriendshipResponse(updatedFriendship));
     }
@@ -205,6 +255,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                     isLast,
                     friendResponses
             );
+
             return ApiResponse.success(HttpStatus.OK, "List of friends", dataResponse);
         } catch (Exception e) {
             System.out.println("error: " + e.getMessage());

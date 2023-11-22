@@ -5,13 +5,11 @@ import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.FriendRequestResponse;
 import com.zetavn.api.payload.response.OverallUserResponse;
 import com.zetavn.api.payload.response.Paginate;
-import com.zetavn.api.service.FriendshipService;
-import com.zetavn.api.service.PostService;
-import com.zetavn.api.service.UserInfoService;
-import com.zetavn.api.service.UserService;
+import com.zetavn.api.service.*;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,8 +31,12 @@ public class UserController {
     @Autowired
     private FriendshipService friendshipService;
 
+
+
+
     @GetMapping("")
-    public ApiResponse<?> getAllUsers() {
+    public ApiResponse<?> getAllUsers(Authentication principal) {
+        System.out.println(principal.getName());
         return ApiResponse.success(HttpStatus.OK, "sucess", userService.getAllUsers());
     }
     @GetMapping("/search")
@@ -88,4 +90,7 @@ public class UserController {
     public ApiResponse<List<OverallUserResponse>> getFriends(@PathVariable("id") String id) {
         return friendshipService.getFriendsByUserId(id);
     }
+
+
 }
+

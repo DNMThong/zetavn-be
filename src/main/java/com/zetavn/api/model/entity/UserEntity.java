@@ -103,4 +103,8 @@ public class UserEntity {
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
     UserInfoEntity userInfo;
+
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    List<ComfirmationTokenEntity> comfirmationTokenEntities;
 }
