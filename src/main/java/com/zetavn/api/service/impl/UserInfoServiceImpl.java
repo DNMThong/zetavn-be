@@ -95,6 +95,7 @@ public class UserInfoServiceImpl implements UserInfoService {
             response.getInformation().setTotalFriends(friendshipRepository.countFriends(userId));
             response.getInformation().setTotalPosts(postRepository.countPostEntityByUserEntityUserId(userId));
             response.getInformation().setCountLikesOfPosts(postRepository.getTotalLikesByUserId(userId));
+            System.out.println("User: " + response.toString());
             return ApiResponse.success(HttpStatus.OK, "Get user information success", response);
         }
     }

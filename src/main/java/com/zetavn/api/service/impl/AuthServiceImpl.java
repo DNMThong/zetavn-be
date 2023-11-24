@@ -17,10 +17,9 @@ import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.JwtResponse;
 import com.zetavn.api.payload.response.SignInResponse;
 import com.zetavn.api.payload.response.UserResponse;
-import com.zetavn.api.repository.ComfirmationTokenRepository;
-import com.zetavn.api.repository.UserInfoRepository;
-import com.zetavn.api.repository.UserRepository;
+import com.zetavn.api.repository.*;
 import com.zetavn.api.service.AuthService;
+import com.zetavn.api.service.FriendshipService;
 import com.zetavn.api.service.MailerService;
 import com.zetavn.api.service.RefreshTokenService;
 import com.zetavn.api.utils.CookieHelper;
@@ -57,6 +56,13 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Service @Slf4j
 public class AuthServiceImpl implements AuthService {
+
+    @Autowired
+    private FriendshipRepository friendshipRepository;
+
+    @Autowired
+    private PostRepository postRepository;
+
 
     @Autowired
     private UserRepository userRepository;
@@ -164,6 +170,9 @@ public class AuthServiceImpl implements AuthService {
             SignInResponse response = new SignInResponse();
 //            JwtResponse jwtResponse = new JwtResponse(tokens.get("access_token"), tokens.get("refresh_token"));
             UserResponse userResponse = UserMapper.userInfoToUserResponse(user.getUserInfo());
+            userResponse.getInformation().setTotalFriends(friendshipRepository.countFriends(user.getUserId()));
+            userResponse.getInformation().setTotalPosts(postRepository.countPostEntityByUserEntityUserId(user.getUserId()));
+            userResponse.getInformation().setCountLikesOfPosts(postRepository.getTotalLikesByUserId(user.getUserId()));
             response.setUserInfo(userResponse);
             response.setAccess_token(tokens.get("access_token"));
 
