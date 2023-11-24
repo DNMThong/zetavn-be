@@ -3,6 +3,7 @@ package com.zetavn.api.service;
 import com.zetavn.api.payload.request.SignUpRequest;
 import com.zetavn.api.payload.request.UserUpdateRequest;
 import com.zetavn.api.payload.response.ApiResponse;
+import com.zetavn.api.payload.response.UserContactResponse;
 import com.zetavn.api.payload.response.UserResponse;
 
 import java.io.UnsupportedEncodingException;
@@ -32,4 +33,6 @@ public interface UserService {
     ApiResponse<UserResponse> updateAvatar(String sourceId, String avatarPath);
 
     ApiResponse<UserResponse> updatePoster(String sourceId, String avatarPath);
+
+    ApiResponse<List<UserContactResponse>> getUserContacts(String userId);
 }

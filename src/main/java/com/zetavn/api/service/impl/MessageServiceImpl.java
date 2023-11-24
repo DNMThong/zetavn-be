@@ -1,0 +1,127 @@
+package com.zetavn.api.service.impl;
+
+import com.zetavn.api.enums.MessageStatusEnum;
+import com.zetavn.api.enums.MessageTypeEnum;
+import com.zetavn.api.exception.NotFoundException;
+import com.zetavn.api.model.entity.MessageEntity;
+import com.zetavn.api.model.entity.UserEntity;
+import com.zetavn.api.model.mapper.CommentMapper;
+import com.zetavn.api.model.mapper.MessageMapper;
+import com.zetavn.api.payload.request.MessageRequest;
+import com.zetavn.api.payload.response.CommentResponse;
+import com.zetavn.api.payload.response.FileUploadResponse;
+import com.zetavn.api.payload.response.MessageResponse;
+import com.zetavn.api.payload.response.Paginate;
+import com.zetavn.api.repository.ActivityLogRepository;
+import com.zetavn.api.repository.MessageRepository;
+import com.zetavn.api.repository.UserRepository;
+import com.zetavn.api.service.CloudinaryService;
+import com.zetavn.api.service.MessageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class MessageServiceImpl implements MessageService {
+    @Autowired
+    private MessageRepository messageRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ActivityLogRepository activityLogRepository;
+
+    @Autowired
+    private SimpMessagingTemplate template;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Override
+    public MessageResponse createMessage(MessageRequest message) {
+        UserEntity userReciever =  userRepository.findById(message.getRecieverId()).orElseThrow(() -> {throw new NotFoundException("Not found user reciever by id");});
+        UserEntity userSender =  userRepository.findById(message.getSenderId()).orElseThrow(() -> {throw new NotFoundException("Not found user sender by id");});
+
+        MessageEntity messageEntity = new MessageEntity();
+        messageEntity.setCreatedAt(LocalDateTime.now());
+        messageEntity.setMessage(message.getMessage());
+        messageEntity.setSenderUser(userSender);
+        messageEntity.setRecieverUser(userReciever);
+        messageEntity.setStatus(MessageStatusEnum.SENT);
+        messageEntity.setType(message.getType());
+
+
+        MessageEntity messageResponse = messageRepository.save(messageEntity);
+
+        return MessageMapper.entityToDto(messageResponse) ;
+    }
+
+    @Override
+    public MessageResponse createMessageFile(MessageRequest message, MultipartFile file) {
+        FileUploadResponse fileUploadResponse = null;
+        if(message.getType().equals(MessageTypeEnum.IMAGE)) {
+            fileUploadResponse = cloudinaryService.upload(file,"images/","image");
+        }else if(message.getType().equals(MessageTypeEnum.VIDEO)) {
+            fileUploadResponse = cloudinaryService.upload(file,"videos/","video");
+        }
+        if(fileUploadResponse!=null) {
+            message.setMessage(fileUploadResponse.getUrl());
+            return this.createMessage(message);
+        }
+        return null;
+    }
+
+    @Override
+    public MessageResponse updateStatusMessage(Long id, MessageStatusEnum status) {
+        MessageEntity message = messageRepository.findById(id).orElseThrow(() -> {throw new NotFoundException("Not found message by id "+id);});
+        message.setStatus(status);
+        MessageEntity messageResponse = messageRepository.save(message);
+        return MessageMapper.entityToDto(messageResponse) ;
+    }
+
+    @Override
+    public Paginate<List<MessageResponse>> getChatMessage(String userIdGetChat, String userIdContact,Integer pageNumber, Integer pageSize) {
+        UserEntity userGetChat =  userRepository.findById(userIdGetChat).orElseThrow(() -> {throw new NotFoundException("Not found user user by id "+userIdGetChat);});
+        UserEntity userContact =  userRepository.findById(userIdContact).orElseThrow(() -> {throw new NotFoundException("Not found user user by id "+userIdContact);});
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<MessageEntity> messagePage = messageRepository.getChatMessagePagination(userIdGetChat,userIdContact,pageable);
+        List<MessageEntity> messages = messagePage.getContent();
+        List<MessageEntity> messagesUpadteRead = new ArrayList<>();
+
+        for (MessageEntity message : messages) {
+            if (message.getStatus().equals(MessageStatusEnum.SENT)
+                    && message.getRecieverUser().getUserId().equals(userIdGetChat)) {
+                message.setStatus(MessageStatusEnum.READ);
+
+                MessageEntity messageUpdate = messageRepository.save(message);
+                MessageResponse messageResponse = MessageMapper.entityToDto(messageUpdate);
+
+                template.convertAndSendToUser(messageResponse.getSender().getId(),"/topic/message/update-read",messageResponse);
+            }
+            messagesUpadteRead.add(message);
+        }
+
+        List<MessageResponse> messageResponses = messagesUpadteRead.stream().map(MessageMapper::entityToDto).collect(Collectors.toList());
+
+        Paginate<List<MessageResponse>> dataResponse = new Paginate<>(
+                messagePage.getNumber(),
+                messagePage.getSize(),
+                messagePage.getTotalElements(),
+                messagePage.getTotalPages(),
+                messagePage.isLast(),
+                messageResponses
+        );
+        return dataResponse;
+    }
+}

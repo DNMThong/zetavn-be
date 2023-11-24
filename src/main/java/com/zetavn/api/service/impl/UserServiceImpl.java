@@ -1,17 +1,18 @@
 package com.zetavn.api.service.impl;
 
 import com.cloudinary.Api;
-import com.zetavn.api.enums.FriendStatusEnum;
-import com.zetavn.api.enums.StatusFriendsEnum;
-import com.zetavn.api.enums.UserStatusEnum;
+import com.zetavn.api.enums.*;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.FriendshipEntity;
+import com.zetavn.api.model.entity.MessageEntity;
 import com.zetavn.api.model.entity.UserEntity;
+import com.zetavn.api.model.mapper.MessageMapper;
 import com.zetavn.api.model.mapper.OverallUserMapper;
 import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.SignUpRequest;
 import com.zetavn.api.payload.request.UserUpdateRequest;
 import com.zetavn.api.payload.response.*;
+import com.zetavn.api.repository.ActivityLogRepository;
 import com.zetavn.api.repository.FriendshipRepository;
 import com.zetavn.api.repository.PostRepository;
 import com.zetavn.api.repository.UserRepository;
@@ -46,6 +47,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private ActivityLogRepository activityLogRepository;
+
 
     @Override
     public ApiResponse<?> create(SignUpRequest signUpRequest) {
@@ -324,5 +329,66 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public ApiResponse<List<UserContactResponse>> getUserContacts(String userId) {
+        UserEntity user = userRepository.findById(userId).orElseGet(() -> {throw new NotFoundException("Not found user with userId: " + userId);});
+
+        Map<String, UserContactResponse> map = new HashMap<String, UserContactResponse>();
+
+        user.getRecieverMessages().forEach(item -> {
+            String id = item.getSenderUser().getUserId();
+            Integer totalUnreadMessage = 0;
+            if(map.containsKey(id)) {
+                UserContactResponse userContact = map.get(id);
+                if(!item.getStatus().equals(MessageStatusEnum.READ)) {
+                    totalUnreadMessage++;
+                }
+                userContact.setTotalUnreadMessage(totalUnreadMessage);
+                userContact.setNewMessage(MessageMapper.entityToDto(item));
+                map.put(id,userContact);
+            }else {
+                UserContactResponse userContactResponse = new UserContactResponse();
+                OverallUserPrivateResponse overallUserPrivate = OverallUserMapper.entityToOverallUserPrivate(item.getSenderUser());
+                overallUserPrivate.setIsOnline(activityLogRepository.checkUserOnline(overallUserPrivate.getId()));
+                userContactResponse.setUser(overallUserPrivate);
+                userContactResponse.setNewMessage(MessageMapper.entityToDto(item));
+                userContactResponse.setTotalUnreadMessage(0);
+                map.put(id,userContactResponse);
+            }
+        });
+
+        user.getSenderMessages().forEach(item -> {
+            String id = item.getRecieverUser().getUserId();
+            if(map.containsKey(id)) {
+                UserContactResponse userContact = map.get(id);
+                if(item.getCreatedAt().isAfter(userContact.getNewMessage().getCreatedAt())) {
+                    userContact.setTotalUnreadMessage(0);
+                    userContact.setNewMessage(MessageMapper.entityToDto(item));
+                    map.put(id,userContact);
+                }
+            }else {
+                UserContactResponse userContactResponse = new UserContactResponse();
+                OverallUserPrivateResponse overallUserPrivate = OverallUserMapper.entityToOverallUserPrivate(item.getRecieverUser());
+                overallUserPrivate.setIsOnline(activityLogRepository.checkUserOnline(overallUserPrivate.getId()));
+                userContactResponse.setUser(overallUserPrivate);
+                userContactResponse.setNewMessage(MessageMapper.entityToDto(item));
+                userContactResponse.setTotalUnreadMessage(0);
+                map.put(id,userContactResponse);
+            }
+        });
+
+
+
+
+
+        List<UserContactResponse> userContacts = new ArrayList<>(map.values());
+
+        userContacts.sort(Comparator.comparing(
+                userContactResponse -> userContactResponse.getNewMessage().getCreatedAt(),
+                Comparator.reverseOrder()
+        ));
+
+        return ApiResponse.success(HttpStatus.OK,"Get list user contact success",userContacts);
+    }
 
 }

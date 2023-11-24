@@ -14,9 +14,8 @@ import java.time.LocalDateTime;
 @Table(name = "activity_log")
 public class ActivityLogEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "activity_log_id")
-    private long activityLogId;
+    private String activityLogId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -26,18 +25,18 @@ public class ActivityLogEntity {
     @Column(name = "online_time", nullable = false)
     private LocalDateTime onlineTime;
 
-    @Column(name = "offline_time", nullable = false)
+    @Column(name = "offline_time")
     private LocalDateTime offlineTime;
 
     @Column(name = "ip_address")
     private String ipAddress;
 
-    @Column(name = "device_information", nullable = false)
+    @Column(name = "device_information")
     private String deviceInformation;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }

@@ -107,4 +107,14 @@ public class UserEntity {
     @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
     @JsonManagedReference
     List<ComfirmationTokenEntity> comfirmationTokenEntities;
+
+    @OneToMany(mappedBy = "senderUser", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @OrderBy("createdAt asc")
+    List<MessageEntity> senderMessages;
+
+    @OneToMany(mappedBy = "recieverUser", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @OrderBy("createdAt asc")
+    List<MessageEntity> recieverMessages;
 }

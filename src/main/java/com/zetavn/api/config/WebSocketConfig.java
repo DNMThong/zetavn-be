@@ -2,7 +2,9 @@ package com.zetavn.api.config;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.zetavn.api.jwt.JWTAuthenticationToken;
+import com.zetavn.api.model.entity.ActivityLogEntity;
 import com.zetavn.api.model.entity.UserEntity;
+import com.zetavn.api.repository.ActivityLogRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.socket.UserHandshakeHandler;
 import com.zetavn.api.utils.JwtHelper;
@@ -36,6 +38,7 @@ import org.springframework.security.messaging.context.SecurityContextChannelInte
 import org.springframework.web.socket.config.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static java.util.Arrays.stream;
@@ -53,6 +56,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private UserRepository userRepository;
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private ActivityLogRepository activityLogRepository;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -80,14 +86,33 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+                String sessionId = (String) message.getHeaders().get("simpSessionId");
+
 
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
+                    String ipAddress = accessor.getFirstNativeHeader("ip_address");
+                    String deviceInformation = accessor.getFirstNativeHeader("device_information");
+
                     if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                         String token = authorizationHeader.substring("Bearer ".length());
                         DecodedJWT decodedJWT = jwtHelper.decodedJWT(token);
                         if(decodedJWT.getExpiresAt().after(new Date())) {
                             String username = decodedJWT.getSubject();
+                            UserEntity user = userRepository.findUserEntityByEmail(username);
+
+                            if(user!=null) {
+                                ActivityLogEntity activityLogEntity = new ActivityLogEntity();
+                                activityLogEntity.setActivityLogId(sessionId);
+                                activityLogEntity.setUserEntity(user);
+                                activityLogEntity.setCreatedAt(LocalDateTime.now());
+                                activityLogEntity.setOnlineTime(LocalDateTime.now());
+                                activityLogEntity.setIpAddress(ipAddress);
+                                activityLogEntity.setDeviceInformation(deviceInformation);
+
+                                activityLogRepository.save(activityLogEntity);
+                            }
+
                             String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
                             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
                             stream(roles).forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
@@ -97,6 +122,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         }
                     }
                 }
+
+                if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+                    Optional<ActivityLogEntity> optional = activityLogRepository.findById(sessionId);
+                    if(optional.isPresent()) {
+                        ActivityLogEntity activityLog = optional.get();
+                        activityLog.setOfflineTime(LocalDateTime.now());
+                        activityLog.setUpdatedAt(LocalDateTime.now());
+                        activityLogRepository.save(activityLog);
+                    }
+                }
+
                 return message;
             }
         });

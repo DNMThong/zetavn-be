@@ -18,7 +18,7 @@ public class FriendshipEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "friendship_id")
-    private long friendshipId;
+    private Long friendshipId;
 
     @ManyToOne
     @JoinColumn(name = "sender_user_id", nullable = false)

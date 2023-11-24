@@ -34,5 +34,10 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
             "or u.userId in (select f.senderUserEntity.userId from FriendshipEntity f where f.receiverUserEntity.userId = :userId and f.status = 'ACCEPTED')")
     List<UserEntity> findFriendsByUser(@Param("userId") String userId);
 
+    @Query("select u from UserEntity u " +
+            "where u.userId in (select m.recieverUser.userId from MessageEntity m where m.senderUser.userId = :userId) " +
+            "or u.userId in (select m.senderUser.userId from MessageEntity m where m.recieverUser.userId = :userId )")
+    List<UserEntity> findUserContracts(@Param("userId") String userId);
+
 
 }

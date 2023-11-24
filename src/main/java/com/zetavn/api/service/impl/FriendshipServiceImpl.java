@@ -16,6 +16,7 @@ import com.zetavn.api.model.mapper.UserSearchMapper;
 import com.zetavn.api.payload.request.FollowRequest;
 import com.zetavn.api.payload.request.FriendshipRequest;
 import com.zetavn.api.payload.response.*;
+import com.zetavn.api.repository.ActivityLogRepository;
 import com.zetavn.api.repository.FriendshipRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.FollowService;
@@ -41,6 +42,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final UserRepository userRepository;
 
     private final SimpMessagingTemplate simpMessagingTemplate;
+
 
     @Autowired
     FriendshipServiceImpl(FriendshipRepository friendshipRepository,
@@ -229,6 +231,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 //    }
     @Override
     public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPaginate(String userId, Integer pageNumber, Integer pageSize) {
+
         try {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
             UserEntity user = userRepository.findUserEntityByUsername(userId);

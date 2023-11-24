@@ -19,17 +19,21 @@ import java.util.Optional;
 @RequestMapping("/api/v0/users")
 public class UserController {
 
-    @Autowired
     UserService userService;
 
-    @Autowired
     PostService postService;
 
-    @Autowired
     private UserInfoService userInfoService;
 
-    @Autowired
     private FriendshipService friendshipService;
+
+    @Autowired
+    public UserController(UserService userService,PostService postService,UserInfoService userInfoService,FriendshipService friendshipService) {
+        this.userService = userService;
+        this.postService = postService;
+        this.userInfoService = userInfoService;
+        this.friendshipService = friendshipService;
+    }
 
     @GetMapping("")
     public ApiResponse<?> getAllUsers() {
@@ -89,7 +93,6 @@ public class UserController {
 
     @PutMapping("/{userId}/{type}")
     public ApiResponse<UserResponse> updateAvatar(@PathVariable("userId") Optional<String> userId, @RequestBody UploadImageBase64Response imageBase64, @PathVariable String type) {
-        System.out.println("ImageBase64: " + imageBase64.toString());
         if (userId.isEmpty()) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Missing userId");
         } else if (imageBase64.getImages().length == 0) {
@@ -107,4 +110,11 @@ public class UserController {
             }
         }
     }
+
+    @GetMapping("/{id}/contacts")
+    public ApiResponse<List<UserContactResponse>> getContacts(@PathVariable("id") String id) {
+        return userService.getUserContacts(id);
+    }
+
+
 }

@@ -8,7 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-
 public class SignInResponse {
 
     private UserResponse userInfo;

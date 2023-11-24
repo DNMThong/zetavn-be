@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OverallUserResponse {
+public class OverallUserPrivateResponse {
     private String id;
     private String username;
     private String firstName;
@@ -17,4 +17,5 @@ public class OverallUserResponse {
     private String display;
     private String avatar;
     private String poster;
+    private Boolean isOnline;
 }
