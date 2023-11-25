@@ -18,7 +18,6 @@ import com.zetavn.api.service.PostLikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.NotActiveException;
 import java.util.ArrayList;
@@ -75,7 +74,7 @@ public class PostLikeServiceImpl implements PostLikeService {
             return  ApiResponse.error(HttpStatus.BAD_REQUEST,e.getMessage());
         }
      }
-     @Transactional
+
     @Override
     public ApiResponse<?> removePostLike(PostLikeRequest postLikeRequest) {
         try{
@@ -83,8 +82,8 @@ public class PostLikeServiceImpl implements PostLikeService {
             UserEntity user = userRepository.findById(postLikeRequest.getUserId()).orElseThrow(NullPointerException::new);
             PostLikeEntity postLike = postLikeRepository.findPostLikeEntityByPostEntityAndUserEntity(post,user);
             postLikeRepository.delete(postLike);
-            notificationService.deleteNotification(postLike.getPostLikeId(), PostNotificationEnum.LIKE);
             return ApiResponse.success(HttpStatus.OK,"Delete post-like success",null);
+
         }catch (Exception e){
             return ApiResponse.error(HttpStatus.BAD_REQUEST,e.getMessage());
         }

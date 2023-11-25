@@ -6,10 +6,12 @@ import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.FriendshipEntity;
 import com.zetavn.api.model.entity.MessageEntity;
 import com.zetavn.api.model.entity.UserEntity;
+import com.zetavn.api.model.entity.UserInfoEntity;
 import com.zetavn.api.model.mapper.MessageMapper;
 import com.zetavn.api.model.mapper.OverallUserMapper;
 import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.SignUpRequest;
+import com.zetavn.api.payload.request.UserInfoRequest;
 import com.zetavn.api.payload.request.UserUpdateRequest;
 import com.zetavn.api.payload.response.*;
 import com.zetavn.api.repository.ActivityLogRepository;
@@ -391,4 +393,195 @@ public class UserServiceImpl implements UserService {
         return ApiResponse.success(HttpStatus.OK,"Get list user contact success",userContacts);
     }
 
+    @Override
+    public ApiResponse<?> getAllUserForAdminByStatus(String status, Integer pageNumber, Integer pageSize) {
+        return switch (status) {
+            case "active" -> pageableUserForAdmin(UserStatusEnum.ACTIVE, pageNumber, pageSize);
+            case "locked" -> pageableUserForAdmin(UserStatusEnum.LOCKED, pageNumber, pageSize);
+            case "suspended" -> pageableUserForAdmin(UserStatusEnum.SUSPENDED, pageNumber, pageSize);
+            default -> getAllUserForAdmin(pageNumber, pageSize);
+        };
+    }
+
+    @Override
+    public ApiResponse<?> pageableUserForAdmin(UserStatusEnum userStatusEnum, Integer pageNumber, Integer pageSize) {
+        log.info("Try to find Users by status {} at page number {} and page size {}", userStatusEnum, pageNumber, pageSize);
+        if (pageNumber < 0 || pageSize < 0) {
+            log.error("Error Logging: pageNumber {} < 0 || pageSize {} < 0 with status {}", pageNumber, pageSize, userStatusEnum);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Page number and page size must be positive");
+        } else {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Page<UserEntity> users = userRepository.findByUserEntityByStatus(userStatusEnum, pageable);
+            if (pageNumber > users.getTotalPages()) {
+                log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, users.getNumber());
+                throw new InvalidParameterException("pageNumber is out of total Page");
+            }
+            try {
+                List<UserEntity> userEntities = users.getContent();
+                System.out.println(userEntities);
+                List<UserAdminDto> userAdminDtos = userEntities.stream().map(UserMapper::userEntityToUserAdminDto).toList();
+                Paginate<List<UserAdminDto>> dataResponse = new Paginate<>();
+                dataResponse.setData(userAdminDtos);
+                dataResponse.setPageNumber(users.getNumber());
+                dataResponse.setPageSize(users.getSize());
+                dataResponse.setTotalElements(users.getTotalElements());
+                dataResponse.setTotalPages(users.getTotalPages());
+                dataResponse.setLastPage(users.isLast());
+                return ApiResponse.success(HttpStatus.OK, "Success", dataResponse);
+            } catch (Exception e) {
+                log.error("Error Logging: pageNumber: {}, pageSize: {}, pageable: {}, error_message: {}", pageNumber, pageSize, pageable, e.getMessage());
+                return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid Param");
+            }
+        }
+    }
+
+    @Override
+    public ApiResponse<?> getAllUserForAdmin(Integer pageNumber, Integer pageSize) {
+
+        log.info("Try to find Users at page number {} and page size {}", pageNumber, pageSize);
+        if (pageNumber < 0 || pageSize < 0) {
+            log.error("Error Logging: pageNumber {} < 0 || pageSize {} < 0", pageNumber, pageSize);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Page number and page size must be positive");
+        } else {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            Page<UserEntity> users = userRepository.findAllUser(pageable);
+            if (pageNumber > users.getTotalPages()) {
+                log.error("Error Logging: pageNumber: {} is out of total_page: {}", pageNumber, users.getNumber());
+                throw new InvalidParameterException("pageNumber is out of total Page");
+            }
+            try {
+                List<UserEntity> userEntities = users.getContent();
+                List<UserAdminDto> userResponses = userEntities.stream().map(UserMapper::userEntityToUserAdminDto).toList();
+                Paginate<List<UserAdminDto>> dataResponse = new Paginate<>();
+                dataResponse.setData(userResponses);
+                dataResponse.setPageNumber(users.getNumber());
+                dataResponse.setPageSize(users.getSize());
+                dataResponse.setTotalElements(users.getTotalElements());
+                dataResponse.setTotalPages(users.getTotalPages());
+                dataResponse.setLastPage(users.isLast());
+                return ApiResponse.success(HttpStatus.OK, "Success", dataResponse);
+            } catch (Exception e) {
+                log.error("Error Logging: pageNumber: {}, pageSize: {}, pageable: {}, error_message: {}", pageNumber, pageSize, pageable, e.getMessage());
+                return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid Param");
+            }
+        }
+    }
+
+    @Override
+    public ApiResponse<?> createForAdmin(UserAdminDto userAdminDto) {
+        UserEntity userEntity = new UserEntity();
+        if (!existUserByEmail(userAdminDto.getEmail())) {
+            log.warn("Found Email in database: {}", userAdminDto.getEmail());
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Email is used", null);
+        }
+        if (!existUserByUsername(userAdminDto.getUsername())) {
+            log.warn("Found Username in database: {}", userAdminDto.getUsername());
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Username is used", null);
+        }
+        if (userAdminDto.getInformation() == null) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! User-info is null");
+        }
+        if (userAdminDto.getInformation().getBirthday() == null) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Birthday is null");
+        }
+        if (userAdminDto.getInformation().getGenderEnum() == null) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Gender is null");
+        }
+        userAdminDto.setId(UUIDGenerator.generateRandomUUID());
+        userAdminDto.setCreatedAt(LocalDateTime.now());
+        userAdminDto.setUpdatedAt(LocalDateTime.now());
+        UserEntity _user = userRepository.save(UserMapper.userAdminDtoToUserEntity(userAdminDto, userEntity));
+        if (_user != null) {
+            UserInfoEntity userInfo = new UserInfoEntity();
+            userInfo.setAboutMe(userAdminDto.getInformation().getAboutMe());
+            userInfo.setGenderEnum(userAdminDto.getInformation().getGenderEnum());
+            userInfo.setBirthday(userAdminDto.getInformation().getBirthday());
+            userInfo.setLivesAt(userAdminDto.getInformation().getLivesAt());
+            userInfo.setWorksAt(userAdminDto.getInformation().getWorksAt());
+            userInfo.setStudiedAt(userAdminDto.getInformation().getStudiedAt());
+            userInfo.setGenderEnum(userAdminDto.getInformation().getGenderEnum());
+            userInfo.setUserEntity(_user);
+            userInfo.setCreatedAt(LocalDateTime.now());
+            userInfo.setUpdatedAt(LocalDateTime.now());
+            log.info("try to save userinfo: birthday: {} - gender: {}", userInfo.getBirthday(), userInfo.getGenderEnum());
+            UserInfoEntity userInfoEntity = userInfoRepository.save(userInfo);
+            _user.setUserInfo(userInfoEntity);
+        } else {
+            throw new IllegalArgumentException("Creat user not success");
+        }
+
+        return ApiResponse.success(HttpStatus.OK, "Create user success", UserMapper.userEntityToUserAdminDto(_user));
+    }
+
+    @Override
+    public ApiResponse<UserAdminDto> updateForAdmin(UserAdminDto userAdminDto) {
+        Optional<UserEntity> userEntity = userRepository.findById(userAdminDto.getId());
+        if (userAdminDto.getUsername() == null || userAdminDto.getUsername().isEmpty()) {
+            log.error("Error Logging: UserService - existUserByUsername - Missing username arg");
+            throw new IllegalArgumentException("UserService - existUserByUsername - Missing username arg");
+        }
+        if (userEntity.isPresent()) {
+            try {
+                userAdminDto.setUpdatedAt(LocalDateTime.now());
+                userAdminDto.setCreatedAt(userEntity.get().getCreatedAt());
+                UserEntity _user = userRepository.save(UserMapper.userAdminDtoToUserEntity(userAdminDto, userEntity.get()));
+                if (userAdminDto.getInformation() == null) {
+                    return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! User-info is null");
+                }
+                if (userAdminDto.getInformation().getBirthday() == null) {
+                    return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Birthday is null");
+                }
+                if (userAdminDto.getInformation().getGenderEnum() == null) {
+                    return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Gender is null");
+                }
+                UserInfoRequest userInfoRequest = new UserInfoRequest();
+                userInfoRequest.setBirthday(userAdminDto.getInformation().getBirthday());
+                userInfoRequest.setAboutMe(userAdminDto.getInformation().getAboutMe());
+                userInfoRequest.setGenderEnum(userAdminDto.getInformation().getGenderEnum());
+                userInfoRequest.setBirthday(userAdminDto.getInformation().getBirthday());
+                userInfoRequest.setLivesAt(userAdminDto.getInformation().getLivesAt());
+                userInfoRequest.setWorksAt(userAdminDto.getInformation().getWorksAt());
+                userInfoRequest.setStudiedAt(userAdminDto.getInformation().getStudiedAt());
+                userInfoService.update(userEntity.get().getUserId(), userInfoRequest);
+                log.info("Update success user");
+                return ApiResponse.success(HttpStatus.OK, "Update user success", UserMapper.userEntityToUserAdminDto(_user));
+            } catch (Exception e) {
+                log.warn("Email or username are used");
+                return ApiResponse.error(HttpStatus.BAD_REQUEST, "Email or username are used", userAdminDto);
+            }
+        }
+        log.warn("Not found userId in database: {}", userAdminDto.getId());
+        return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found user", null);
+    }
+
+    @Override
+    public ApiResponse<?> removeForAdmin(String id, boolean isDeleted) {
+        Optional<UserEntity> userEntity = userRepository.findById(id);
+        if (userEntity.isPresent()) {
+            log.info("User removed:", userEntity.get().getUserId());
+            userEntity.get().setIsDeleted(isDeleted);
+            userRepository.save(userEntity.get());
+            return ApiResponse.success(HttpStatus.OK, "User is deleted", null);
+        }
+        return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found userId", id);
+    }
+
+    @Override
+    public ApiResponse<?> getOneUserForAdmin(String id) {
+        Optional<UserEntity> userEntity = userRepository.findById(id);
+        if (userEntity.isPresent()) {
+            return ApiResponse.success(HttpStatus.OK, "User is deleted", UserMapper.userEntityToUserAdminDto(userEntity.get()));
+        }
+        return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found User", null);
+    }
+import com.zetavn.api.enums.FriendStatusEnum;
+import com.zetavn.api.enums.StatusFriendsEnum;
+import com.zetavn.api.enums.UserStatusEnum;
+import com.zetavn.api.model.dto.UserAdminDto;
+import com.zetavn.api.model.entity.MessageEntity;
+import com.zetavn.api.model.entity.UserInfoEntity;
+import com.zetavn.api.payload.request.UserInfoRequest;
+import com.zetavn.api.repository.ActivityLogRepository;
+import com.zetavn.api.repository.UserInfoRepository;
+import com.zetavn.api.service.UserInfoService;
 }

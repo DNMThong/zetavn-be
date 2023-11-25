@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,5 +28,7 @@ public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
     Optional<FollowEntity> findByFollowerUserEntityAndFollowingUserEntity(UserEntity followerUserEntity, UserEntity followingUserEntity);
 
     Optional<FollowEntity> findFollowEntityByFollowerUserEntityUserIdAndFollowingUserEntityUserId(String followerUserEntity_userId, String followingUserEntity_userId);
+    @Query("SELECT COUNT(o) FROM FollowEntity o WHERE  DATE(o.createdAt) >=?1 AND DATE(o.createdAt) <=?2")
+    Long countFollowInDateRange(LocalDate startDate, LocalDate endDate);
 
 }
