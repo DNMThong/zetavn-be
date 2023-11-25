@@ -29,8 +29,8 @@ public class StatisticAdminController {
 
 
     @GetMapping()
-    public ApiResponse<?>getStatistic(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy")LocalDate startDate,
-                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate endDate){
+    public ApiResponse<?>getStatistic(@RequestParam(required = false) @DateTimeFormat(pattern = "MM/dd/yyyy") LocalDate startDate,
+                                    @RequestParam(required = false) @DateTimeFormat(pattern = "MM/dd/yyyy") LocalDate endDate){
             return statisticService.getStatistic(startDate,endDate);
     }
 

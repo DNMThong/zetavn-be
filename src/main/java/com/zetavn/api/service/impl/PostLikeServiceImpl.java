@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.NotActiveException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,7 @@ public class PostLikeServiceImpl implements PostLikeService {
             PostLikeEntity postLike = new PostLikeEntity();
             postLike.setPostEntity(post);
             postLike.setUserEntity(user);
+            postLike.setCreatedAt(LocalDateTime.now());
             PostLikeEntity postLikeEntity = postLikeRepository.save(postLike);
 
             notificationService.createNotification(user.getUserId(), post.getUserEntity().getUserId(), post.getPostId(), PostNotificationEnum.LIKE, postLike.getPostLikeId());

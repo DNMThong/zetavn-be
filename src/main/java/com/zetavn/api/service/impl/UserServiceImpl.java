@@ -3,8 +3,8 @@ package com.zetavn.api.service.impl;
 import com.cloudinary.Api;
 import com.zetavn.api.enums.*;
 import com.zetavn.api.exception.NotFoundException;
+import com.zetavn.api.model.dto.UserAdminDto;
 import com.zetavn.api.model.entity.FriendshipEntity;
-import com.zetavn.api.model.entity.MessageEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.entity.UserInfoEntity;
 import com.zetavn.api.model.mapper.MessageMapper;
@@ -14,10 +14,8 @@ import com.zetavn.api.payload.request.SignUpRequest;
 import com.zetavn.api.payload.request.UserInfoRequest;
 import com.zetavn.api.payload.request.UserUpdateRequest;
 import com.zetavn.api.payload.response.*;
-import com.zetavn.api.repository.ActivityLogRepository;
-import com.zetavn.api.repository.FriendshipRepository;
-import com.zetavn.api.repository.PostRepository;
-import com.zetavn.api.repository.UserRepository;
+import com.zetavn.api.repository.*;
+import com.zetavn.api.service.UserInfoService;
 import com.zetavn.api.service.UserService;
 import com.zetavn.api.utils.UUIDGenerator;
 import lombok.Data;
@@ -52,6 +50,14 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private ActivityLogRepository activityLogRepository;
+
+    @Autowired
+    private UserInfoRepository userInfoRepository;
+
+    @Autowired
+    private UserInfoService userInfoService;
+
+
 
 
     @Override
@@ -574,14 +580,4 @@ public class UserServiceImpl implements UserService {
         }
         return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found User", null);
     }
-import com.zetavn.api.enums.FriendStatusEnum;
-import com.zetavn.api.enums.StatusFriendsEnum;
-import com.zetavn.api.enums.UserStatusEnum;
-import com.zetavn.api.model.dto.UserAdminDto;
-import com.zetavn.api.model.entity.MessageEntity;
-import com.zetavn.api.model.entity.UserInfoEntity;
-import com.zetavn.api.payload.request.UserInfoRequest;
-import com.zetavn.api.repository.ActivityLogRepository;
-import com.zetavn.api.repository.UserInfoRepository;
-import com.zetavn.api.service.UserInfoService;
 }

@@ -1,5 +1,7 @@
 package com.zetavn.api.service;
 
+import com.zetavn.api.enums.UserStatusEnum;
+import com.zetavn.api.model.dto.UserAdminDto;
 import com.zetavn.api.payload.request.SignUpRequest;
 import com.zetavn.api.payload.request.UserUpdateRequest;
 import com.zetavn.api.payload.response.ApiResponse;
@@ -21,7 +23,7 @@ public interface UserService {
 
     List<UserResponse> getAllUsers();
 
-    ApiResponse<UserResponse> update();
+    UserResponse update(String userId, UserUpdateRequest userUpdateRequest);
 
     ApiResponse<UserResponse> remove(String userId);
 
@@ -33,7 +35,11 @@ public interface UserService {
 
     ApiResponse<?> getStrangersByKeyword(String sourceId, String keyword, Integer pageNumebr, Integer pageSize);
 
-    ApiResponse<?> getAllUsersByKeyword(String keyword, Integer pageNumber, Integer pageSize);
+    ApiResponse<UserResponse> updateAvatar(String sourceId, String avatarPath);
+
+    ApiResponse<UserResponse> updatePoster(String sourceId, String avatarPath);
+
+    ApiResponse<List<UserContactResponse>> getUserContacts(String userId);
 
     ApiResponse<?> getAllUserForAdminByStatus(String status, Integer pageNumber, Integer pageSize);
 
@@ -49,9 +55,4 @@ public interface UserService {
 
     ApiResponse<?> getOneUserForAdmin(String id);
 
-    ApiResponse<UserResponse> updateAvatar(String sourceId, String avatarPath);
-
-    ApiResponse<UserResponse> updatePoster(String sourceId, String avatarPath);
-
-    ApiResponse<List<UserContactResponse>> getUserContacts(String userId);
 }

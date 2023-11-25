@@ -36,9 +36,6 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Autowired
     private FriendshipRepository friendshipRepository;
 
-    @Autowired
-    private UserService userService;
-
     @Override
     public ApiResponse<?> create(UserInfoRequest request) {
         return null;

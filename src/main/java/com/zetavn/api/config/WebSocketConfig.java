@@ -54,8 +54,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private JwtHelper jwtHelper;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @Autowired
     private ActivityLogRepository activityLogRepository;

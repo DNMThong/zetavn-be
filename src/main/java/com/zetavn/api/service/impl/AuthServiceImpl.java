@@ -115,6 +115,7 @@ public class AuthServiceImpl implements AuthService {
             userEntity.setCreatedAt(LocalDateTime.now());
             userEntity.setUpdatedAt(LocalDateTime.now());
             userEntity.setIsAuthorized(false);
+            userEntity.setIsDeleted(false);
             userEntity.setStatus(UserStatusEnum.ACTIVE);
             userEntity.setRole(RoleEnum.USER);
             userEntity.setLastName(signUpRequest.getLastName());
@@ -151,6 +152,8 @@ public class AuthServiceImpl implements AuthService {
             authenticationManager.authenticate(authenticationToken);
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid Username or Password!!");
+        }catch (Exception e) {
+            log.error(e.getMessage());
         }
         // Fetch the user
         UserEntity user = userRepository.findUserEntityByEmail(signInRequest.getUsername());

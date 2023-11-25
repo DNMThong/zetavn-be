@@ -28,6 +28,6 @@ public class PostLikeEntity {
     @JsonBackReference
     private PostEntity postEntity;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

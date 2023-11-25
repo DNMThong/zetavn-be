@@ -63,7 +63,7 @@ public class AuthController {
         // Authenticate the user
 
 //        doAuthenticate(signInRequest);
-        log.info("Try to login: {}", signInRequest.toString());
+//        log.info("Try to login: {}", signInRequest.toString());
         // Fetch the user details
 
         return authService.login(signInRequest, response);

@@ -42,9 +42,9 @@ public class SecurityConfig {
                                 .sameOrigin()
                         )
                 )
-                .authorizeHttpRequests(r -> r.requestMatchers("/api/v0/auth/**","/ws/**").permitAll()
+                .authorizeHttpRequests(r -> r.requestMatchers("/api/v0/auth/**","/ws/**","/api/v0/admins/**").permitAll()
                         .requestMatchers("/api/v0/auth/logout").authenticated()
-                        .anyRequest().hasAnyAuthority("USER"))
+                        .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .addFilterBefore(get(jwtHelper, refreshTokenService), UsernamePasswordAuthenticationFilter.class);

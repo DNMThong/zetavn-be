@@ -44,7 +44,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
 
 
-    @Query("SELECT o FROM UserEntity o WHERE o.isDeleted=false ORDER BY o.createdAt DESC")
+    @Query("SELECT o FROM UserEntity o WHERE o.isDeleted = false ORDER BY o.createdAt DESC")
     Page<UserEntity> findAllUser(Pageable pageable);
 
     @Query("SELECT o FROM UserEntity o WHERE o.status=?1 AND o.isDeleted=false ORDER BY o.createdAt DESC")
