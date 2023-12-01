@@ -9,7 +9,9 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zetavn.api.exception.CustomExceptionHandler;
 import com.zetavn.api.model.entity.RefreshTokenEntity;
+import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.repository.RefreshTokenRepository;
+import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.RefreshTokenService;
 import com.zetavn.api.service.impl.RefreshTokenImpl;
 import com.zetavn.api.utils.JwtHelper;
@@ -46,11 +48,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final RefreshTokenService refreshTokenService;
 
+    private  final UserRepository userRepository;
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = request.getHeader(AUTHORIZATION);
+
         log.info("authorizationHeader: " + authorizationHeader);
+        log.info("Method: {}, URI: {}",request.getMethod(),request.getRequestURI());
+
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             try {
                 String token = authorizationHeader.substring("Bearer ".length());
@@ -58,11 +65,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 if(decodedJWT.getExpiresAt().before(new Date()))
                     throw new TokenExpiredException("The token was expired", decodedJWT.getExpiresAt().toInstant());
                 String username = decodedJWT.getSubject();
+                UserEntity user = userRepository.findUserEntityByEmail(username);
+
                 String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
                 Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
                 stream(roles).forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
                 UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                        new UsernamePasswordAuthenticationToken(user.getUserId(), null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             } catch (TokenExpiredException e) {
                 log.error("Error logging in: {}", e.getMessage());

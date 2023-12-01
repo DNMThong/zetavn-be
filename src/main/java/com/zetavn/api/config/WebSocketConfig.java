@@ -6,6 +6,7 @@ import com.zetavn.api.model.entity.ActivityLogEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.repository.ActivityLogRepository;
 import com.zetavn.api.repository.UserRepository;
+import com.zetavn.api.service.OnlineUserServiceImpl;
 import com.zetavn.api.socket.UserHandshakeHandler;
 import com.zetavn.api.utils.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +108,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                 activityLogEntity.setOnlineTime(LocalDateTime.now());
                                 activityLogEntity.setIpAddress(ipAddress);
                                 activityLogEntity.setDeviceInformation(deviceInformation);
-
                                 activityLogRepository.save(activityLogEntity);
                             }
 
@@ -115,7 +115,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
                             stream(roles).forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
                             UsernamePasswordAuthenticationToken authenticationToken =
-                                    new UsernamePasswordAuthenticationToken(username, null, authorities);
+                                    new UsernamePasswordAuthenticationToken(user.getUserId(), null, authorities);
                             accessor.setUser(authenticationToken);
                         }
                     }
@@ -129,6 +129,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         activityLog.setUpdatedAt(LocalDateTime.now());
                         activityLogRepository.save(activityLog);
                     }
+
                 }
 
                 return message;

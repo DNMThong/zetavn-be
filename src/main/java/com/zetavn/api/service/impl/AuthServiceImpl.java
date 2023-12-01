@@ -42,6 +42,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -59,41 +61,28 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private FriendshipRepository friendshipRepository;
-
     @Autowired
     private PostRepository postRepository;
-
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private UserInfoRepository userInfoRepository;
-
     @Autowired
     private RefreshTokenService refreshTokenService;
-
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private ComfirmationTokenRepository comfirmationTokenRepository;
-
     @Autowired
     private JwtHelper jwtHelper;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     @Autowired
     private JavaMailSender sender;
-
     @Autowired
     private Configuration configFreemarker;
-
     @Autowired
     MailerService mailerService;
-
     @Value("${zetavn.domain}")
     String domain;
 

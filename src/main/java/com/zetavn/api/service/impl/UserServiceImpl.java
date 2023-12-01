@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -96,7 +97,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse update(String userId, UserUpdateRequest userUpdateRequest) {
+    public UserResponse update(UserUpdateRequest userUpdateRequest) {
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity user = userRepository.findById(userId).get();
         user.setEmail(userUpdateRequest.getEmail());
         user.setUsername(userUpdateRequest.getUsername());
@@ -142,7 +144,8 @@ public class UserServiceImpl implements UserService {
         }
     }
     @Override
-    public ApiResponse<?> getAllUsersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize) {
+    public ApiResponse<?> getAllUsersByKeyword(String keyword, Integer pageNumber, Integer pageSize) {
+        String sourceId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         log.info("Try to find Users by keyword {} at page number {} and page size {}", keyword, pageNumber, pageSize);
         if (pageNumber < 0 || pageSize < 0) {
             log.error("Error Logging: pageNumber {} < 0 || pageSize {} < 0 with keyword {}", pageNumber, pageSize, keyword);
@@ -198,7 +201,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<?> getAllFriendsByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize) {
+    public ApiResponse<?> getAllFriendsByKeyword(String keyword, Integer pageNumber, Integer pageSize) {
+        String sourceId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         log.info("Try to find Users by keyword {} at page number {} and page size {}", keyword, pageNumber, pageSize);
         if (pageNumber < 0 || pageSize < 0) {
             log.error("Error Logging: pageNumber {} < 0 || pageSize {} < 0 with keyword {}", pageNumber, pageSize, keyword);
@@ -256,7 +261,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<?> getStrangersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize) {
+    public ApiResponse<?> getStrangersByKeyword(String keyword, Integer pageNumber, Integer pageSize) {
+        String sourceId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         log.info("Try to find Users by keyword {} at page number {} and page size {}", keyword, pageNumber, pageSize);
         if (pageNumber < 0 || pageSize < 0) {
             log.error("Error Logging: pageNumber {} < 0 || pageSize {} < 0 with keyword {}", pageNumber, pageSize, keyword);
@@ -314,7 +320,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<UserResponse> updateAvatar(String sourceId, String avatarPath) {
+    public ApiResponse<UserResponse> updateAvatar(String avatarPath) {
+        String sourceId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<UserEntity> user = userRepository.findById(sourceId);
         if (user.isEmpty())
             throw new NotFoundException("Not found user with userId: " + sourceId);
@@ -326,7 +333,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<UserResponse> updatePoster(String sourceId, String posterPath) {
+    public ApiResponse<UserResponse> updatePoster(String posterPath) {
+        String sourceId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<UserEntity> user = userRepository.findById(sourceId);
         if (user.isEmpty())
             throw new NotFoundException("Not found user with userId: " + sourceId);
@@ -338,7 +346,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApiResponse<List<UserContactResponse>> getUserContacts(String userId) {
+    public ApiResponse<List<UserContactResponse>> getUserContacts() {
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserEntity user = userRepository.findById(userId).orElseGet(() -> {throw new NotFoundException("Not found user with userId: " + userId);});
 
         Map<String, UserContactResponse> map = new HashMap<String, UserContactResponse>();

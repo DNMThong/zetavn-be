@@ -60,11 +60,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ApiResponse<?> login(@RequestBody SignInRequest signInRequest, HttpServletResponse response) throws IOException {
-        // Authenticate the user
-
-//        doAuthenticate(signInRequest);
-//        log.info("Try to login: {}", signInRequest.toString());
-        // Fetch the user details
 
         return authService.login(signInRequest, response);
     }

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.time.LocalDate;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-@ToString
 public class UserInfoRequest {
 
     private String email;

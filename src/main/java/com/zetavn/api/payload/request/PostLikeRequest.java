@@ -6,8 +6,6 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@ToString
 public class PostLikeRequest {
 
     String postId;

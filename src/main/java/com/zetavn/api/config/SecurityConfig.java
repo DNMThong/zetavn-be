@@ -3,6 +3,7 @@ package com.zetavn.api.config;
 import com.zetavn.api.enums.RoleEnum;
 import com.zetavn.api.jwt.JwtAuthenticationEntryPoint;
 import com.zetavn.api.jwt.JwtAuthorizationFilter;
+import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.RefreshTokenService;
 import com.zetavn.api.utils.JwtHelper;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,8 @@ public class SecurityConfig {
 
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
 
+    private final UserRepository userRepository;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -62,6 +65,6 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
     private JwtAuthorizationFilter get(JwtHelper jwtHelper, RefreshTokenService refreshTokenService) {
-        return new JwtAuthorizationFilter(jwtHelper, refreshTokenService);
+        return new JwtAuthorizationFilter(jwtHelper, refreshTokenService,userRepository);
     }
 }

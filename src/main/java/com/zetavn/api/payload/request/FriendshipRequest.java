@@ -7,7 +7,6 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
 public class FriendshipRequest {
     private String senderId;
     private String receiverId;

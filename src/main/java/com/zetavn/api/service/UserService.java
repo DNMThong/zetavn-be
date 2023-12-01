@@ -23,23 +23,23 @@ public interface UserService {
 
     List<UserResponse> getAllUsers();
 
-    UserResponse update(String userId, UserUpdateRequest userUpdateRequest);
+    UserResponse update(UserUpdateRequest userUpdateRequest);
 
     ApiResponse<UserResponse> remove(String userId);
 
     ApiResponse<UserResponse> getUserByEmailOrUsername(String username, String email);
 
-    ApiResponse<?> getAllUsersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize);
+    ApiResponse<?> getAllUsersByKeyword(String keyword, Integer pageNumber, Integer pageSize);
 
-    ApiResponse<?> getAllFriendsByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize);
+    ApiResponse<?> getAllFriendsByKeyword(String keyword, Integer pageNumber, Integer pageSize);
 
-    ApiResponse<?> getStrangersByKeyword(String sourceId, String keyword, Integer pageNumebr, Integer pageSize);
+    ApiResponse<?> getStrangersByKeyword(String keyword, Integer pageNumebr, Integer pageSize);
 
-    ApiResponse<UserResponse> updateAvatar(String sourceId, String avatarPath);
+    ApiResponse<UserResponse> updateAvatar(String avatarPath);
 
-    ApiResponse<UserResponse> updatePoster(String sourceId, String avatarPath);
+    ApiResponse<UserResponse> updatePoster(String avatarPath);
 
-    ApiResponse<List<UserContactResponse>> getUserContacts(String userId);
+    ApiResponse<List<UserContactResponse>> getUserContacts();
 
     ApiResponse<?> getAllUserForAdminByStatus(String status, Integer pageNumber, Integer pageSize);
 
