@@ -38,7 +38,6 @@ public class UserController {
 
     @GetMapping("")
     public ApiResponse<?> getAllUsers() {
-
         return ApiResponse.success(HttpStatus.OK, "sucess", userService.getAllUsers());
     }
     @GetMapping("/search")
@@ -47,15 +46,16 @@ public class UserController {
                                             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                             @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize,
                                             @RequestParam(name = "option", defaultValue = "all", required = false) String option) {
+        String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         switch (option) {
             case "friends": {
-                return userService.getAllFriendsByKeyword(kw, pageNumber, pageSize);
+                return userService.getAllFriendsByKeyword(id, kw, pageNumber, pageSize);
             }
             case "strangers": {
-                return userService.getStrangersByKeyword(kw, pageNumber, pageSize);
+                return userService.getStrangersByKeyword(id, kw, pageNumber, pageSize);
             }
             case "all": {
-                return userService.getAllUsersByKeyword(kw, pageNumber, pageSize);
+                return userService.getAllUsersByKeyword(id ,kw, pageNumber, pageSize);
             }
             default: {
                 return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid option: Option(friends, strange, ?all)");
@@ -68,11 +68,17 @@ public class UserController {
         return postService.getAllPostByUserId(userId);
     }
 
-    @GetMapping("/{id}/newsfeed")
-    public ApiResponse<?> getPostById(@PathVariable(name = "id") String userId,
+    @GetMapping("/newsfeed")
+    public ApiResponse<?> getPostById(
                                       @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                       @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
-        return postService.getAllPostByUserFollow(userId, pageNumber, pageSize);
+
+        try {
+            String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return postService.getAllPostByUserFollow(id, pageNumber, pageSize);
+        }catch (Exception e) {
+            return ApiResponse.error(HttpStatus.UNAUTHORIZED,"UNAUTHORIZED");
+        }
     }
 
     @GetMapping("/{username}")
@@ -92,17 +98,19 @@ public class UserController {
         return friendshipService.getFriendsByUserId(id);
     }
 
-    @PutMapping("/{type}")
-    public ApiResponse<UserResponse> updateAvatar(@RequestBody UploadImageBase64Response imageBase64, @PathVariable String type) {
-        if (imageBase64.getImages().length == 0) {
+    @PutMapping("/{userId}/{type}")
+    public ApiResponse<UserResponse> updateAvatar(@PathVariable("userId") Optional<String> userId, @RequestBody UploadImageBase64Response imageBase64, @PathVariable String type) {
+        if (userId.isEmpty()) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Missing userId");
+        } else if (imageBase64.getImages().length == 0) {
             return ApiResponse.error(HttpStatus.NO_CONTENT, "Missing image");
         } else {
             switch (type) {
                 case "avatar": {
-                    return userService.updateAvatar(imageBase64.getImages()[0]);
+                    return userService.updateAvatar(userId.get(), imageBase64.getImages()[0]);
                 }
                 case "poster": {
-                    return userService.updatePoster(imageBase64.getImages()[0]);
+                    return userService.updatePoster(userId.get(), imageBase64.getImages()[0]);
                 }
                 default:
                     return ApiResponse.error(HttpStatus.NOT_ACCEPTABLE, "Type not acceptable");
@@ -110,9 +118,10 @@ public class UserController {
         }
     }
 
-    @GetMapping("/contacts")
-    public ApiResponse<List<UserContactResponse>> getContacts() {
-        return userService.getUserContacts();
+    @GetMapping("/{id}/contacts")
+    public ApiResponse<List<UserContactResponse>> getContacts(@PathVariable("id") String id) {
+        return userService.getUserContacts(id);
     }
+
 
 }
