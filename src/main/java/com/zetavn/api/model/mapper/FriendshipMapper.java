@@ -47,19 +47,19 @@ public class FriendshipMapper {
 
 
 
-    public FriendshipEntity friendshipRequestToEntity(FriendshipRequest friendshipRequest) {
-        FriendshipEntity friendshipEntity = new FriendshipEntity();
-
-        Optional<UserEntity> senderUser = userRepository.findById(friendshipRequest.getSenderId());
-        if(senderUser.isEmpty()) throw new NotFoundException("Not found senderUser with ID: " + friendshipRequest.getSenderId());
-        friendshipEntity.setSenderUserEntity(senderUser.get());
-
-        Optional<UserEntity> receiverUser = userRepository.findById(friendshipRequest.getReceiverId());
-        if(receiverUser.isEmpty()) throw new NotFoundException("Not found receiverUser with ID: " + friendshipRequest.getReceiverId());
-        friendshipEntity.setReceiverUserEntity(receiverUser.get());
-
-        return friendshipEntity;
-    }
+//    public FriendshipEntity friendshipRequestToEntity(FriendshipRequest friendshipRequest) {
+//        FriendshipEntity friendshipEntity = new FriendshipEntity();
+//
+//        Optional<UserEntity> senderUser = userRepository.findById(friendshipRequest.getSenderId());
+//        if(senderUser.isEmpty()) throw new NotFoundException("Not found senderUser with ID: " + friendshipRequest.getSenderId());
+//        friendshipEntity.setSenderUserEntity(senderUser.get());
+//
+//        Optional<UserEntity> receiverUser = userRepository.findById(friendshipRequest.getReceiverId());
+//        if(receiverUser.isEmpty()) throw new NotFoundException("Not found receiverUser with ID: " + friendshipRequest.getReceiverId());
+//        friendshipEntity.setReceiverUserEntity(receiverUser.get());
+//
+//        return friendshipEntity;
+//    }
 
 }
 

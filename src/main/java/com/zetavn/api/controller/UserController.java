@@ -46,20 +46,24 @@ public class UserController {
                                             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                             @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize,
                                             @RequestParam(name = "option", defaultValue = "all", required = false) String option) {
-        String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        switch (option) {
-            case "friends": {
-                return userService.getAllFriendsByKeyword(id, kw, pageNumber, pageSize);
+        try {
+            String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            switch (option) {
+                case "friends": {
+                    return userService.getAllFriendsByKeyword(id, kw, pageNumber, pageSize);
+                }
+                case "strangers": {
+                    return userService.getStrangersByKeyword(id, kw, pageNumber, pageSize);
+                }
+                case "all": {
+                    return userService.getAllUsersByKeyword(id ,kw, pageNumber, pageSize);
+                }
+                default: {
+                    return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid option: Option(friends, strange, ?all)");
+                }
             }
-            case "strangers": {
-                return userService.getStrangersByKeyword(id, kw, pageNumber, pageSize);
-            }
-            case "all": {
-                return userService.getAllUsersByKeyword(id ,kw, pageNumber, pageSize);
-            }
-            default: {
-                return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid option: Option(friends, strange, ?all)");
-            }
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.UNAUTHORIZED, e.getMessage());
         }
     }
 

@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -59,38 +60,45 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public ApiResponse<FriendshipResponse> sendRequest(FriendshipRequest friendshipRequest) {
-        FriendshipEntity existingFriendship = friendshipRepository.getFriendshipByUserID(friendshipRequest.getSenderId(), friendshipRequest.getReceiverId());
-        if(existingFriendship != null && existingFriendship.getStatus() == FriendStatusEnum.ACCEPTED) throw new DuplicateRecordException("This relationship already exists");
+        try {
+            String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            FriendshipEntity existingFriendship = friendshipRepository.getFriendshipByUserID(id, friendshipRequest.getUserId());
+            if(existingFriendship != null && existingFriendship.getStatus() == FriendStatusEnum.ACCEPTED) throw new DuplicateRecordException("This relationship already exists");
 
-        if (existingFriendship != null) {
-            if (existingFriendship.getStatus() == FriendStatusEnum.PENDING) {
-                return ApiResponse.error(HttpStatus.BAD_REQUEST, "Friend request already exists", null);
-            } else if (existingFriendship.getStatus() == FriendStatusEnum.REJECTED) {
-                friendshipRepository.deleteById(existingFriendship.getFriendshipId());
+            if (existingFriendship != null) {
+                if (existingFriendship.getStatus() == FriendStatusEnum.PENDING) {
+                    return ApiResponse.error(HttpStatus.BAD_REQUEST, "Friend request already exists", null);
+                } else if (existingFriendship.getStatus() == FriendStatusEnum.REJECTED) {
+                    friendshipRepository.deleteById(existingFriendship.getFriendshipId());
+                }
             }
+
+            FriendshipEntity friendship = new FriendshipEntity();
+            friendship.setSenderUserEntity(userRepository.findById(id).get());
+            friendship.setReceiverUserEntity(userRepository.findById(friendshipRequest.getUserId()).get());
+            friendship.setStatus(FriendStatusEnum.PENDING);
+            friendship.setCreatedAt(LocalDateTime.now());
+
+            FollowRequest follow = new FollowRequest();
+            follow.setFollowerId(friendship.getSenderUserEntity().getUserId());
+            follow.setFollowingId(friendship.getReceiverUserEntity().getUserId());
+            followService.friendshipFollow(follow);
+
+            FriendshipEntity saveFriendship = friendshipRepository.save(friendship);
+
+            // Send socket
+            FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
+            friendRequestResponse.setUser(OverallUserMapper.entityToDto(saveFriendship.getSenderUserEntity()));
+            friendRequestResponse.setCreatedAt(saveFriendship.getCreatedAt());
+            friendRequestResponse.setStatus(NotiFriendRequestEnum.PENDING);
+
+            simpMessagingTemplate.convertAndSendToUser(saveFriendship.getReceiverUserEntity().getUserId(),"/topic/friendship",friendRequestResponse);
+
+
+            return ApiResponse.success(HttpStatus.OK, "send request success!", friendshipMapper.entityToFriendshipResponse(saveFriendship));
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.UNAUTHORIZED, e.getMessage());
         }
-
-        FriendshipEntity friendship = friendshipMapper.friendshipRequestToEntity(friendshipRequest);
-        friendship.setStatus(FriendStatusEnum.PENDING);
-        friendship.setCreatedAt(LocalDateTime.now());
-
-        FollowRequest follow = new FollowRequest();
-        follow.setFollowerId(friendship.getSenderUserEntity().getUserId());
-        follow.setFollowingId(friendship.getReceiverUserEntity().getUserId());
-        followService.friendshipFollow(follow);
-
-        FriendshipEntity saveFriendship = friendshipRepository.save(friendship);
-
-        // Send socket
-        FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
-        friendRequestResponse.setUser(OverallUserMapper.entityToDto(saveFriendship.getSenderUserEntity()));
-        friendRequestResponse.setCreatedAt(saveFriendship.getCreatedAt());
-        friendRequestResponse.setStatus(NotiFriendRequestEnum.PENDING);
-
-        simpMessagingTemplate.convertAndSendToUser(saveFriendship.getReceiverUserEntity().getUserId(),"/topic/friendship",friendRequestResponse);
-
-
-        return ApiResponse.success(HttpStatus.OK, "send request success!", friendshipMapper.entityToFriendshipResponse(saveFriendship));
     }
 
     @Override
@@ -171,13 +179,15 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendship.setStatus(FriendStatusEnum.ACCEPTED);
         friendship.setCreatedAt(LocalDateTime.now());
 
+        //!!!!!!!!!!
+//        FollowRequest follow = new FollowRequest();
+//        follow.setUserId(friendship.getSenderUserEntity().getUserId());
+//        followService.friendshipFollow(follow);
+        //!!!!!!!!!!
         FollowRequest follow = new FollowRequest();
-        follow.setFollowerId(friendship.getReceiverUserEntity().getUserId());
-        follow.setFollowingId(friendship.getSenderUserEntity().getUserId());
+        follow.setFollowerId(friendship.getSenderUserEntity().getUserId());
+        follow.setFollowingId(friendship.getReceiverUserEntity().getUserId());
         followService.friendshipFollow(follow);
-
-
-
         FriendshipEntity updatedFriendship = friendshipRepository.save(friendship);
 
         FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
