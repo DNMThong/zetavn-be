@@ -122,8 +122,9 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{id}/contacts")
-    public ApiResponse<List<UserContactResponse>> getContacts(@PathVariable("id") String id) {
+    @GetMapping("/contacts")
+    public ApiResponse<List<UserContactResponse>> getContacts() {
+        String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService.getUserContacts(id);
     }
 

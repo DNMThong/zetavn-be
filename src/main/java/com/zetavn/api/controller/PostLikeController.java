@@ -5,6 +5,7 @@ import com.zetavn.api.payload.request.PostLikeRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.service.PostLikeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,8 +15,8 @@ public class PostLikeController {
     PostLikeService postLikeService;
 
     @GetMapping("")
-    public ApiResponse<?> checkPostLike(@RequestParam(name = "userId") String userId,
-                                        @RequestParam(name = "postId") String postId){
+    public ApiResponse<?> checkPostLike(@RequestParam(name = "postId") String postId){
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return postLikeService.checkPostLike(userId,postId);
     }
 

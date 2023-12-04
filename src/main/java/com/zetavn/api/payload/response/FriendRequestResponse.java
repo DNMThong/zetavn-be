@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FriendRequestResponse {
-
     private OverallUserResponse user;
     @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
     private LocalDateTime createdAt;
