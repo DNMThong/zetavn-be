@@ -59,10 +59,10 @@ public class PostLikeServiceImpl implements PostLikeService {
         }
 
     @Override
-    public ApiResponse<?> createPostLike(PostLikeRequest postLikeRequest) {
+    public ApiResponse<?> createPostLike(PostLikeRequest postLikeRequest, String userId) {
         try{
             PostEntity post = postRepository.findById(postLikeRequest.getPostId()).orElseThrow(NullPointerException::new);
-            UserEntity user = userRepository.findById(postLikeRequest.getUserId()).orElseThrow(NullPointerException::new);
+            UserEntity user = userRepository.findById(userId).orElseThrow(NullPointerException::new);
             PostLikeEntity postLike = new PostLikeEntity();
             postLike.setPostEntity(post);
             postLike.setUserEntity(user);
@@ -78,10 +78,10 @@ public class PostLikeServiceImpl implements PostLikeService {
      }
 
     @Override
-    public ApiResponse<?> removePostLike(PostLikeRequest postLikeRequest) {
+    public ApiResponse<?> removePostLike(PostLikeRequest postLikeRequest, String userId) {
         try{
             PostEntity post = postRepository.findById(postLikeRequest.getPostId()).orElseThrow(NullPointerException::new);
-            UserEntity user = userRepository.findById(postLikeRequest.getUserId()).orElseThrow(NullPointerException::new);
+            UserEntity user = userRepository.findById(userId).orElseThrow(NullPointerException::new);
             PostLikeEntity postLike = postLikeRepository.findPostLikeEntityByPostEntityAndUserEntity(post,user);
             postLikeRepository.delete(postLike);
             return ApiResponse.success(HttpStatus.OK,"Delete post-like success",null);

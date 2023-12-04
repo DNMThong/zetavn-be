@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.InvalidParameterException;
@@ -68,13 +69,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ApiResponse<PostDto> createPost(PostRequest postRequest) {
+    public ApiResponse<PostDto> createPost(PostRequest postRequest, String userId) {
         try {
-
             LocalDateTime currentDateTime = LocalDateTime.now();
             String uuid = generateRandomUUID();
 
-            UserEntity user = userRepository.findById(postRequest.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + postRequest.getUserId()));
+            UserEntity user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("No user found with ID: " + userId));
             PostEntity post = new PostEntity();
             post.setPostId(uuid);
             post.setUserEntity(user);
@@ -126,93 +126,93 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ApiResponse<PostDto> updatePost(String postId, PostRequest updatedPostRequest) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        PostEntity existingPost = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No posts found with ID: " + postId));
-        UserEntity existingUser = userRepository.findById(updatedPostRequest.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + updatedPostRequest.getUserId()));
+    public ApiResponse<PostDto> updatePost(String postId, PostRequest updatedPostRequest, String userId) {
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            PostEntity existingPost = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No posts found with ID: " + postId));
+            UserEntity existingUser = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("No user found with ID: " + userId));
 
-        existingPost.setContent(updatedPostRequest.getContent());
-        existingPost.setAccessModifier(updatedPostRequest.getAccessModifier());
-        existingPost.setUpdatedAt(currentDateTime);
+            existingPost.setContent(updatedPostRequest.getContent());
+            existingPost.setAccessModifier(updatedPostRequest.getAccessModifier());
+            existingPost.setUpdatedAt(currentDateTime);
 
-        if (updatedPostRequest.getActivityId() != null) {
-            PostActivityEntity postActivity = postActivityRepository.getActivityById(updatedPostRequest.getActivityId());
-            existingPost.setPostActivityEntity(postActivity);
-            postRepository.save(existingPost);
-        } else {
-            existingPost.setPostActivityEntity(null);
-            postRepository.save(existingPost);
-        }
+            if (updatedPostRequest.getActivityId() != null) {
+                PostActivityEntity postActivity = postActivityRepository.getActivityById(updatedPostRequest.getActivityId());
+                existingPost.setPostActivityEntity(postActivity);
+                postRepository.save(existingPost);
+            } else {
+                existingPost.setPostActivityEntity(null);
+                postRepository.save(existingPost);
+            }
 
-        if (updatedPostRequest.getMedias() != null) {
-            List<PostMediaRequest> updatedMediaList = updatedPostRequest.getMedias();
-            List<PostMediaEntity> currentMediaList = existingPost.getPostMediaEntityList();
-            List<PostMediaEntity> mediaToRemove = new ArrayList<>(currentMediaList);
+            if (updatedPostRequest.getMedias() != null) {
+                List<PostMediaRequest> updatedMediaList = updatedPostRequest.getMedias();
+                List<PostMediaEntity> currentMediaList = existingPost.getPostMediaEntityList();
+                List<PostMediaEntity> mediaToRemove = new ArrayList<>(currentMediaList);
 
-            for (PostMediaRequest updatedMedia : updatedMediaList) {
-                PostMediaEntity currentMedia = mediaToRemove.stream()
-                        .filter(media -> media.getMediaPath().equals(updatedMedia.getMediaPath()))
-                        .findFirst()
-                        .orElse(null);
+                for (PostMediaRequest updatedMedia : updatedMediaList) {
+                    PostMediaEntity currentMedia = mediaToRemove.stream()
+                            .filter(media -> media.getMediaPath().equals(updatedMedia.getMediaPath()))
+                            .findFirst()
+                            .orElse(null);
 
-                if (currentMedia != null) {
-                    currentMedia.setPostEntity(existingPost);
-                    currentMedia.setMediaPath(updatedMedia.getMediaPath());
-                    currentMedia.setMediaType(updatedMedia.getMediaType());
-                    currentMedia.setUserEntity(existingUser);
-                    mediaToRemove.remove(currentMedia);
+                    if (currentMedia != null) {
+                        currentMedia.setPostEntity(existingPost);
+                        currentMedia.setMediaPath(updatedMedia.getMediaPath());
+                        currentMedia.setMediaType(updatedMedia.getMediaType());
+                        currentMedia.setUserEntity(existingUser);
+                        mediaToRemove.remove(currentMedia);
+                    }
+                }
+                postMediaRepository.deleteAll(mediaToRemove);
+
+                for (PostMediaRequest updatedMedia : updatedMediaList) {
+                    boolean mediaExists = currentMediaList.stream()
+                            .anyMatch(media -> media.getMediaPath().equals(updatedMedia.getMediaPath()));
+
+                    if (!mediaExists) {
+                        PostMediaEntity newMedia = new PostMediaEntity();
+                        newMedia.setPostEntity(existingPost);
+                        newMedia.setMediaPath(updatedMedia.getMediaPath());
+                        newMedia.setMediaType(updatedMedia.getMediaType());
+                        newMedia.setUserEntity(existingUser);
+                        postMediaRepository.save(newMedia);
+                    }
                 }
             }
-            postMediaRepository.deleteAll(mediaToRemove);
 
-            for (PostMediaRequest updatedMedia : updatedMediaList) {
-                boolean mediaExists = currentMediaList.stream()
-                        .anyMatch(media -> media.getMediaPath().equals(updatedMedia.getMediaPath()));
+            if (updatedPostRequest.getMentions() != null) {
+                List<PostMentionRequest> updatedMentionList = updatedPostRequest.getMentions();
+                List<PostMentionEntity> currentMentionList = existingPost.getPostMentionEntityList();
+                List<PostMentionEntity> mentionToRemove = new ArrayList<>(currentMentionList);
 
-                if (!mediaExists) {
-                    PostMediaEntity newMedia = new PostMediaEntity();
-                    newMedia.setPostEntity(existingPost);
-                    newMedia.setMediaPath(updatedMedia.getMediaPath());
-                    newMedia.setMediaType(updatedMedia.getMediaType());
-                    newMedia.setUserEntity(existingUser);
-                    postMediaRepository.save(newMedia);
+                for (PostMentionRequest updatedMention : updatedMentionList) {
+                    PostMentionEntity currentMention = mentionToRemove.stream()
+                            .filter(mention -> mention.getUserEntity().getUserId().equals(updatedMention.getUserId()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (currentMention != null) {
+                        currentMention.setPostEntity(existingPost);
+                        currentMention.setUserEntity(userRepository.findById(updatedMention.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + updatedMention.getUserId())));
+                        mentionToRemove.remove(currentMention);
+                    }
+                }
+                postMentionRepository.deleteAll(mentionToRemove);
+
+                for (PostMentionRequest updateMention : updatedMentionList) {
+                    boolean mentionExists = currentMentionList.stream()
+                            .anyMatch(mention -> mention.getUserEntity().getUserId().equals(updateMention.getUserId()));
+
+                    if (!mentionExists) {
+                        PostMentionEntity newMention = new PostMentionEntity();
+                        newMention.setPostEntity(existingPost);
+                        newMention.setUserEntity(userRepository.findById(updateMention.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + updateMention.getUserId())));
+                        postMentionRepository.save(newMention);
+                    }
                 }
             }
-        }
 
-        if (updatedPostRequest.getMentions() != null) {
-            List<PostMentionRequest> updatedMentionList = updatedPostRequest.getMentions();
-            List<PostMentionEntity> currentMentionList = existingPost.getPostMentionEntityList();
-            List<PostMentionEntity> mentionToRemove = new ArrayList<>(currentMentionList);
-
-            for (PostMentionRequest updatedMention : updatedMentionList) {
-                PostMentionEntity currentMention = mentionToRemove.stream()
-                        .filter(mention -> mention.getUserEntity().getUserId().equals(updatedMention.getUserId()))
-                        .findFirst()
-                        .orElse(null);
-
-                if (currentMention != null) {
-                    currentMention.setPostEntity(existingPost);
-                    currentMention.setUserEntity(userRepository.findById(updatedMention.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + updatedMention.getUserId())));
-                    mentionToRemove.remove(currentMention);
-                }
-            }
-            postMentionRepository.deleteAll(mentionToRemove);
-
-            for (PostMentionRequest updateMention : updatedMentionList) {
-                boolean mentionExists = currentMentionList.stream()
-                        .anyMatch(mention -> mention.getUserEntity().getUserId().equals(updateMention.getUserId()));
-
-                if (!mentionExists) {
-                    PostMentionEntity newMention = new PostMentionEntity();
-                    newMention.setPostEntity(existingPost);
-                    newMention.setUserEntity(userRepository.findById(updateMention.getUserId()).orElseThrow(() -> new NotFoundException("No user found with ID: " + updateMention.getUserId())));
-                    postMentionRepository.save(newMention);
-                }
-            }
-        }
-
-        return ApiResponse.success(HttpStatus.OK, "Updated post success", PostMapper.entityToDto(existingPost));
+            return ApiResponse.success(HttpStatus.OK, "Updated post success", PostMapper.entityToDto(existingPost));
     }
 
     @Override

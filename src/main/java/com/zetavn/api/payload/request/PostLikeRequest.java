@@ -7,9 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostLikeRequest {
-
     String postId;
-
-    String userId;
-
 }

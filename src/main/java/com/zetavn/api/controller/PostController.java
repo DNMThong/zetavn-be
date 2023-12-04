@@ -8,6 +8,7 @@ import com.zetavn.api.service.impl.PostServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,12 +33,22 @@ public class PostController {
 
     @PostMapping("")
     public ApiResponse<?> createPost(@RequestBody PostRequest postRequest) {
-        return postService.createPost(postRequest);
+        try {
+            String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return postService.createPost(postRequest, id);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.UNAUTHORIZED, e.getMessage());
+        }
     }
 
     @PutMapping("/{postId}")
     public ApiResponse<?> updatePost(@PathVariable String postId, @RequestBody PostRequest postRequest) {
-        return postService.updatePost(postId, postRequest);
+        try {
+            String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return postService.updatePost(postId, postRequest, id);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.UNAUTHORIZED, e.getMessage());
+        }
     }
 
     @DeleteMapping("/{postId}")

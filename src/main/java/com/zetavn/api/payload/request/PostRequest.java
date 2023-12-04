@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostRequest {
-    private String userId;
     private String content;
     private PostAccessModifierEnum accessModifier;
     private Integer activityId;
