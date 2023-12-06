@@ -48,9 +48,9 @@ public class MessageServiceImpl implements MessageService {
     private CloudinaryService cloudinaryService;
 
     @Override
-    public MessageResponse createMessage(MessageRequest message) {
+    public MessageResponse createMessage(MessageRequest message,String senderId) {
         UserEntity userReciever =  userRepository.findById(message.getRecieverId()).orElseThrow(() -> {throw new NotFoundException("Not found user reciever by id");});
-        UserEntity userSender =  userRepository.findById(message.getSenderId()).orElseThrow(() -> {throw new NotFoundException("Not found user sender by id");});
+        UserEntity userSender =  userRepository.findById(senderId).orElseThrow(() -> {throw new NotFoundException("Not found user sender by id");});
 
         MessageEntity messageEntity = new MessageEntity();
         messageEntity.setCreatedAt(LocalDateTime.now());
@@ -67,7 +67,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public MessageResponse createMessageFile(MessageRequest message, MultipartFile file) {
+    public MessageResponse createMessageFile(MessageRequest message, MultipartFile file,String senderId) {
         FileUploadResponse fileUploadResponse = null;
         if(message.getType().equals(MessageTypeEnum.IMAGE)) {
             fileUploadResponse = cloudinaryService.upload(file,"images/","image");
@@ -76,7 +76,7 @@ public class MessageServiceImpl implements MessageService {
         }
         if(fileUploadResponse!=null) {
             message.setMessage(fileUploadResponse.getUrl());
-            return this.createMessage(message);
+            return this.createMessage(message,senderId);
         }
         return null;
     }

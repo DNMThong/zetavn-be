@@ -10,13 +10,11 @@ import com.zetavn.api.model.entity.ComfirmationTokenEntity;
 import com.zetavn.api.model.entity.RefreshTokenEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.entity.UserInfoEntity;
+import com.zetavn.api.model.mapper.UserInfoMapper;
 import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.payload.request.SignInRequest;
 import com.zetavn.api.payload.request.SignUpRequest;
-import com.zetavn.api.payload.response.ApiResponse;
-import com.zetavn.api.payload.response.JwtResponse;
-import com.zetavn.api.payload.response.SignInResponse;
-import com.zetavn.api.payload.response.UserResponse;
+import com.zetavn.api.payload.response.*;
 import com.zetavn.api.repository.*;
 import com.zetavn.api.service.AuthService;
 import com.zetavn.api.service.FriendshipService;
@@ -194,7 +192,12 @@ public class AuthServiceImpl implements AuthService {
 
                 // response data for client
                 SignInResponse _res = new SignInResponse();
-                UserResponse userResponse = UserMapper.userEntityToUserResponse(user);
+
+                UserResponse userResponse = UserMapper.userInfoToUserResponse(user.getUserInfo());
+                userResponse.getInformation().setTotalFriends(friendshipRepository.countFriends(user.getUserId()));
+                userResponse.getInformation().setTotalPosts(postRepository.countPostEntityByUserEntityUserId(user.getUserId()));
+                userResponse.getInformation().setCountLikesOfPosts(postRepository.getTotalLikesByUserId(user.getUserId()));
+
                 _res.setUserInfo(userResponse);
                 _res.setAccess_token(access_token);
                 return ApiResponse.success(HttpStatus.OK, "Re-login success", _res);

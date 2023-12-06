@@ -55,8 +55,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = request.getHeader(AUTHORIZATION);
 
-        log.info("authorizationHeader: " + authorizationHeader);
-        log.info("Method: {}, URI: {}",request.getMethod(),request.getRequestURI());
+//        log.info("authorizationHeader: " + authorizationHeader);
+//        log.info("Method: {}, URI: {}",request.getMethod(),request.getRequestURI());
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             try {

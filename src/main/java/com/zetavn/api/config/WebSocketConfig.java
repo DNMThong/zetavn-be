@@ -92,6 +92,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
                     String ipAddress = accessor.getFirstNativeHeader("ip_address");
                     String deviceInformation = accessor.getFirstNativeHeader("device_information");
+                    String saveActivityLog = accessor.getFirstNativeHeader("saveActivityLog");
 
                     if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                         String token = authorizationHeader.substring("Bearer ".length());
@@ -100,7 +101,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             String username = decodedJWT.getSubject();
                             UserEntity user = userRepository.findUserEntityByEmail(username);
 
-                            if(user!=null) {
+                            if(user!=null&&saveActivityLog.equals("true")) {
                                 ActivityLogEntity activityLogEntity = new ActivityLogEntity();
                                 activityLogEntity.setActivityLogId(sessionId);
                                 activityLogEntity.setUserEntity(user);

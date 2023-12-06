@@ -26,6 +26,7 @@ public class NotificationController {
         if(principal!=null) {
             System.out.println(principal.getName());
         }
+        System.out.println("HELASOFKAJDJ");
     }
 
 }

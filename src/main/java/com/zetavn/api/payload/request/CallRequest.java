@@ -1,6 +1,6 @@
 package com.zetavn.api.payload.request;
 
-import com.zetavn.api.enums.MessageTypeEnum;
+import com.zetavn.api.enums.CallTypeEnum;
 import com.zetavn.api.payload.response.OverallUserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +11,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MessageRequest {
-    private String recieverId;
-    private String message;
-    private MessageTypeEnum type;
+public class CallRequest {
+    String to;
+    OverallUserResponse from;
+    CallTypeEnum type;
+    String roomId;
 }
