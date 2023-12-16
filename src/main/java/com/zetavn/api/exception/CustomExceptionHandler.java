@@ -23,7 +23,7 @@ public class CustomExceptionHandler {
     }
 
     // 400 Bad Request: Yêu cầu không hợp lệ do cú pháp sai hoặc tham số không hợp lệ.
-    @ExceptionHandler(DuplicateRecordException.class)
+    @ExceptionHandler({DuplicateRecordException.class,InvalidFieldException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<Void> handlerDuplicateRecordException(DuplicateRecordException ex, WebRequest req) {
 //        logger.error(ex.getMessage());

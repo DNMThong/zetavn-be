@@ -58,8 +58,10 @@ public class PostController {
 
     @GetMapping("/postMedia")
     public ApiResponse<?> getPostById(@RequestParam(name = "userId") String userId,
+                                      @RequestParam(name = "type") String type,
                                       @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                       @RequestParam(value = "pageSize", defaultValue = "9", required = false) Integer pageSize) {
-        return postService.getPostsWithMediaByUserId(userId, pageNumber, pageSize);
+        System.out.println(pageSize);
+        return postService.getPostsWithMediaByUserId(userId, type, pageNumber, pageSize);
     }
 }

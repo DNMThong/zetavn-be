@@ -4,9 +4,11 @@ import com.zetavn.api.enums.PostStatusEnum;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.dto.PostAdminDto;
 import com.zetavn.api.model.dto.PostDto;
+import com.zetavn.api.model.dto.PostMediaDto;
 import com.zetavn.api.model.dto.UserMentionDto;
 import com.zetavn.api.model.entity.*;
 import com.zetavn.api.model.mapper.PostMapper;
+import com.zetavn.api.model.mapper.PostMediaMapper;
 import com.zetavn.api.model.mapper.UserMapper;
 import com.zetavn.api.model.mapper.UserMentionMapper;
 import com.zetavn.api.payload.request.PostMediaRequest;
@@ -64,8 +66,21 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ApiResponse<List<PostDto>> getAllPostByUserId(String userID) {
-        return ApiResponse.success(HttpStatus.OK, "Get all post by userId success", PostMapper.entityListToDtoList(postRepository.getAllPostByUserId(userID)));
+    public ApiResponse<Paginate<List<PostDto>>> getAllPostByUserId(String userId,Integer pageNumber, Integer pageSize) {
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> {throw new NotFoundException("Not found post by userId: "+userId);});
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<PostEntity> posts = postRepository.getAllPostByUserId(userEntity.getUserId(),pageable);
+        List<PostEntity> postList = posts.getContent();
+        List<PostDto> postDtoList = PostMapper.entityListToDtoList(postList);
+        Paginate<List<PostDto>> dataResponse = new Paginate<>(
+                posts.getNumber(),
+                posts.getSize(),
+                posts.getTotalElements(),
+                posts.getTotalPages(),
+                posts.isLast(),
+                postDtoList
+        );
+        return ApiResponse.success(HttpStatus.OK, "Get all post by userId success", dataResponse);
     }
 
     @Override
@@ -254,13 +269,15 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    public ApiResponse<Paginate<List<PostDto>>> getPostsWithMediaByUserId(String userId, Integer pageNumber, Integer pageSize) {
+    @Override
+    public ApiResponse<Paginate<List<PostMediaDto>>> getPostsWithMediaByUserId(String userId,String type, Integer pageNumber, Integer pageSize) {
         try {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<PostEntity> posts = postRepository.getPostsWithMediaByUserId(userId, pageable);
-            List<PostEntity> postList = posts.getContent();
-            List<PostDto> postDtoList = PostMapper.entityListToDtoList(postList);
-            Paginate<List<PostDto>> dataResponse = new Paginate<>(
+
+            Page<PostMediaEntity> posts = postRepository.getPostsWithMediaByUserId(userId, type, pageable);
+            List<PostMediaEntity> postList = posts.getContent();
+            List<PostMediaDto> postDtoList = PostMediaMapper.entityListToDtoList(postList);
+            Paginate<List<PostMediaDto>> dataResponse = new Paginate<>(
                     posts.getNumber(),
                     posts.getSize(),
                     posts.getTotalElements(),

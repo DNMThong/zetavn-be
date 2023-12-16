@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 public class MessageMapper {
 
-
-
     public static MessageResponse entityToDto(MessageEntity message) {
         MessageResponse messageDto = new MessageResponse();
         messageDto.setId(message.getMessageId());
@@ -21,6 +19,10 @@ public class MessageMapper {
         messageDto.setReciever(OverallUserMapper.entityToDto(message.getRecieverUser()));
         messageDto.setSender(OverallUserMapper.entityToDto(message.getSenderUser()));
         messageDto.setCreatedAt(message.getCreatedAt());
+
+        if(message.getMessageCall()!=null) {
+            messageDto.setCall(MessageCallMapper.entityToDto(message.getMessageCall()));
+        }
 
         return messageDto;
     }

@@ -15,4 +15,5 @@ public class MessageRequest {
     private String recieverId;
     private String message;
     private MessageTypeEnum type;
+    private MessageCallRequest call;
 }

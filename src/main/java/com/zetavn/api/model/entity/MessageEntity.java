@@ -46,4 +46,7 @@ public class MessageEntity {
     @JoinColumn(name = "reciever_id", nullable = false)
     @JsonBackReference
     private UserEntity recieverUser;
+
+    @OneToOne(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+    private MessageCallEntity messageCall;
 }

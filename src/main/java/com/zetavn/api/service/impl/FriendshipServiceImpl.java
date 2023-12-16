@@ -239,46 +239,48 @@ public class FriendshipServiceImpl implements FriendshipService {
 //
 //        return ApiResponse.success(HttpStatus.OK, "Reject success!", friendshipMapper.entityToFriendshipResponse(updatedFriendship));
 //    }
-    @Override
-    public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPaginate(String userId, Integer pageNumber, Integer pageSize) {
+@Override
+public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPaginate(String userId, Integer pageNumber, Integer pageSize) {
 
-        try {
-            Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            UserEntity user = userRepository.findUserEntityByUsername(userId);
-            Page<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUserPageable(user.getUserId(), pageable);
-            Page<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(user.getUserId(), pageable);
-            List<UserEntity> allFriends = new ArrayList<>(friendsSentToUser.getContent());
-            allFriends.addAll(friendsReceivedByUser.getContent());
+    try {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        UserEntity user = userRepository.findUserEntityByUsername(userId);
+//            Page<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUserPageable(user.getUserId(), pageable);
+//            Page<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(user.getUserId(), pageable);
+        Page<UserEntity> findFriend = friendshipRepository.findFriends(user.getUserId(), pageable);
+        List<UserEntity> allFriends = findFriend.getContent();
+//                    new ArrayList<>(friendsSentToUser.getContent());
+//            allFriends.addAll(friendsReceivedByUser.getContent());
 
-            List<FriendRequestResponse> friendResponses = new ArrayList<>();
-            int number = Math.max(friendsSentToUser.getNumber(), friendsReceivedByUser.getNumber());
-            int size = Math.max(friendsSentToUser.getSize(), friendsReceivedByUser.getSize());
-            long totalElements = friendsSentToUser.getTotalElements() + friendsReceivedByUser.getTotalElements();
-            int totalPages = Math.max(friendsSentToUser.getTotalPages(), friendsReceivedByUser.getTotalPages());
-            boolean isLast = friendsSentToUser.isLast() && friendsReceivedByUser.isLast();
+        List<FriendRequestResponse> friendResponses = new ArrayList<>();
+//            int number = Math.max(friendsSentToUser.getNumber(), friendsReceivedByUser.getNumber());
+//            int size = Math.max(friendsSentToUser.getSize(), friendsReceivedByUser.getSize());
+//            long totalElements = friendsSentToUser.getTotalElements() + friendsReceivedByUser.getTotalElements();
+//            int totalPages = Math.max(friendsSentToUser.getTotalPages(), friendsReceivedByUser.getTotalPages());
+//            boolean isLast = friendsSentToUser.isLast() && friendsReceivedByUser.isLast();
 
-            for (UserEntity friend : allFriends) {
-                FriendRequestResponse friendResponse = new FriendRequestResponse();
-                friendResponse.setUser(OverallUserMapper.entityToDto(friend));
-                friendResponse.setCreatedAt(null);
-                friendResponses.add(friendResponse);
-            }
-
-            Paginate<List<FriendRequestResponse>> dataResponse = new Paginate<>(
-                    number,
-                    size,
-                    totalElements,
-                    totalPages,
-                    isLast,
-                    friendResponses
-            );
-
-            return ApiResponse.success(HttpStatus.OK, "List of friends", dataResponse);
-        } catch (Exception e) {
-            System.out.println("error: " + e.getMessage());
-            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid param!");
+        for (UserEntity friend : allFriends) {
+            FriendRequestResponse friendResponse = new FriendRequestResponse();
+            friendResponse.setUser(OverallUserMapper.entityToDto(friend));
+            friendResponse.setCreatedAt(null);
+            friendResponses.add(friendResponse);
         }
+
+        Paginate<List<FriendRequestResponse>> dataResponse = new Paginate<>(
+                findFriend.getNumber(),
+                findFriend.getSize(),
+                findFriend.getTotalElements(),
+                findFriend.getTotalPages(),
+                findFriend.isLast(),
+                friendResponses
+        );
+
+        return ApiResponse.success(HttpStatus.OK, "List of friends", dataResponse);
+    } catch (Exception e) {
+        System.out.println("error: " + e.getMessage());
+        return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid param!");
     }
+}
 
     @Override
     public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendSuggestions(String userId, Integer pageNumber, Integer pageSize) {
@@ -313,7 +315,6 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Override
     public ApiResponse<List<OverallUserResponse>> getFriendsByUserId(String userId) {
         UserEntity userEnitty = userRepository.findUserEntityByUsername(userId);
-        System.out.println("User ID: " + userEnitty.getUserId());
         List<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUser(userEnitty.getUserId());
         List<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(userEnitty.getUserId());
 

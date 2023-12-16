@@ -2,6 +2,7 @@ package com.zetavn.api.repository;
 
 import com.zetavn.api.enums.PostStatusEnum;
 import com.zetavn.api.model.entity.PostEntity;
+import com.zetavn.api.model.entity.PostMediaEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -18,8 +19,8 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, String> {
-    @Query("SELECT o FROM PostEntity o WHERE o.userEntity.userId LIKE ?1")
-    List<PostEntity> getAllPostByUserId(String userId);
+    @Query("SELECT p FROM PostEntity p WHERE p.userEntity.userId LIKE ?1 ORDER BY p.createdAt DESC")
+    Page<PostEntity> getAllPostByUserId(String userId,Pageable pageable);
 
     @Modifying
     @Transactional
@@ -51,6 +52,6 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
     Page<PostEntity> findTop10PostsByCommentAndLike(Pageable pageable);
 
 
-    @Query("SELECT p.postEntity FROM PostMediaEntity p WHERE p.userEntity.userId = ?1 ORDER BY p.postEntity.createdAt DESC")
-    Page<PostEntity> getPostsWithMediaByUserId(String userId, Pageable pageable);
+    @Query("SELECT p FROM PostMediaEntity p WHERE p.mediaType = :type  and p.userEntity.userId = :userId ORDER BY p.postEntity.createdAt DESC")
+    Page<PostMediaEntity> getPostsWithMediaByUserId(@Param("userId") String userId, @Param("type") String type, Pageable pageable);
 }

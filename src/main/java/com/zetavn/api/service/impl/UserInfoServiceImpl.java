@@ -1,5 +1,6 @@
 package com.zetavn.api.service.impl;
 
+import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.entity.UserInfoEntity;
 import com.zetavn.api.model.mapper.UserMapper;
@@ -85,7 +86,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     public ApiResponse<?> getUserInfoByUsername(String username) {
         UserEntity user = userRepository.findUserEntityByUsername(username);
         if (user == null) {
-            return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found user");
+            throw new NotFoundException("Not found");
         } else {
             String userId = user.getUserId();
             UserResponse response = UserMapper.userInfoToUserResponse(userInfoRepository.findByUserEntity_UserId(userId));

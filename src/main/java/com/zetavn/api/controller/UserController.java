@@ -1,5 +1,6 @@
 package com.zetavn.api.controller;
 
+import com.zetavn.api.model.dto.PostDto;
 import com.zetavn.api.payload.request.UploadImageBase64Response;
 import com.zetavn.api.payload.request.UserInfoRequest;
 import com.zetavn.api.payload.response.*;
@@ -68,8 +69,12 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/posts")
-    public ApiResponse<?> getAllPostByUserId(@PathVariable String userId) {
-        return postService.getAllPostByUserId(userId);
+    public ApiResponse<Paginate<List<PostDto>>> getAllPostByUserId(
+            @PathVariable String userId,
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize
+                                                                   ) {
+        return postService.getAllPostByUserId(userId,pageNumber,pageSize);
     }
 
     @GetMapping("/newsfeed")
@@ -85,7 +90,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/{username}/profile")
     public ApiResponse<?> getUserProfile(@PathVariable(name = "username", required = true) Optional<String> userId) {
         return userInfoService.getUserInfoByUsername(userId.get());
     }

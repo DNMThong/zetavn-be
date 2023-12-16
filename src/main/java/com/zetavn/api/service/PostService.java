@@ -15,7 +15,7 @@ import java.util.List;
 public interface PostService {
     PostDto getPostById(String postId);
 
-    ApiResponse<?> getAllPostByUserId(String userID);
+    ApiResponse<Paginate<List<PostDto>>> getAllPostByUserId(String userId,Integer pageNumber, Integer pageSize);
 
     ApiResponse<PostDto> createPost(PostRequest postRequest, String userId);
 
@@ -35,5 +35,5 @@ public interface PostService {
 
     ApiResponse<?> getOnePostForAdmin(String id);
 
-    ApiResponse<?> getPostsWithMediaByUserId(String userId, Integer pageNumber, Integer pageSize);
+    ApiResponse<?> getPostsWithMediaByUserId(String userId,String type, Integer pageNumber, Integer pageSize);
 }

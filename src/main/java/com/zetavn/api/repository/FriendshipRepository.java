@@ -17,6 +17,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Long> {
+
+    @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
+            "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED' " +
+            "OR f.receiverUserEntity IN (SELECT f2.senderUserEntity FROM FriendshipEntity f2 " +
+            "WHERE f2.receiverUserEntity.userId = :userId AND f2.status = 'ACCEPTED')")
+    Page<UserEntity> findFriends(@Param("userId") String userId, Pageable pageable);
+
     @Query("SELECT f from  FriendshipEntity f " +
             "WHERE f.senderUserEntity.userId = :senderId " +
             "AND   f.receiverUserEntity.userId = :receiverId")

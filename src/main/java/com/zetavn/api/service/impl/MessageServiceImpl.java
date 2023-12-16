@@ -2,17 +2,18 @@ package com.zetavn.api.service.impl;
 
 import com.zetavn.api.enums.MessageStatusEnum;
 import com.zetavn.api.enums.MessageTypeEnum;
+import com.zetavn.api.exception.InvalidFieldException;
 import com.zetavn.api.exception.NotFoundException;
+import com.zetavn.api.model.entity.MessageCallEntity;
 import com.zetavn.api.model.entity.MessageEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.mapper.CommentMapper;
 import com.zetavn.api.model.mapper.MessageMapper;
+import com.zetavn.api.payload.request.MessageCallRequest;
 import com.zetavn.api.payload.request.MessageRequest;
-import com.zetavn.api.payload.response.CommentResponse;
-import com.zetavn.api.payload.response.FileUploadResponse;
-import com.zetavn.api.payload.response.MessageResponse;
-import com.zetavn.api.payload.response.Paginate;
+import com.zetavn.api.payload.response.*;
 import com.zetavn.api.repository.ActivityLogRepository;
+import com.zetavn.api.repository.MesageCallRepository;
 import com.zetavn.api.repository.MessageRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.CloudinaryService;
@@ -47,6 +48,9 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+    @Autowired
+    private MesageCallRepository mesageCallRepository;
+
     @Override
     public MessageResponse createMessage(MessageRequest message,String senderId) {
         UserEntity userReciever =  userRepository.findById(message.getRecieverId()).orElseThrow(() -> {throw new NotFoundException("Not found user reciever by id");});
@@ -60,8 +64,22 @@ public class MessageServiceImpl implements MessageService {
         messageEntity.setStatus(MessageStatusEnum.SENT);
         messageEntity.setType(message.getType());
 
-
         MessageEntity messageResponse = messageRepository.save(messageEntity);
+
+        if(message.getType().equals(MessageTypeEnum.CALL)) {
+            MessageCallRequest callRequest = message.getCall();
+            if(callRequest==null) throw new InvalidFieldException("Field call is null");
+
+            MessageCallEntity messageCall = new MessageCallEntity();
+            messageCall.setDuration(callRequest.getDuration());
+            messageCall.setStatus(callRequest.getStatus());
+            messageCall.setType(callRequest.getType());
+            messageCall.setCreatedAt(LocalDateTime.now());
+            messageCall.setMessage(messageResponse);
+
+            MessageCallEntity messageCallResponse = mesageCallRepository.save(messageCall);
+            messageResponse.setMessageCall(messageCallResponse);
+        }
 
         return MessageMapper.entityToDto(messageResponse) ;
     }
