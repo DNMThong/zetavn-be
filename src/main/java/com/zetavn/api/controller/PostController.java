@@ -52,8 +52,13 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public ApiResponse<?> deletePost(@PathVariable String postId) {
-        return postService.deletePost(postId);
+    public ApiResponse<?> removePost(@PathVariable String postId) {
+        try {
+            String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return postService.removePost(id, postId);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.UNAUTHORIZED, e.getMessage());
+        }
     }
 
     @GetMapping("/postMedia")

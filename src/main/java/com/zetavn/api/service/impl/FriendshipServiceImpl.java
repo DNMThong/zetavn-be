@@ -31,9 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class FriendshipServiceImpl implements FriendshipService {
@@ -224,7 +222,32 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         return ApiResponse.success(HttpStatus.OK, "Reject success!", friendshipMapper.entityToFriendshipResponse(updatedFriendship));
     }
-//    @Override
+
+    @Override
+    public ApiResponse<FriendshipResponse> unfriend(String userUnfriend, String userUnfriended) {
+        FriendshipEntity friendship = friendshipRepository.getFriendshipByUserID(userUnfriend, userUnfriended);
+
+        if (friendship == null) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Invalid request", null);
+        }
+
+        friendshipRepository.delete(friendship);
+        followService.deleteFollow(friendship.getSenderUserEntity().getUserId(), friendship.getReceiverUserEntity().getUserId());
+
+        UserEntity userEntity = userRepository.findById(userUnfriend).orElseThrow(() -> {throw new NotFoundException("Not found user");});
+
+
+        FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
+        friendRequestResponse.setUser(OverallUserMapper.entityToDto(userEntity));
+        friendRequestResponse.setCreatedAt(friendship.getCreatedAt());
+        friendRequestResponse.setStatus(NotiFriendRequestEnum.CANCEL);
+
+        simpMessagingTemplate.convertAndSendToUser(userUnfriended,"/topic/friendship",friendRequestResponse);
+
+        return ApiResponse.success(HttpStatus.OK, "Unfriend success!", friendshipMapper.entityToFriendshipResponse(friendship));
+    }
+
+    //    @Override
 //    public ApiResponse<FriendshipResponse> rejected(Long friendshipId) {
 //        FriendshipEntity friendship = friendshipRepository.findById(friendshipId).orElse(null);
 //
@@ -244,10 +267,10 @@ public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPagi
 
     try {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        UserEntity user = userRepository.findUserEntityByUsername(userId);
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> {throw new NotFoundException("Not found userId: "+userId);});
 //            Page<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUserPageable(user.getUserId(), pageable);
 //            Page<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(user.getUserId(), pageable);
-        Page<UserEntity> findFriend = friendshipRepository.findFriends(user.getUserId(), pageable);
+        Page<UserEntity> findFriend = friendshipRepository.findFriendsPagination(user.getUserId(), pageable);
         List<UserEntity> allFriends = findFriend.getContent();
 //                    new ArrayList<>(friendsSentToUser.getContent());
 //            allFriends.addAll(friendsReceivedByUser.getContent());
@@ -283,20 +306,33 @@ public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPagi
 }
 
     @Override
-    public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendSuggestions(String userId, Integer pageNumber, Integer pageSize) {
+    public ApiResponse<Paginate<List<OverallUserResponse>>> getFriendSuggestions(String userId, Integer pageNumber, Integer pageSize) {
         try {
+            UserEntity user = userRepository.findById(userId).orElseThrow(() -> {throw new NotFoundException("Not found suggestions for user id: "+userId);});
+
+            Map<String,String> map = new HashMap<>();
+
+            List<UserEntity> friends = userRepository.findFriendsByUser(userId);
+
+            friends.forEach(item1 -> {
+                userRepository.findFriendsByUser(item1.getUserId()).forEach(item2 -> {
+                    map.put(item2.getUserId(),"");
+                });
+            });
+            List<String> listUserId = new ArrayList<>(map.keySet());
+
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<UserEntity> friendSuggestions = friendshipRepository.findSuggestionsForUser(userId, pageable);
+            Page<UserEntity> friendSuggestions = friendshipRepository.findSuggestionsForUser(userId,listUserId, pageable);
             List<UserEntity> users = friendSuggestions.getContent();
-            List<FriendRequestResponse> suggestionResponses = new ArrayList<>();
+            List<OverallUserResponse> suggestionResponses = new ArrayList<>();
             for (UserEntity suggestion : users) {
-                // Ánh xạ từ UserEntity sang FriendRequestResponse
-                FriendRequestResponse suggestionResponse = new FriendRequestResponse();
-                suggestionResponse.setUser(OverallUserMapper.entityToDto(suggestion));
-                suggestionResponse.setCreatedAt(null);
-                suggestionResponses.add(suggestionResponse);
+                OverallUserResponse userResponse = OverallUserMapper.entityToDto(suggestion);
+//                FriendRequestResponse suggestionResponse = new FriendRequestResponse();
+//                suggestionResponse.setUser(OverallUserMapper.entityToDto(suggestion));
+//                suggestionResponse.setCreatedAt(null);
+                suggestionResponses.add(userResponse);
             }
-            Paginate<List<FriendRequestResponse>> dataResponse = new Paginate<>(
+            Paginate<List<OverallUserResponse>> dataResponse = new Paginate<>(
                     friendSuggestions.getNumber(),
                     friendSuggestions.getSize(),
                     friendSuggestions.getTotalElements(),
@@ -314,7 +350,7 @@ public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPagi
 
     @Override
     public ApiResponse<List<OverallUserResponse>> getFriendsByUserId(String userId) {
-        UserEntity userEnitty = userRepository.findUserEntityByUsername(userId);
+        UserEntity userEnitty = userRepository.findById(userId).orElseThrow(() -> {throw new NotFoundException("Not found userId: "+userId);});
         List<UserEntity> friendsSentToUser = friendshipRepository.findFriendsSentToUser(userEnitty.getUserId());
         List<UserEntity> friendsReceivedByUser = friendshipRepository.findFriendsReceivedByUser(userEnitty.getUserId());
 
@@ -328,7 +364,7 @@ public ApiResponse<Paginate<List<FriendRequestResponse>>> getFriendsByUserIdPagi
         }
         return ApiResponse.success(HttpStatus.OK , "List of friends", friendResponses);
     }
-//
+
 //    @Override
 //    public ApiResponse<List<FriendRequestResponse>> getFriendSuggestions(String userId) {
 //        List<UserEntity> friendSuggestions = friendshipRepository.findSuggestionsForUser(userId);

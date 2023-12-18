@@ -18,11 +18,17 @@ import java.util.Optional;
 
 public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Long> {
 
-    @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
-            "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED' " +
-            "OR f.receiverUserEntity IN (SELECT f2.senderUserEntity FROM FriendshipEntity f2 " +
-            "WHERE f2.receiverUserEntity.userId = :userId AND f2.status = 'ACCEPTED')")
-    Page<UserEntity> findFriends(@Param("userId") String userId, Pageable pageable);
+
+    @Query("SELECT u " +
+            "FROM UserEntity u " +
+            "WHERE u.userId IN " +
+            "(SELECT f.senderUserEntity.userId FROM FriendshipEntity f " +
+            "WHERE f.receiverUserEntity.userId = :userId and f.status = 'ACCEPTED') " +
+            "OR u.userId IN " +
+            "(SELECT f.receiverUserEntity.userId FROM FriendshipEntity f " +
+            "WHERE f.senderUserEntity.userId = :userId and f.status = 'ACCEPTED' ) ")
+    Page<UserEntity> findFriendsPagination(@Param("userId") String userId, Pageable pageable);
+
 
     @Query("SELECT f from  FriendshipEntity f " +
             "WHERE f.senderUserEntity.userId = :senderId " +
@@ -59,13 +65,13 @@ public interface FriendshipRepository extends JpaRepository<FriendshipEntity, Lo
     @Query("SELECT u " +
             "FROM UserEntity u " +
             "WHERE u.userId NOT IN " +
-            "(SELECT f.senderUserEntity FROM FriendshipEntity f " +
-            "WHERE f.receiverUserEntity.userId = :userId) " +
+            "(SELECT f.senderUserEntity.userId FROM FriendshipEntity f " +
+            "WHERE f.receiverUserEntity.userId = :userId and f.status <> 'REJECTED') " +
             "AND u.userId NOT IN " +
-            "(SELECT f.receiverUserEntity FROM FriendshipEntity f " +
-            "WHERE f.senderUserEntity.userId = :userId) " +
-            "AND u.userId <> :userId")
-    Page<UserEntity> findSuggestionsForUser(@Param("userId") String userId, Pageable pageable);
+            "(SELECT f.receiverUserEntity.userId FROM FriendshipEntity f " +
+            "WHERE f.senderUserEntity.userId = :userId and f.status <> 'REJECTED' ) " +
+            "AND u.userId <> :userId AND u.userId IN :listUserId")
+    Page<UserEntity> findSuggestionsForUser(@Param("userId") String userId,List<String> listUserId, Pageable pageable);
 
     @Query("SELECT f.senderUserEntity FROM FriendshipEntity f " +
             "WHERE f.receiverUserEntity.userId = :userId AND f.status = 'ACCEPTED' AND (LOWER(CONCAT(f.receiverUserEntity.firstName, ' ', f.receiverUserEntity.lastName)) LIKE CONCAT('%', LOWER(:kw), '%'))")

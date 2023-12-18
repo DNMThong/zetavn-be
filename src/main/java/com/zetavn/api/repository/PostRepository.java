@@ -19,7 +19,7 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, String> {
-    @Query("SELECT p FROM PostEntity p WHERE p.userEntity.userId LIKE ?1 ORDER BY p.createdAt DESC")
+    @Query("SELECT p FROM PostEntity p WHERE p.userEntity.userId  LIKE ?1 and p.isDeleted = false ORDER BY p.createdAt DESC")
     Page<PostEntity> getAllPostByUserId(String userId,Pageable pageable);
 
     @Modifying
@@ -27,8 +27,12 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
     @Query("UPDATE PostEntity pe SET pe.isDeleted = :isDeleted WHERE pe.postId = :postId")
     void disablePost(@Param("postId") String postId, @Param("isDeleted") boolean isDeleted);
 
-    @Query("SELECT p FROM PostEntity p WHERE p.userEntity.userId IN :listUserId ORDER BY p.createdAt DESC")
-    Page<PostEntity> getAllPostByUserList(List<String> listUserId, Pageable pageable);
+    @Query("SELECT p FROM PostEntity p WHERE " +
+            "(p.userEntity.userId IN :friends and p.accessModifier = 'FRIENDS' or p.accessModifier = 'PUBLIC') " +
+            "or (p.userEntity.userId IN :friendsOfFriend and p.accessModifier = 'PUBLIC') " +
+            "or p.userEntity.userId = :userId " +
+            "and p.isDeleted = false ORDER BY p.createdAt DESC")
+    Page<PostEntity> getAllPostByUserList(String userId, List<String> friends,List<String> friendsOfFriend, Pageable pageable);
 
     Long countPostEntityByUserEntityUserId(String id);
 
@@ -52,6 +56,6 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
     Page<PostEntity> findTop10PostsByCommentAndLike(Pageable pageable);
 
 
-    @Query("SELECT p FROM PostMediaEntity p WHERE p.mediaType = :type  and p.userEntity.userId = :userId ORDER BY p.postEntity.createdAt DESC")
+    @Query("SELECT p FROM PostMediaEntity p WHERE p.mediaType = :type  and p.userEntity.userId = :userId and p.postEntity.isDeleted = false ORDER BY p.postEntity.createdAt DESC")
     Page<PostMediaEntity> getPostsWithMediaByUserId(@Param("userId") String userId, @Param("type") String type, Pageable pageable);
 }

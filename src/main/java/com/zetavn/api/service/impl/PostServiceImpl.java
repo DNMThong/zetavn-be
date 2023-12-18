@@ -29,11 +29,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.parser.Entity;
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.zetavn.api.utils.UUIDGenerator.generateRandomUUID;
@@ -67,7 +66,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ApiResponse<Paginate<List<PostDto>>> getAllPostByUserId(String userId,Integer pageNumber, Integer pageSize) {
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> {throw new NotFoundException("Not found post by userId: "+userId);});
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> {throw new NotFoundException("Not found post by username: "+userId);});
+
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<PostEntity> posts = postRepository.getAllPostByUserId(userEntity.getUserId(),pageable);
         List<PostEntity> postList = posts.getContent();
@@ -231,25 +231,40 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ApiResponse<String> deletePost(String postId) {
-        Optional<PostEntity> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isPresent()) {
-            PostEntity existingPost = optionalPost.get();
-            postRepository.delete(existingPost);
-            return ApiResponse.success(HttpStatus.OK, "The post has been successfully deleted.", "postId: " + postId);
+    public ApiResponse<?> removePost(String userId, String postId) {
+        Optional<PostEntity> p = postRepository.findById(postId);
+        if(p.isPresent()) {
+            PostEntity post = p.get();
+            if(post.getUserEntity().getUserId().equals(userId)) {
+                post.setIsDeleted(true);
+                post.setUpdatedAt(LocalDateTime.now());
+                postRepository.save(post);
+                return ApiResponse.success(HttpStatus.OK, "delete success", "");
+            } else {
+                return ApiResponse.error(HttpStatus.BAD_REQUEST, "post not by userId");
+            }
         } else {
-            return ApiResponse.error(HttpStatus.NOT_FOUND, "No posts found with ID: " + postId);
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Not found post");
         }
     }
 
     @Override
     public ApiResponse<Paginate<List<PostDto>>> getAllPostByUserFollow(String userId, Integer pageNumber, Integer pageSize) {
-        List<UserMentionDto> users = UserMentionMapper.entityListToDtoList(userRepository.findFriendsByUser(userId));
-        List<String> listUserId = users.stream().map(UserMentionDto::getId).collect(Collectors.toList());
-        listUserId.add(userId);
+
+        Map<String,String> friendsOfFriendMap = new HashMap<>();
+        List<String> friends = new ArrayList<>();
+
+        userRepository.findFriendsByUser(userId).forEach(friend -> {
+            friends.add(friend.getUserId());
+            userRepository.findFriendsByUser(friend.getUserId()).forEach(friendOfFriend -> {
+                friendsOfFriendMap.put(friendOfFriend.getUserId(),"");
+            });
+        });
+        List<String> friendsOfFriend = new ArrayList<>(friendsOfFriendMap.keySet());
+
         try {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<PostEntity> posts = postRepository.getAllPostByUserList(listUserId, pageable);
+            Page<PostEntity> posts = postRepository.getAllPostByUserList(userId, friends,friendsOfFriend, pageable);
             List<PostEntity> postList = posts.getContent();
             List<PostDto> postDtoList = PostMapper.entityListToDtoList(postList);
 

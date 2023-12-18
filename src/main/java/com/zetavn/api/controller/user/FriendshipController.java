@@ -54,9 +54,19 @@ public class FriendshipController {
     @PutMapping("/reject")
     public ApiResponse<FriendshipResponse> reject(@RequestBody FriendshipRequest friendshipRequest) {
         try {
-            System.out.println("Reject Reqeust: " + friendshipRequest.toString());
             String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return friendshipService.accept(friendshipRequest.getUserId(), id);
+            return friendshipService.rejected(friendshipRequest.getUserId(), id);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.UNAUTHORIZED, e.getMessage());
+        }
+    }
+
+    @Transactional
+    @DeleteMapping("/unfriend")
+    public ApiResponse<FriendshipResponse> unfriend(@RequestBody FriendshipRequest friendshipRequest) {
+        try {
+            String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return friendshipService.unfriend(id,friendshipRequest.getUserId());
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.UNAUTHORIZED, e.getMessage());
         }
@@ -70,7 +80,7 @@ public class FriendshipController {
     }
 
     @GetMapping("/suggestions")
-    public ApiResponse<Paginate<List<FriendRequestResponse>>> friendSuggestions(@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+    public ApiResponse<Paginate<List<OverallUserResponse>>> friendSuggestions(@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
                                                                                 @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize) {
         try {
             String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

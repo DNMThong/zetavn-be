@@ -21,7 +21,7 @@ public interface PostService {
 
     ApiResponse<PostDto> updatePost(String postId, PostRequest updatedPostRequest, String userId);
 
-    ApiResponse<?> deletePost(String postId);
+    ApiResponse<?> removePost(String userId, String postId);
 
     ApiResponse<Paginate<List<PostDto>>> getAllPostByUserFollow(String userId, Integer pageNumber, Integer pageSize);
 
