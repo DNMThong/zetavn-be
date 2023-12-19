@@ -1,6 +1,7 @@
 package com.zetavn.api.service.impl;
 
 import com.zetavn.api.enums.PostNotificationEnum;
+import com.zetavn.api.exception.DuplicateRecordException;
 import com.zetavn.api.model.entity.PostEntity;
 import com.zetavn.api.model.entity.PostLikeEntity;
 import com.zetavn.api.model.entity.UserEntity;
@@ -63,19 +64,24 @@ public class PostLikeServiceImpl implements PostLikeService {
         try{
             PostEntity post = postRepository.findById(postLikeRequest.getPostId()).orElseThrow(NullPointerException::new);
             UserEntity user = userRepository.findById(userId).orElseThrow(NullPointerException::new);
+            PostLikeEntity postLikeCheck = postLikeRepository.findPostLikeEntityByPostEntityAndUserEntity(post,user);
+            if(postLikeCheck!=null){
+                throw new DuplicateRecordException("You liked post");
+            }
             PostLikeEntity postLike = new PostLikeEntity();
             postLike.setPostEntity(post);
             postLike.setUserEntity(user);
             postLike.setCreatedAt(LocalDateTime.now());
             PostLikeEntity postLikeEntity = postLikeRepository.save(postLike);
-
-            notificationService.createNotification(user.getUserId(), post.getUserEntity().getUserId(), post.getPostId(), PostNotificationEnum.LIKE, postLike.getPostLikeId());
+            if(userId!=post.getUserEntity().getUserId()) {
+                notificationService.createNotification(user.getUserId(), post.getUserEntity().getUserId(), post.getPostId(), PostNotificationEnum.LIKE, postLike.getPostLikeId());
+            }
             return ApiResponse.success(HttpStatus.OK,"Create post-like success", postLikeEntity);
-
         }catch (Exception e){
-            return  ApiResponse.error(HttpStatus.BAD_REQUEST,e.getMessage());
+            return ApiResponse.error(HttpStatus.BAD_REQUEST,e.getMessage());
         }
-     }
+    }
+
 
     @Override
     public ApiResponse<?> removePostLike(PostLikeRequest postLikeRequest, String userId) {
