@@ -101,16 +101,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             String username = decodedJWT.getSubject();
                             UserEntity user = userRepository.findUserEntityByEmail(username);
 
-//                            if(user!=null&&saveActivityLog.equals("true")) {
-//                                ActivityLogEntity activityLogEntity = new ActivityLogEntity();
-//                                activityLogEntity.setActivityLogId(sessionId);
-//                                activityLogEntity.setUserEntity(user);
-//                                activityLogEntity.setCreatedAt(LocalDateTime.now());
-//                                activityLogEntity.setOnlineTime(LocalDateTime.now());
-//                                activityLogEntity.setIpAddress(ipAddress);
-//                                activityLogEntity.setDeviceInformation(deviceInformation);
-//                                activityLogRepository.save(activityLogEntity);
-//                            }
+                            if(user!=null&&saveActivityLog.equals("true")) {
+                                ActivityLogEntity activityLogEntity = new ActivityLogEntity();
+                                activityLogEntity.setActivityLogId(sessionId);
+                                activityLogEntity.setUserEntity(user);
+                                activityLogEntity.setCreatedAt(LocalDateTime.now());
+                                activityLogEntity.setOnlineTime(LocalDateTime.now());
+                                activityLogEntity.setIpAddress(ipAddress);
+                                activityLogEntity.setDeviceInformation(deviceInformation);
+                                activityLogRepository.save(activityLogEntity);
+                            }
 
                             String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
                             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -122,16 +122,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     }
                 }
 
-//                if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
-//                    Optional<ActivityLogEntity> optional = activityLogRepository.findById(sessionId);
-//                    if(optional.isPresent()) {
-//                        ActivityLogEntity activityLog = optional.get();
-//                        activityLog.setOfflineTime(LocalDateTime.now());
-//                        activityLog.setUpdatedAt(LocalDateTime.now());
-//                        activityLogRepository.save(activityLog);
-//                    }
-//
-//                }
+                if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+                    Optional<ActivityLogEntity> optional = activityLogRepository.findById(sessionId);
+                    if(optional.isPresent()) {
+                        ActivityLogEntity activityLog = optional.get();
+                        activityLog.setOfflineTime(LocalDateTime.now());
+                        activityLog.setUpdatedAt(LocalDateTime.now());
+                        activityLogRepository.save(activityLog);
+                    }
+
+                }
 
                 return message;
             }
