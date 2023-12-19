@@ -30,7 +30,7 @@
                 <tr>
                     <td style="text-align: center;">
                         <a href="http://localhost:3000" title="logo" target="_blank">
-                            <img width="60" src="https://res.cloudinary.com/dusmue7d9/image/upload/v1698827611/images/cnfx4fbgsz12fuqga0rf.png" title="logo" alt="logo" />
+                            <img width="60" src="https://res.cloudinary.com/dusmue7d9/image/upload/v1702960023/images/cqr2zrcen7ivfwdb9wuv.png" title="logo" alt="logo" />
                         </a>
                     </td>
                 </tr>
