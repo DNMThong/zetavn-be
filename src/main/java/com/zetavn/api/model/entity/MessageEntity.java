@@ -36,7 +36,6 @@ public class MessageEntity {
     private MessageStatusEnum status;
 
     @Column(name = "created_at", nullable = false)
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime createdAt;
 
     @ManyToOne

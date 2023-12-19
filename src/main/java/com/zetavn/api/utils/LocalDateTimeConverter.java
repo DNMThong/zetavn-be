@@ -4,16 +4,17 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 
 @Converter(autoApply = true)
 public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime, Timestamp> {
 
     @Override
     public Timestamp convertToDatabaseColumn(LocalDateTime attribute) {
-        return (attribute == null ? null : Timestamp.valueOf(attribute));
+        OffsetDateTime timeUtc = attribute.atOffset(ZoneOffset.UTC);
+        OffsetDateTime offsetTime = timeUtc.withOffsetSameInstant(ZoneOffset.ofHours(-7));
+        System.out.println(offsetTime.toLocalDateTime().toString());
+        return (attribute == null ? null : Timestamp.valueOf(offsetTime.toLocalDateTime()));
     }
 
     @Override
