@@ -477,26 +477,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public ApiResponse<?> createForAdmin(UserAdminDto userAdminDto) {
         UserEntity userEntity = new UserEntity();
-        if (!existUserByEmail(userAdminDto.getEmail())) {
+        if (existUserByEmail(userAdminDto.getEmail())) {
             log.warn("Found Email in database: {}", userAdminDto.getEmail());
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Email is used", null);
         }
-        if (!existUserByUsername(userAdminDto.getUsername())) {
+        if (existUserByUsername(userAdminDto.getUsername())) {
             log.warn("Found Username in database: {}", userAdminDto.getUsername());
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Username is used", null);
-        }
-        if (userAdminDto.getInformation() == null) {
-            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! User-info is null");
-        }
-        if (userAdminDto.getInformation().getBirthday() == null) {
-            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Birthday is null");
         }
         if (userAdminDto.getInformation().getGenderEnum() == null) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Gender is null");
         }
         userAdminDto.setId(UUIDGenerator.generateRandomUUID());
+        userAdminDto.setPassword(passwordEncoder.encode(userAdminDto.getPassword()));
         userAdminDto.setCreatedAt(LocalDateTime.now());
         userAdminDto.setUpdatedAt(LocalDateTime.now());
+        userAdminDto.setIsDeleted(false);
         UserEntity _user = userRepository.save(UserMapper.userAdminDtoToUserEntity(userAdminDto, userEntity));
         if (_user != null) {
             UserInfoEntity userInfo = new UserInfoEntity();
@@ -582,13 +578,15 @@ public class UserServiceImpl implements UserService {
         return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found User", null);
     }
 
+
     @Override
-    public ApiResponse<?> lockUserAccountForAdmin(String id) {
+    public ApiResponse<?> lockUserAccountForAdmin(String id, UserStatusEnum status, RoleEnum role) {
         UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Lock user account failed! User account does not exist"));
-        userEntity.setStatus(UserStatusEnum.LOCKED);
+        userEntity.setStatus(status);
+        userEntity.setRole(role);
         userEntity.setUpdatedAt(LocalDateTime.now());
         userRepository.save(userEntity);
 
-        return ApiResponse.success(HttpStatus.OK,"Lock user account success", UserMapper.userEntityToUserAdminDto(userEntity));
+        return ApiResponse.success(HttpStatus.OK, "Lock user account success", UserMapper.userEntityToUserAdminDto(userEntity));
     }
 }

@@ -1,5 +1,7 @@
 package com.zetavn.api.controller.admin;
 
+import com.zetavn.api.enums.RoleEnum;
+import com.zetavn.api.enums.UserStatusEnum;
 import com.zetavn.api.model.dto.UserAdminDto;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.service.UserService;
@@ -43,8 +45,13 @@ public class UserAdminController {
         return userService.removeForAdmin(id, isDeleted);
     }
 
+
     @PutMapping("/lock/{id}")
-    public ApiResponse<?> lockUserAccount(@PathVariable String id) {
-        return userService.lockUserAccountForAdmin(id);
+    public ApiResponse<?> lockUserAccount(
+            @PathVariable String id,
+            @RequestParam UserStatusEnum status,
+            @RequestParam RoleEnum role
+    ) {
+        return userService.lockUserAccountForAdmin(id, status, role);
     }
 }

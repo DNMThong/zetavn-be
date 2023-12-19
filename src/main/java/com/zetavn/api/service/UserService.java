@@ -1,5 +1,6 @@
 package com.zetavn.api.service;
 
+import com.zetavn.api.enums.RoleEnum;
 import com.zetavn.api.enums.UserStatusEnum;
 import com.zetavn.api.model.dto.UserAdminDto;
 import com.zetavn.api.payload.request.SignUpRequest;
@@ -55,5 +56,5 @@ public interface UserService {
 
     ApiResponse<?> getOneUserForAdmin(String id);
 
-    ApiResponse<?> lockUserAccountForAdmin(String id);
+    ApiResponse<?> lockUserAccountForAdmin(String id, UserStatusEnum status, RoleEnum role);
 }

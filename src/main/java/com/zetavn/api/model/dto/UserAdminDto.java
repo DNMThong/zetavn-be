@@ -26,6 +26,7 @@ public class UserAdminDto {
     private String lastName;
     private String avatar;
     private String poster;
+    private Boolean isDeleted;
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
     @Enumerated(EnumType.STRING)
