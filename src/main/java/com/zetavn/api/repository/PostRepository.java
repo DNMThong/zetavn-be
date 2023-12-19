@@ -28,9 +28,9 @@ public interface PostRepository extends JpaRepository<PostEntity, String> {
     void disablePost(@Param("postId") String postId, @Param("isDeleted") boolean isDeleted);
 
     @Query("SELECT p FROM PostEntity p WHERE " +
-            "(p.userEntity.userId IN :friends and p.accessModifier = 'FRIENDS' or p.accessModifier = 'PUBLIC') " +
+            "((p.userEntity.userId IN :friends and p.accessModifier = 'FRIENDS' or p.accessModifier = 'PUBLIC') " +
             "or (p.userEntity.userId IN :friendsOfFriend and p.accessModifier = 'PUBLIC') " +
-            "or p.userEntity.userId = :userId " +
+            "or p.userEntity.userId = :userId )" +
             "and p.isDeleted = false ORDER BY p.createdAt DESC")
     Page<PostEntity> getAllPostByUserList(String userId, List<String> friends,List<String> friendsOfFriend, Pageable pageable);
 

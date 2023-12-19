@@ -18,7 +18,6 @@ public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime,
 
     @Override
     public LocalDateTime convertToEntityAttribute(Timestamp dbData) {
-
         OffsetDateTime timeUtc = dbData.toLocalDateTime().atOffset(ZoneOffset.UTC);
         OffsetDateTime offsetTime = timeUtc.withOffsetSameInstant(ZoneOffset.ofHours(7));
         return (dbData == null ? null : offsetTime.toLocalDateTime());
