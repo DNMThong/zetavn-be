@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import java.nio.file.AccessDeniedException;
+
 @RestControllerAdvice
 public class CustomExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(CustomExceptionHandler.class);
@@ -36,5 +38,12 @@ public class CustomExceptionHandler {
     public ApiResponse<Void> handlerException(Exception ex, WebRequest req) {
 //        logger.error(ex.getMessage());
         return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiResponse<Void> handlerForbiddenException(Exception ex, WebRequest req) {
+        logger.error("Access denied ex: {}", ex.getMessage());
+        return ApiResponse.error(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 }

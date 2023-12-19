@@ -5,12 +5,9 @@ import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.dto.PostAdminDto;
 import com.zetavn.api.model.dto.PostDto;
 import com.zetavn.api.model.dto.PostMediaDto;
-import com.zetavn.api.model.dto.UserMentionDto;
 import com.zetavn.api.model.entity.*;
 import com.zetavn.api.model.mapper.PostMapper;
 import com.zetavn.api.model.mapper.PostMediaMapper;
-import com.zetavn.api.model.mapper.UserMapper;
-import com.zetavn.api.model.mapper.UserMentionMapper;
 import com.zetavn.api.payload.request.PostMediaRequest;
 import com.zetavn.api.payload.request.PostMentionRequest;
 import com.zetavn.api.payload.request.PostRequest;
@@ -20,20 +17,16 @@ import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.repository.*;
 import com.zetavn.api.service.PostService;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.parser.Entity;
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.zetavn.api.utils.UUIDGenerator.generateRandomUUID;
 
@@ -398,5 +391,15 @@ public class PostServiceImpl implements PostService {
             return ApiResponse.success(HttpStatus.OK,"success", PostMapper.entityToPostAdminDto(postEntity.get()));
         }
         return ApiResponse.error(HttpStatus.NOT_FOUND,"Not found post",null);
+    }
+
+    @Override
+    public ApiResponse<?> lockPostForAdmin(String id) {
+        PostEntity post = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Lock post failed! Post does not exist"));
+        post.setStatus(PostStatusEnum.LOCKED);
+        post.setUpdatedAt(LocalDateTime.now());
+        PostEntity postUpdated= postRepository.save(post);
+
+        return ApiResponse.success(HttpStatus.OK,"Lock post success",postUpdated);
     }
 }

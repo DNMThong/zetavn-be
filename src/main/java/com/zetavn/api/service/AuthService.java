@@ -29,6 +29,7 @@ public interface AuthService {
     ApiResponse<?> confirmationEmail(String token);
 
 
+    ApiResponse<SignInResponse> loginForAdmin(SignInRequest signInRequest, HttpServletResponse res) throws Exception;
 
-
+    ApiResponse<?> createForAdmin(SignUpRequest signUpRequest);
 }
