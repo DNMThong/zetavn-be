@@ -29,6 +29,7 @@ public class PostLikeController {
     public ApiResponse<?> createPostLike(@RequestBody PostLikeRequest postLikeRequest){
         try {
             String id = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
             return postLikeService.createPostLike(postLikeRequest, id);
         } catch (Exception e) {
             return ApiResponse.error(HttpStatus.UNAUTHORIZED, e.getMessage());

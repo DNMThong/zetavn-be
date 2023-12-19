@@ -15,7 +15,6 @@ public interface PostLikeRepository extends JpaRepository<PostLikeEntity, Long> 
 
     List<PostLikeEntity> getAllByPostEntity(PostEntity postEntity);
     Integer countByPostEntity (PostEntity postEntity);
-
     PostLikeEntity findPostLikeEntityByPostEntityAndUserEntity(PostEntity postEntity, UserEntity userEntity);
     @Query("SELECT COUNT(l) FROM PostLikeEntity l WHERE   DATE(l.createdAt) >=?1 AND DATE(l.createdAt) <=?2")
     Long countLikesInDateRange( LocalDate startDate, LocalDate endDate);

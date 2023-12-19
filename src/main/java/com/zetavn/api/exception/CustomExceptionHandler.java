@@ -5,6 +5,8 @@ import com.zetavn.api.payload.response.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,7 +15,16 @@ import org.springframework.web.context.request.WebRequest;
 @RestControllerAdvice
 public class CustomExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(CustomExceptionHandler.class);
-
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiResponse<Void> handleBadCredentialsException(BadCredentialsException ex, WebRequest req) {
+        return ApiResponse.error(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiResponse<Void> handleAccessDeniedException(AccessDeniedException ex, WebRequest req) {
+        return ApiResponse.error(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
     // 404 Not Found: Tài nguyên yêu cầu không tồn tại trên máy chủ.
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
