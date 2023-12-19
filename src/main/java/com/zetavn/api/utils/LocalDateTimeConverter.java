@@ -12,7 +12,7 @@ public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime,
     @Override
     public Timestamp convertToDatabaseColumn(LocalDateTime attribute) {
         OffsetDateTime timeUtc = attribute.atOffset(ZoneOffset.UTC);
-        OffsetDateTime offsetTime = timeUtc.withOffsetSameInstant(ZoneOffset.ofHours(-7));
+        OffsetDateTime offsetTime = timeUtc.withOffsetSameInstant(ZoneOffset.ofHours(7));
         System.out.println(offsetTime.toLocalDateTime().toString());
         return (attribute == null ? null : Timestamp.valueOf(offsetTime.toLocalDateTime()));
     }
