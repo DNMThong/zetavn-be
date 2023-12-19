@@ -1,9 +1,9 @@
 package com.zetavn.api.controller.admin;
 
+import com.zetavn.api.enums.RoleEnum;
+import com.zetavn.api.enums.UserStatusEnum;
 import com.zetavn.api.model.dto.UserAdminDto;
 import com.zetavn.api.payload.response.ApiResponse;
-import com.zetavn.api.repository.PostRepository;
-import com.zetavn.api.service.PostService;
 import com.zetavn.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,9 +15,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserAdminController {
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private PostService postService;
 
     @GetMapping()
     public ApiResponse<?> getAllUser(
@@ -48,8 +45,12 @@ public class UserAdminController {
     }
 
     @PutMapping("/lock/{id}")
-    public ApiResponse<?> lockUserAccount(@PathVariable String id) {
-        return userService.lockUserAccountForAdmin(id);
+    public ApiResponse<?> lockUserAccount(
+            @PathVariable String id,
+            @RequestParam UserStatusEnum status,
+            @RequestParam RoleEnum role
+    ) {
+        return userService.lockUserAccountForAdmin(id, status, role);
     }
 
 

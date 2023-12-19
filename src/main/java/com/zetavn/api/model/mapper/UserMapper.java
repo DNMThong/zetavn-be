@@ -71,6 +71,7 @@ public class UserMapper {
         userEntity.setUsername(userAdminDto.getUsername());
         userEntity.setRole(userAdminDto.getRole());
         userEntity.setStatus(userAdminDto.getStatus());
+        userEntity.setIsDeleted(userAdminDto.getIsDeleted());
         return  userEntity;
     }
     public static List<UserAdminDto> UserEntityListToAdminDtoList(List<UserEntity> dtoList) {
