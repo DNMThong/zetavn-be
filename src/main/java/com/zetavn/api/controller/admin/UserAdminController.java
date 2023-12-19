@@ -3,11 +3,14 @@ package com.zetavn.api.controller.admin;
 import com.zetavn.api.model.dto.UserAdminDto;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.service.UserService;
+import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v0/admins/users")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class UserAdminController {
     @Autowired
     UserService userService;
@@ -38,5 +41,10 @@ public class UserAdminController {
     @DeleteMapping("/{id}")
     public ApiResponse<?> remove(@PathVariable String id, @RequestBody boolean isDeleted) {
         return userService.removeForAdmin(id, isDeleted);
+    }
+
+    @PutMapping("/lock/{id}")
+    public ApiResponse<?> lockUserAccount(@PathVariable String id) {
+        return userService.lockUserAccountForAdmin(id);
     }
 }

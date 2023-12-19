@@ -55,4 +55,5 @@ public interface UserService {
 
     ApiResponse<?> getOneUserForAdmin(String id);
 
+    ApiResponse<?> lockUserAccountForAdmin(String id);
 }

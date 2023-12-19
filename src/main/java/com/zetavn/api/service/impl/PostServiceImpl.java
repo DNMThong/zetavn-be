@@ -367,4 +367,14 @@ public class PostServiceImpl implements PostService {
         }
         return ApiResponse.error(HttpStatus.NOT_FOUND,"Not found post",null);
     }
+
+    @Override
+    public ApiResponse<?> lockPostForAdmin(String id) {
+        PostEntity post = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Lock post failed! Post does not exist"));
+        post.setStatus(PostStatusEnum.LOCKED);
+        post.setUpdatedAt(LocalDateTime.now());
+        PostEntity postUpdated= postRepository.save(post);
+
+        return ApiResponse.success(HttpStatus.OK,"Lock post success",postUpdated);
+    }
 }

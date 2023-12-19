@@ -4,12 +4,15 @@ import com.zetavn.api.payload.request.UpdatePostForAdminRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.repository.PostRepository;
 import com.zetavn.api.service.PostService;
+import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v0/admins/posts")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class PostAdminController {
     @Autowired
     PostService postService;
@@ -24,6 +27,7 @@ public class PostAdminController {
     }
 
     @PutMapping()
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ApiResponse<?> update(@RequestBody UpdatePostForAdminRequest request) {
         return postService.updatePostForAdmin(request);
     }
@@ -31,5 +35,10 @@ public class PostAdminController {
     @GetMapping("/{id}")
     public ApiResponse<?> getOnePost(@PathVariable String id) {
         return postService.getOnePostForAdmin(id);
+    }
+
+    @PutMapping("/lock/{id}")
+    public ApiResponse<?> lockPost(@PathVariable String id) {
+        return postService.lockPostForAdmin(id);
     }
 }

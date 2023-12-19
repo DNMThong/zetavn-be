@@ -28,6 +28,9 @@ public class JwtHelper {
     @Value("${zetavn.access_token_expiration_time}")
     private Long ACCESS_TOKEN_EXPIRATION_TIME;
 
+//    @Value("zetavn.admin_token_expiration_time")
+    private Long ADMIN_TOKEN_EXPIRATION_TIME = 21600000L;
+
     @Value("${zetavn.refresh_token_expiration_time}")
     private Long REFRESH_TOKEN_EXPIRATION_TIME;
 
@@ -81,6 +84,20 @@ public class JwtHelper {
                 .withExpiresAt(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
                 .sign(algorithm);
         return refresh_token;
+    }
+
+    public String generateTokenForAdmin(UserEntity user) {
+        ArrayList<String> authorities = new ArrayList<>();
+        authorities.add(user.getRole().name());
+        Algorithm algorithm = getAlgorithm();
+        String token = JWT.create()
+                .withSubject(user.getEmail())
+                .withClaim("status", user.getStatus().toString())
+                .withClaim("roles", authorities)
+                .withIssuedAt(new Date(System.currentTimeMillis()))
+                .withExpiresAt(new Date(System.currentTimeMillis() + ADMIN_TOKEN_EXPIRATION_TIME))
+                .sign(algorithm);
+        return token;
     }
 
     private JWTVerifier verifier(Algorithm algorithm) {

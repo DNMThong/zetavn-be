@@ -1,6 +1,7 @@
 package com.zetavn.api.config;
 
 import com.zetavn.api.enums.RoleEnum;
+//import com.zetavn.api.exception.EntryPointExceptionHandler;
 import com.zetavn.api.jwt.JwtAuthenticationEntryPoint;
 import com.zetavn.api.jwt.JwtAuthorizationFilter;
 import com.zetavn.api.repository.UserRepository;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,6 +26,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableGlobalMethodSecurity(
+        prePostEnabled = true,
+        securedEnabled = true,
+        jsr250Enabled = true)
 public class SecurityConfig {
 
     private final AuthenticationConfiguration configuration;
@@ -35,7 +41,6 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
 
     private final UserRepository userRepository;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -45,7 +50,8 @@ public class SecurityConfig {
                                 .sameOrigin()
                         )
                 )
-                .authorizeHttpRequests(r -> r.requestMatchers("/api/v0/auth/**","/ws/**","/api/v0/admins/**").permitAll()
+                .authorizeHttpRequests(r -> r.requestMatchers("/api/v0/auth/**","/ws/**", "/api/v0/admins/auth/login").permitAll()
+                        .requestMatchers("/api/v0/admins/**").authenticated()
                         .requestMatchers("/api/v0/auth/logout").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

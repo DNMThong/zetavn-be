@@ -71,7 +71,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
                 stream(roles).forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
                 UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(user.getUserId(), null, authorities);
+                        new UsernamePasswordAuthenticationToken(user, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             } catch (TokenExpiredException e) {
                 log.error("Error logging in: {}", e.getMessage());

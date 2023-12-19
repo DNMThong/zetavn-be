@@ -5,6 +5,7 @@ import com.zetavn.api.enums.*;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.dto.UserAdminDto;
 import com.zetavn.api.model.entity.FriendshipEntity;
+import com.zetavn.api.model.entity.PostEntity;
 import com.zetavn.api.model.entity.UserEntity;
 import com.zetavn.api.model.entity.UserInfoEntity;
 import com.zetavn.api.model.mapper.MessageMapper;
@@ -579,5 +580,15 @@ public class UserServiceImpl implements UserService {
             return ApiResponse.success(HttpStatus.OK, "User is deleted", UserMapper.userEntityToUserAdminDto(userEntity.get()));
         }
         return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found User", null);
+    }
+
+    @Override
+    public ApiResponse<?> lockUserAccountForAdmin(String id) {
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Lock user account failed! User account does not exist"));
+        userEntity.setStatus(UserStatusEnum.LOCKED);
+        userEntity.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(userEntity);
+
+        return ApiResponse.success(HttpStatus.OK,"Lock user account success", UserMapper.userEntityToUserAdminDto(userEntity));
     }
 }

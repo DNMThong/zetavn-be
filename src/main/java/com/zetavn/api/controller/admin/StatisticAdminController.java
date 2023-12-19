@@ -7,11 +7,13 @@ import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.repository.PostRepository;
 import com.zetavn.api.repository.UserRepository;
 import com.zetavn.api.service.StatisticService;
+import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v0/admins/statistics")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class StatisticAdminController {
     @Autowired
     StatisticService statisticService;
