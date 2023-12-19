@@ -22,9 +22,12 @@ public class WebConfig {
     @Value("${zetavn.domain}")
     private String domain;
 
+    @Value("${zetavn.admin-domain}")
+    private String adminDomain;
+
     @Bean
     public FilterRegistrationBean corsFilter() {
-        List<String> allowedOrigins = Arrays.asList(domain, "https://admin.zetavn.com");
+        List<String> allowedOrigins = Arrays.asList(domain, adminDomain);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
