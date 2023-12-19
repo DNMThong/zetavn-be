@@ -1,6 +1,7 @@
 package com.zetavn.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zetavn.api.enums.MessageStatusEnum;
 import com.zetavn.api.enums.MessageTypeEnum;
 import jakarta.persistence.*;
@@ -35,6 +36,7 @@ public class MessageEntity {
     private MessageStatusEnum status;
 
     @Column(name = "created_at", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime createdAt;
 
     @ManyToOne
