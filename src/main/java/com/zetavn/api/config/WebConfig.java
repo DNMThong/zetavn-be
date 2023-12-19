@@ -11,6 +11,7 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebMvc
@@ -23,10 +24,12 @@ public class WebConfig {
 
     @Bean
     public FilterRegistrationBean corsFilter() {
+        List<String> allowedOrigins = Arrays.asList(domain, "https://admin.zetavn.com");
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin(domain);
+        config.setAllowedOrigins(allowedOrigins);
         config.addAllowedHeader("*");
         config.setAllowedMethods(Arrays.asList(
                 HttpMethod.GET.name(),
