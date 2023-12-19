@@ -11,16 +11,22 @@ public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime,
 
     @Override
     public Timestamp convertToDatabaseColumn(LocalDateTime attribute) {
+        if(attribute==null) {
+            return null;
+        }
         OffsetDateTime timeUtc = attribute.atOffset(ZoneOffset.UTC);
         OffsetDateTime offsetTime = timeUtc.withOffsetSameInstant(ZoneOffset.ofHours(-7));
-        return (attribute == null ? null : Timestamp.valueOf(offsetTime.toLocalDateTime()));
+        return Timestamp.valueOf(offsetTime.toLocalDateTime());
     }
 
     @Override
     public LocalDateTime convertToEntityAttribute(Timestamp dbData) {
+        if (dbData == null) {
+            return null;
+        }
         OffsetDateTime timeUtc = dbData.toLocalDateTime().atOffset(ZoneOffset.UTC);
         OffsetDateTime offsetTime = timeUtc.withOffsetSameInstant(ZoneOffset.ofHours(7));
-        return (dbData == null ? null : offsetTime.toLocalDateTime());
+        return offsetTime.toLocalDateTime();
     }
 }
 
