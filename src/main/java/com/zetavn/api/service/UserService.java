@@ -1,19 +1,17 @@
 package com.zetavn.api.service;
 
+import com.zetavn.api.enums.RoleEnum;
 import com.zetavn.api.enums.UserStatusEnum;
 import com.zetavn.api.model.dto.UserAdminDto;
 import com.zetavn.api.payload.request.SignUpRequest;
 import com.zetavn.api.payload.request.UserUpdateRequest;
 import com.zetavn.api.payload.response.ApiResponse;
 import com.zetavn.api.payload.response.UserContactResponse;
-import com.zetavn.api.payload.response.Paginate;
 import com.zetavn.api.payload.response.UserResponse;
-import org.springframework.data.domain.Page;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
 
@@ -55,4 +53,5 @@ public interface UserService {
 
     ApiResponse<?> getOneUserForAdmin(String id);
 
+    ApiResponse<?> lockUserAccountForAdmin(String id, UserStatusEnum status, RoleEnum role);
 }

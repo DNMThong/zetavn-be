@@ -36,4 +36,6 @@ public interface PostService {
     ApiResponse<?> getOnePostForAdmin(String id);
 
     ApiResponse<?> getPostsWithMediaByUserId(String userId,String type, Integer pageNumber, Integer pageSize);
+
+    ApiResponse<?> lockPostForAdmin(String id);
 }

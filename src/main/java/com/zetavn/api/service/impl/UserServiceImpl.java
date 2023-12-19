@@ -1,6 +1,5 @@
 package com.zetavn.api.service.impl;
 
-import com.cloudinary.Api;
 import com.zetavn.api.enums.*;
 import com.zetavn.api.exception.NotFoundException;
 import com.zetavn.api.model.dto.UserAdminDto;
@@ -18,7 +17,6 @@ import com.zetavn.api.repository.*;
 import com.zetavn.api.service.UserInfoService;
 import com.zetavn.api.service.UserService;
 import com.zetavn.api.utils.UUIDGenerator;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -56,8 +54,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserInfoService userInfoService;
-
-
 
 
     @Override
@@ -141,6 +137,7 @@ public class UserServiceImpl implements UserService {
             return user != null;
         }
     }
+
     @Override
     public ApiResponse<?> getAllUsersByKeyword(String sourceId, String keyword, Integer pageNumber, Integer pageSize) {
         log.info("Try to find Users by keyword {} at page number {} and page size {}", keyword, pageNumber, pageSize);
@@ -157,7 +154,7 @@ public class UserServiceImpl implements UserService {
             try {
                 List<UserEntity> userEntities = users.getContent();
                 List<UserSearchResponse> userSearchResponses = new ArrayList<>();
-                for(UserEntity u : userEntities) {
+                for (UserEntity u : userEntities) {
                     UserSearchResponse user = new UserSearchResponse();
                     OverallUserResponse userResponses = OverallUserMapper.entityToDto(u);
                     user.setUser(userResponses);
@@ -165,7 +162,7 @@ public class UserServiceImpl implements UserService {
                     user.setTotalPosts(postRepository.countPostEntityByUserEntityUserId(u.getUserId()));
                     user.setCountLikesOfPosts(postRepository.getTotalLikesByUserId(u.getUserId()));
                     FriendshipEntity statusFriendsEnum = friendshipRepository.checkFriendshipStatus(sourceId, u.getUserId());
-                    if(statusFriendsEnum != null) {
+                    if (statusFriendsEnum != null) {
                         if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.ACCEPTED)) {
                             user.setStatus(StatusFriendsEnum.FRIEND);
                         } else if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.PENDING)) {
@@ -211,13 +208,13 @@ public class UserServiceImpl implements UserService {
 //            friendIdList.addAll(source.get().getUserSenderList().stream().map(u -> u.getReceiverUserEntity().getUserId()).toList());
 
             source.get().getUserReceiverList().forEach((item) -> {
-                if(item.getStatus()==FriendStatusEnum.ACCEPTED) {
+                if (item.getStatus() == FriendStatusEnum.ACCEPTED) {
                     friendIdList.add(item.getSenderUserEntity().getUserId());
                 }
             });
 
             source.get().getUserSenderList().forEach((item) -> {
-                if(item.getStatus()==FriendStatusEnum.ACCEPTED) {
+                if (item.getStatus() == FriendStatusEnum.ACCEPTED) {
                     friendIdList.add(item.getReceiverUserEntity().getUserId());
                 }
             });
@@ -230,7 +227,7 @@ public class UserServiceImpl implements UserService {
             try {
                 List<UserEntity> userEntities = users.getContent();
                 List<UserSearchResponse> userSearchResponses = new ArrayList<>();
-                for(UserEntity u : userEntities) {
+                for (UserEntity u : userEntities) {
                     UserSearchResponse user = new UserSearchResponse();
                     OverallUserResponse userResponses = OverallUserMapper.entityToDto(u);
                     user.setUser(userResponses);
@@ -275,7 +272,7 @@ public class UserServiceImpl implements UserService {
             try {
                 List<UserEntity> userEntities = users.getContent();
                 List<UserSearchResponse> userSearchResponses = new ArrayList<>();
-                for(UserEntity u : userEntities) {
+                for (UserEntity u : userEntities) {
                     UserSearchResponse user = new UserSearchResponse();
                     OverallUserResponse userResponses = OverallUserMapper.entityToDto(u);
                     user.setUser(userResponses);
@@ -283,7 +280,7 @@ public class UserServiceImpl implements UserService {
                     user.setTotalPosts(postRepository.countPostEntityByUserEntityUserId(u.getUserId()));
                     user.setCountLikesOfPosts(postRepository.getTotalLikesByUserId(u.getUserId()));
                     FriendshipEntity statusFriendsEnum = friendshipRepository.checkFriendshipStatus(sourceId, u.getUserId());
-                    if(statusFriendsEnum != null) {
+                    if (statusFriendsEnum != null) {
                         if (statusFriendsEnum.getStatus().equals(FriendStatusEnum.PENDING)) {
                             if (statusFriendsEnum.getSenderUserEntity().getUserId().equals(sourceId)) {
                                 user.setStatus(StatusFriendsEnum.SENDER);
@@ -339,54 +336,53 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ApiResponse<List<UserContactResponse>> getUserContacts(String userId) {
-        UserEntity user = userRepository.findById(userId).orElseGet(() -> {throw new NotFoundException("Not found user with userId: " + userId);});
+        UserEntity user = userRepository.findById(userId).orElseGet(() -> {
+            throw new NotFoundException("Not found user with userId: " + userId);
+        });
 
         Map<String, UserContactResponse> map = new HashMap<String, UserContactResponse>();
 
         user.getRecieverMessages().forEach(item -> {
             String id = item.getSenderUser().getUserId();
             Integer totalUnreadMessage = 0;
-            if(map.containsKey(id)) {
+            if (map.containsKey(id)) {
                 UserContactResponse userContact = map.get(id);
-                if(!item.getStatus().equals(MessageStatusEnum.READ)) {
+                if (!item.getStatus().equals(MessageStatusEnum.READ)) {
                     totalUnreadMessage++;
                 }
                 userContact.setTotalUnreadMessage(totalUnreadMessage);
                 userContact.setNewMessage(MessageMapper.entityToDto(item));
-                map.put(id,userContact);
-            }else {
+                map.put(id, userContact);
+            } else {
                 UserContactResponse userContactResponse = new UserContactResponse();
                 OverallUserPrivateResponse overallUserPrivate = OverallUserMapper.entityToOverallUserPrivate(item.getSenderUser());
                 overallUserPrivate.setIsOnline(activityLogRepository.checkUserOnline(overallUserPrivate.getId()));
                 userContactResponse.setUser(overallUserPrivate);
                 userContactResponse.setNewMessage(MessageMapper.entityToDto(item));
                 userContactResponse.setTotalUnreadMessage(0);
-                map.put(id,userContactResponse);
+                map.put(id, userContactResponse);
             }
         });
 
         user.getSenderMessages().forEach(item -> {
             String id = item.getRecieverUser().getUserId();
-            if(map.containsKey(id)) {
+            if (map.containsKey(id)) {
                 UserContactResponse userContact = map.get(id);
-                if(item.getCreatedAt().isAfter(userContact.getNewMessage().getCreatedAt())) {
+                if (item.getCreatedAt().isAfter(userContact.getNewMessage().getCreatedAt())) {
                     userContact.setTotalUnreadMessage(0);
                     userContact.setNewMessage(MessageMapper.entityToDto(item));
-                    map.put(id,userContact);
+                    map.put(id, userContact);
                 }
-            }else {
+            } else {
                 UserContactResponse userContactResponse = new UserContactResponse();
                 OverallUserPrivateResponse overallUserPrivate = OverallUserMapper.entityToOverallUserPrivate(item.getRecieverUser());
                 overallUserPrivate.setIsOnline(activityLogRepository.checkUserOnline(overallUserPrivate.getId()));
                 userContactResponse.setUser(overallUserPrivate);
                 userContactResponse.setNewMessage(MessageMapper.entityToDto(item));
                 userContactResponse.setTotalUnreadMessage(0);
-                map.put(id,userContactResponse);
+                map.put(id, userContactResponse);
             }
         });
-
-
-
 
 
         List<UserContactResponse> userContacts = new ArrayList<>(map.values());
@@ -396,7 +392,7 @@ public class UserServiceImpl implements UserService {
                 Comparator.reverseOrder()
         ));
 
-        return ApiResponse.success(HttpStatus.OK,"Get list user contact success",userContacts);
+        return ApiResponse.success(HttpStatus.OK, "Get list user contact success", userContacts);
     }
 
     @Override
@@ -476,26 +472,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public ApiResponse<?> createForAdmin(UserAdminDto userAdminDto) {
         UserEntity userEntity = new UserEntity();
-        if (!existUserByEmail(userAdminDto.getEmail())) {
+        if (existUserByEmail(userAdminDto.getEmail())) {
             log.warn("Found Email in database: {}", userAdminDto.getEmail());
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Email is used", null);
         }
-        if (!existUserByUsername(userAdminDto.getUsername())) {
+        if (existUserByUsername(userAdminDto.getUsername())) {
             log.warn("Found Username in database: {}", userAdminDto.getUsername());
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Username is used", null);
-        }
-        if (userAdminDto.getInformation() == null) {
-            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! User-info is null");
-        }
-        if (userAdminDto.getInformation().getBirthday() == null) {
-            return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Birthday is null");
         }
         if (userAdminDto.getInformation().getGenderEnum() == null) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "Create failed! Gender is null");
         }
         userAdminDto.setId(UUIDGenerator.generateRandomUUID());
+        userAdminDto.setPassword(passwordEncoder.encode(userAdminDto.getPassword()));
         userAdminDto.setCreatedAt(LocalDateTime.now());
         userAdminDto.setUpdatedAt(LocalDateTime.now());
+        userAdminDto.setIsDeleted(false);
         UserEntity _user = userRepository.save(UserMapper.userAdminDtoToUserEntity(userAdminDto, userEntity));
         if (_user != null) {
             UserInfoEntity userInfo = new UserInfoEntity();
@@ -579,5 +571,16 @@ public class UserServiceImpl implements UserService {
             return ApiResponse.success(HttpStatus.OK, "User is deleted", UserMapper.userEntityToUserAdminDto(userEntity.get()));
         }
         return ApiResponse.error(HttpStatus.NOT_FOUND, "Not found User", null);
+    }
+
+    @Override
+    public ApiResponse<?> lockUserAccountForAdmin(String id, UserStatusEnum status, RoleEnum role) {
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Lock user account failed! User account does not exist"));
+        userEntity.setStatus(status);
+        userEntity.setRole(role);
+        userEntity.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(userEntity);
+
+        return ApiResponse.success(HttpStatus.OK, "Lock user account success", UserMapper.userEntityToUserAdminDto(userEntity));
     }
 }

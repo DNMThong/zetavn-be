@@ -6,9 +6,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import com.zetavn.api.enums.UserStatusEnum;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,7 +20,7 @@ import com.zetavn.api.enums.UserStatusEnum;
 @Setter
 @Entity
 @Table(name = "Users")
-public class UserEntity {
+public class UserEntity  implements UserDetails {
     @Id
     @Column(name = "user_id")
     private String userId;
@@ -117,4 +121,28 @@ public class UserEntity {
     @JsonManagedReference
     @OrderBy("createdAt asc")
     List<MessageEntity> recieverMessages;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return status != UserStatusEnum.LOCKED;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
