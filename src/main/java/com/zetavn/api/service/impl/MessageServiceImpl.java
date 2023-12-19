@@ -63,8 +63,10 @@ public class MessageServiceImpl implements MessageService {
         messageEntity.setRecieverUser(userReciever);
         messageEntity.setStatus(MessageStatusEnum.SENT);
         messageEntity.setType(message.getType());
+        System.out.println("MESSAGE "+LocalDateTime.now().toString());
 
         MessageEntity messageResponse = messageRepository.save(messageEntity);
+        System.out.println("messageResponse "+messageResponse.getCreatedAt().toString());
 
         if(message.getType().equals(MessageTypeEnum.CALL)) {
             MessageCallRequest callRequest = message.getCall();
