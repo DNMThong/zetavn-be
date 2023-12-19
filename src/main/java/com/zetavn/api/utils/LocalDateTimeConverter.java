@@ -17,10 +17,11 @@ public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime,
 
     @Override
     public LocalDateTime convertToEntityAttribute(Timestamp dbData) {
+        System.out.println(dbData.toLocalDateTime().toString());
         ZonedDateTime utcZonedDateTime = ZonedDateTime.of(dbData.toLocalDateTime(), ZoneId.of("UTC"));
         ZonedDateTime vietnamZonedDateTime = utcZonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
         LocalDateTime vietnamDateTime = vietnamZonedDateTime.toLocalDateTime();
-
+        System.out.println(vietnamDateTime.toString());
         return (dbData == null ? null : vietnamDateTime);
     }
 }
