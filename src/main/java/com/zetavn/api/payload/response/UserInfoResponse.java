@@ -16,13 +16,13 @@ public class UserInfoResponse {
 
     private String aboutMe;
     private GenderEnum genderEnum;
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "dd/MM/yyyy",shape = JsonFormat.Shape.STRING)
     private LocalDate birthday;
     private String livesAt;
     private String worksAt;
     private String studiedAt;
 
-    @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
+    @JsonFormat(pattern = "hh:mma dd/MM/yyyy",shape = JsonFormat.Shape.STRING)
     private LocalDateTime updateAt;
     private Long totalFriends;
     private Long totalPosts;

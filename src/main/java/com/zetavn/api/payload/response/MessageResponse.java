@@ -16,7 +16,7 @@ public class MessageResponse {
     private String message;
     private MessageTypeEnum type;
     private MessageStatusEnum status;
-    @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
+    @JsonFormat(pattern = "hh:mma dd/MM/yyyy",shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;
     private OverallUserResponse sender;
     private OverallUserResponse reciever;

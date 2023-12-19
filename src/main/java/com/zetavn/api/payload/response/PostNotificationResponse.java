@@ -21,7 +21,7 @@ public class PostNotificationResponse {
     private OverallUserResponse receiving;
     private PostNotificationEnum type;
     private Boolean isRead;
-    @JsonFormat(pattern = "hh:mma dd/MM/yyyy")
+    @JsonFormat(pattern = "hh:mma dd/MM/yyyy",shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;
     private Boolean isCancel;
 }
