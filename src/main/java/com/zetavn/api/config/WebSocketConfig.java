@@ -62,12 +62,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-//                .setHandshakeHandler(new UserHandshakeHandler(jwtHelper,userRepository))
+                // .setHandshakeHandler(new UserHandshakeHandler(jwtHelper,userRepository))
                 .setAllowedOrigins(domain);
 
         registry.addEndpoint("/ws")
                 .setAllowedOrigins(domain)
-//                .setHandshakeHandler(new UserHandshakeHandler(jwtHelper,userRepository))
+                // .setHandshakeHandler(new UserHandshakeHandler(jwtHelper,userRepository))
                 .withSockJS();
 
     }
@@ -76,7 +76,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/app")
                 .setUserDestinationPrefix("/user")
-                .enableSimpleBroker("/topic","/queue","/user");
+                .enableSimpleBroker("/topic", "/queue", "/user");
     }
 
     @Override
@@ -87,7 +87,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
                 String sessionId = (String) message.getHeaders().get("simpSessionId");
 
-
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
                     String ipAddress = accessor.getFirstNativeHeader("ip_address");
@@ -97,11 +96,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                         String token = authorizationHeader.substring("Bearer ".length());
                         DecodedJWT decodedJWT = jwtHelper.decodedJWT(token);
-                        if(decodedJWT.getExpiresAt().after(new Date())) {
+                        if (decodedJWT.getExpiresAt().after(new Date())) {
                             String username = decodedJWT.getSubject();
                             UserEntity user = userRepository.findUserEntityByEmail(username);
 
-                            if(user!=null&&saveActivityLog.equals("true")) {
+                            if (user != null && saveActivityLog.equals("true")) {
                                 ActivityLogEntity activityLogEntity = new ActivityLogEntity();
                                 activityLogEntity.setActivityLogId(sessionId);
                                 activityLogEntity.setUserEntity(user);
@@ -115,23 +114,24 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
                             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
                             stream(roles).forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
-                            UsernamePasswordAuthenticationToken authenticationToken =
-                                    new UsernamePasswordAuthenticationToken(user.getUserId(), null, authorities);
+                            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                                    user.getUserId(), null, authorities);
                             accessor.setUser(authenticationToken);
                         }
                     }
                 }
 
-                if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
-                    Optional<ActivityLogEntity> optional = activityLogRepository.findById(sessionId);
-                    if(optional.isPresent()) {
-                        ActivityLogEntity activityLog = optional.get();
-                        activityLog.setOfflineTime(LocalDateTime.now());
-                        activityLog.setUpdatedAt(LocalDateTime.now());
-                        activityLogRepository.save(activityLog);
-                    }
+                // if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+                // Optional<ActivityLogEntity> optional =
+                // activityLogRepository.findById(sessionId);
+                // if(optional.isPresent()) {
+                // ActivityLogEntity activityLog = optional.get();
+                // activityLog.setOfflineTime(LocalDateTime.now());
+                // activityLog.setUpdatedAt(LocalDateTime.now());
+                // activityLogRepository.save(activityLog);
+                // }
 
-                }
+                // }
 
                 return message;
             }
